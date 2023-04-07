@@ -36,29 +36,27 @@ pub fn slay() {
 
 fn checkForOperator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
 
-    // dup duplicates the top element
-    if elem == "dup" {
-        if let Some(str_ref) = stack.last() {
-            let str_val: String = str_ref.to_owned();
-            stack.push(str_val);
+    match elem {
 
-        } else {}
-    }
+        // dup duplicates the top element
+        "dup" => {
+            if let Some(str_ref) = stack.last() {
+                let str_val: String = str_ref.to_owned();
+                stack.push(str_val);
+            } else {}
+        },
 
-    // swap swaps the top two elements
-    else if elem == "swap" {
-        let len = stack.len();
-        if len > 1 {stack.swap(len-1, len);} else {}
-    }
+        // swap swaps the top two elements
+        "swap" => {
+            let len = stack.len();
+            if len > 1 {stack.swap(len-2, len-1);} else {}
+        },
 
-    // pop removes the top element
-    else if elem == "pop" {
-        stack.pop();
-    }
+        // pop removes the top element
+        "pop" => {stack.pop();},
 
-    // If a stack operation was not typed in, push the value to the stack
-    else {
-        stack.push(elem.to_string());
+        // If a stack operation was not typed in, push the value to the stack
+        other => stack.push(elem.to_string()),
     }
 
     // Return the stack
