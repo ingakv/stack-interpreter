@@ -2,6 +2,16 @@
 use std::io;
 use std::io::{Write};
 
+fn getline() -> String {
+    let mut input = String::new();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    input.trim_end().to_string()
+}
+
 pub fn slay() {
 
     let mut stack: Vec<String> = Vec::new();
@@ -10,21 +20,18 @@ pub fn slay() {
         print!("bprog> ");
         io::stdout().flush();
 
-        let mut input = String::new();
-
-        io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-
-        let newEl: Vec<&str> = input.split_whitespace().collect();
+        let input = getline();
 
 
-        println!("Stack: ");
-        for i in newEl {
-            stack = checkForOperator(i, stack.clone());
+        let new_el: Vec<&str> = input.split_whitespace().collect();
+
+
+        for i in new_el {
+            stack = check_for_operator(i, stack.clone());
         }
 
 
+        println!("Stack: ");
         for i in stack.iter().rev() {
             println!("{}",i);
         }
@@ -33,8 +40,7 @@ pub fn slay() {
 
 }
 
-
-fn checkForOperator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+fn check_for_operator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
 
     match elem {
 
@@ -46,6 +52,8 @@ fn checkForOperator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
             } else {}
         },
 
+
+
         // swap swaps the top two elements
         "swap" => {
             let len = stack.len();
@@ -55,12 +63,29 @@ fn checkForOperator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
         // pop removes the top element
         "pop" => {stack.pop();},
 
+
+////////////////////// Simple IO //////////////////////////////
+
+        // Prints the top element to standard output
+        "print" => {
+            if let Some(str_ref) = stack.last() {
+            let str_val: String = str_ref.to_owned();
+            println!("{}\n", str_val);
+            } else {}
+        },
+
+
+        // Reads an input, and adds it to the stack
+        "read" => { stack.push(getline()); },
+
+
         // If a stack operation was not typed in, push the value to the stack
-        other => stack.push(elem.to_string()),
+        _ => stack.push(elem.to_string()),
+
+
     }
 
     // Return the stack
     stack
 }
-
 
