@@ -18,14 +18,17 @@ pub fn slay() {
 
         let newEl: Vec<&str> = input.split_whitespace().collect();
 
-        println!("Input divided: ");
+        println!("Stack: ");
         for i in newEl {
             str.push(i.parse().unwrap());
         }
 
-        for i in str.iter() {
+
+
+        for i in str.iter().rev() {
             println!("{}",i);
         }
+
 
     }
 
