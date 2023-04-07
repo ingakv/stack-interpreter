@@ -1,27 +1,32 @@
 
-
 use std::io;
+use std::io::{Write};
 
 pub fn slay() {
 
-    println!("Please input something");
+    let mut str: Vec<String> = Vec::new();
 
-    let apples = 5;
-    let bananas = 10;
+    loop {
+        print!("bprog> ");
+        io::stdout().flush();
 
-    let mut input = String::new();
+        let mut input = String::new();
 
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-    
-//    let str: Vec<&str> = input.split_whitespace().collect();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
 
-    println!("Apples = {apples}, Bananas = {bananas}");
-    println!("Apples + Bananas = {}", apples + bananas);
+        let newEl: Vec<&str> = input.split_whitespace().collect();
 
-    for str in input.split_whitespace() {
-        println!("Input divided: {}", str);
+        println!("Input divided: ");
+        for i in newEl {
+            str.push(i.parse().unwrap());
+        }
+
+        for i in str.iter() {
+            println!("{}",i);
+        }
+
     }
 
 }
