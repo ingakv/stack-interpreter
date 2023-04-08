@@ -2,15 +2,7 @@
 use std::io;
 use std::io::{Write};
 
-fn getline() -> String {
-    let mut input = String::new();
 
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
-
-    input.trim_end().to_string()
-}
 
 pub fn slay() {
 
@@ -27,7 +19,7 @@ pub fn slay() {
 
 
         for i in new_el {
-            stack = check_for_operator(i, stack.clone());
+            stack = check_operator(i, stack.clone());
         }
 
 
@@ -40,7 +32,23 @@ pub fn slay() {
 
 }
 
-fn check_for_operator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+fn check_operator(c : &str, mut stack: Vec<String>) -> Vec<String> {
+    if c == "dup" || c == "swap" || c == "pop" {
+        stack_op(c, stack)
+    }
+
+    else if c == "print" || c == "read" {
+        simpleIO(c, stack)
+    }
+    else {
+        // If a stack operation was not typed in, push the value to the stack
+        stack.push(c.to_string());
+        stack
+    }
+}
+
+
+fn stack_op(elem : &str, mut stack: Vec<String>) -> Vec<String> {
 
     match elem {
 
@@ -52,8 +60,6 @@ fn check_for_operator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
             } else {}
         },
 
-
-
         // swap swaps the top two elements
         "swap" => {
             let len = stack.len();
@@ -63,25 +69,7 @@ fn check_for_operator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
         // pop removes the top element
         "pop" => {stack.pop();},
 
-
-////////////////////// Simple IO //////////////////////////////
-
-        // Prints the top element to standard output
-        "print" => {
-            if let Some(str_ref) = stack.last() {
-            let str_val: String = str_ref.to_owned();
-            println!("{}\n", str_val);
-            } else {}
-        },
-
-
-        // Reads an input, and adds it to the stack
-        "read" => { stack.push(getline()); },
-
-
-        // If a stack operation was not typed in, push the value to the stack
-        _ => stack.push(elem.to_string()),
-
+        _ => {}
 
     }
 
@@ -89,3 +77,38 @@ fn check_for_operator(elem : &str, mut stack: Vec<String>) -> Vec<String> {
     stack
 }
 
+
+fn simpleIO(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+
+    match elem {
+
+        // Prints the top element to standard output
+        "print" => {
+            if let Some(str_ref) = stack.last() {
+                let str_val: String = str_ref.to_owned();
+                println!("{}\n", str_val);
+            } else {}
+        },
+
+
+        // Reads an input, and adds it to the stack
+        "read" => { stack.push(getline()); },
+
+        _ => {}
+
+    }
+
+    // Return the stack
+    stack
+}
+
+
+fn getline() -> String {
+    let mut input = String::new();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    input.trim_end().to_string()
+}
