@@ -4,7 +4,7 @@ use std::io::{Write};
 
 
 
-pub fn slay() {
+pub fn main() {
 
     let mut stack: Vec<String> = Vec::new();
 
@@ -33,17 +33,19 @@ pub fn slay() {
 }
 
 fn check_operator(c : &str, mut stack: Vec<String>) -> Vec<String> {
-    if c == "dup" || c == "swap" || c == "pop" {
-        stack_op(c, stack)
-    }
 
-    else if c == "print" || c == "read" {
-        simpleIO(c, stack)
-    }
-    else {
-        // If a stack operation was not typed in, push the value to the stack
-        stack.push(c.to_string());
-        stack
+    match c {
+        "dup" | "swap" | "pop" => { stack_op(c, stack) },
+
+        "print" | "read" => { simpleIO(c, stack) },
+
+        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => { arithmetic(c, stack) },
+
+        _ => {
+            // If a stack operation was not typed in, push the value to the stack
+            stack.push(c.to_string());
+            stack
+        }
     }
 }
 
@@ -87,6 +89,39 @@ fn simpleIO(elem : &str, mut stack: Vec<String>) -> Vec<String> {
             if let Some(str_ref) = stack.last() {
                 let str_val: String = str_ref.to_owned();
                 println!("{}\n", str_val);
+            } else {}
+        },
+
+
+        // Reads an input, and adds it to the stack
+        "read" => { stack.push(getline()); },
+
+        _ => {}
+
+    }
+
+    // Return the stack
+    stack
+}
+
+
+fn arithmetic(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+    let top = stack.pop();
+
+    match elem {
+
+        "+" => {
+
+            let val1 = arithmetic(elem, stack);
+
+            if top.is_some()
+
+            if let Some(str_ref) = top {
+                let val1: String = str_ref.to_owned();
+            } else {}
+
+            if let Some(str_ref) = stack.pop() {
+                let val2: String = str_ref.to_owned();
             } else {}
         },
 

@@ -1,4 +1,3 @@
-//mod hello_world;
 
 pub mod mylib;
 
@@ -6,6 +5,6 @@ pub mod mylib;
 fn main() {
 
 
-    mylib::slay()
+    mylib::main()
 
 }
