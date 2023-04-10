@@ -10,18 +10,17 @@ pub fn main() {
 
     loop {
         print!("bprog> ");
-        io::stdout().flush();
+        io::stdout().flush().unwrap();
 
-        let input = getline();
+        let mut input = get_line();
 
 
         let new_el: Vec<&str> = input.split_whitespace().collect();
 
 
         for i in new_el {
-            stack = check_operator(i, stack.clone());
+            stack = check_operator(i, &mut stack);
         }
-
 
         println!("Stack: ");
         for i in stack.iter().rev() {
@@ -32,25 +31,32 @@ pub fn main() {
 
 }
 
-fn check_operator(c : &str, mut stack: Vec<String>) -> Vec<String> {
+fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
     match c {
         "dup" | "swap" | "pop" => { stack_op(c, stack) },
 
-        "print" | "read" => { simpleIO(c, stack) },
+        "print" | "read" => { simple_io(c, stack) },
 
-        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => { arithmetic(c, stack) },
+        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
+
+            let mut new = stack.clone();
+            new.push(c.to_string());
+
+            stack.push(arithmetic(&mut new));
+            stack.to_vec()
+        },
 
         _ => {
             // If a stack operation was not typed in, push the value to the stack
             stack.push(c.to_string());
-            stack
+            stack.to_vec()
         }
     }
 }
 
 
-fn stack_op(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+fn stack_op(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 
     match elem {
 
@@ -76,11 +82,11 @@ fn stack_op(elem : &str, mut stack: Vec<String>) -> Vec<String> {
     }
 
     // Return the stack
-    stack
+    stack.to_owned()
 }
 
 
-fn simpleIO(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+fn simple_io(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 
     match elem {
 
@@ -94,51 +100,35 @@ fn simpleIO(elem : &str, mut stack: Vec<String>) -> Vec<String> {
 
 
         // Reads an input, and adds it to the stack
-        "read" => { stack.push(getline()); },
+        "read" => { stack.push(get_line()); },
 
         _ => {}
 
     }
 
     // Return the stack
-    stack
+    stack.to_owned()
 }
 
 
-fn arithmetic(elem : &str, mut stack: Vec<String>) -> Vec<String> {
-    let top = stack.pop();
 
-    match elem {
+fn arithmetic(stack: &mut Vec<String>) -> String {
+    let top = stack.pop().unwrap();
 
-        "+" => {
+    if top == "+"{
+        let num1 = arithmetic(stack);
+        let num2 = arithmetic(stack);
 
-            let val1 = arithmetic(elem, stack);
-
-            if top.is_some()
-
-            if let Some(str_ref) = top {
-                let val1: String = str_ref.to_owned();
-            } else {}
-
-            if let Some(str_ref) = stack.pop() {
-                let val2: String = str_ref.to_owned();
-            } else {}
-        },
-
-
-        // Reads an input, and adds it to the stack
-        "read" => { stack.push(getline()); },
-
-        _ => {}
-
+        let v1: f64 = num1.parse().unwrap();
+        let v2: f64 = num2.parse().unwrap();
+        (v1 + v2).to_string()
     }
-
-    // Return the stack
-    stack
+    else {
+        top
+    }
 }
 
-
-fn getline() -> String {
+fn get_line() -> String {
     let mut input = String::new();
 
     io::stdin()
@@ -147,3 +137,4 @@ fn getline() -> String {
 
     input.trim_end().to_string()
 }
+
