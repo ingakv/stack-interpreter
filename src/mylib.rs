@@ -12,7 +12,7 @@ pub fn main() {
         print!("bprog> ");
         io::stdout().flush().unwrap();
 
-        let mut input = get_line();
+        let input = get_line();
 
 
         let new_el: Vec<&str> = input.split_whitespace().collect();
@@ -40,10 +40,17 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
         "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
 
+            // Adds the operator onto the stack
             let mut new = stack.clone();
             new.push(c.to_string());
 
+            // Adds the answer
             stack.push(arithmetic(&mut new));
+
+            // Removes the two original variables
+            stack.remove(stack.len()-2);
+            stack.remove(stack.len()-2);
+
             stack.to_vec()
         },
 
