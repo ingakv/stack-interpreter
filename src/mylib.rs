@@ -1,6 +1,7 @@
 
 use std::io;
 use std::io::{Write};
+use std::num;
 
 
 
@@ -45,7 +46,7 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
             new.push(c.to_string());
 
             // Adds the answer
-            stack.push(arithmetic(&mut new));
+            stack.push(find_arithmetic(&mut new));
 
             // Removes the two original variables
             stack.remove(stack.len()-2);
@@ -61,6 +62,8 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
         }
     }
 }
+
+
 
 
 fn stack_op(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
@@ -119,21 +122,72 @@ fn simple_io(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 
 
 
-fn arithmetic(stack: &mut Vec<String>) -> String {
-    let top = stack.pop().unwrap();
+fn find_arithmetic(stack: &mut Vec<String>) -> String {
+    let c = stack.pop().unwrap();
+    let ops = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
-    if top == "+"{
-        let num1 = arithmetic(stack);
-        let num2 = arithmetic(stack);
+    if ops.contains(&&*c) {
+        let num1 = find_arithmetic(stack);
+        let num2 = find_arithmetic(stack);
 
-        let v1: f64 = num1.parse().unwrap();
-        let v2: f64 = num2.parse().unwrap();
-        (v1 + v2).to_string()
+        if "".is {
+            arithmetic(&c, num1, num2)
+        }
+
+        else {
+            arithmetic(&c, num1, num2)
+        }
+
     }
     else {
-        top
+        c
     }
 }
+
+fn arithmetic(c:&str, x: String, y: String) -> String {
+
+    let v1: f64 = x.parse().unwrap();
+    let v2: f64 = y.parse().unwrap();
+
+    match c {
+
+        // Calculates the answers to the arithmetic operations
+
+        // Addition
+        "+" => { (v1 + v2).to_string() },
+
+        // Subtraction
+        "-" => { (v1 - v2).to_string() },
+
+        // Multiplication
+        "*" => { (v1 * v2).to_string() },
+
+        // Floating point division
+        "/" => { (v1 / v2).to_string() },
+
+        // Integer division
+        "div" => {
+            let a = v1 as i64;
+            let b = v2 as i64;
+
+            (a / b).to_string()
+        },
+
+        // Smaller than
+        "<" => { (v1 < v2).to_string() },
+
+        // Bigger than
+        ">" => { (v1 > v2).to_string() },
+
+        // Equals
+        "==" => { (v1 == v2).to_string() },
+
+        _ => panic!("Invalid input!")
+
+    }
+}
+
+
 
 fn get_line() -> String {
     let mut input = String::new();
