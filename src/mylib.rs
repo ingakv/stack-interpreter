@@ -1,6 +1,7 @@
 
 use std::io;
 use std::io::{Write};
+use std::num;
 
 
 
@@ -10,18 +11,17 @@ pub fn main() {
 
     loop {
         print!("bprog> ");
-        io::stdout().flush();
+        io::stdout().flush().unwrap();
 
-        let input = getline();
+        let input = get_line();
 
 
         let new_el: Vec<&str> = input.split_whitespace().collect();
 
 
         for i in new_el {
-            stack = check_operator(i, stack.clone());
+            stack = check_operator(i, &mut stack);
         }
-
 
         println!("Stack: ");
         for i in stack.iter().rev() {
@@ -32,25 +32,41 @@ pub fn main() {
 
 }
 
-fn check_operator(c : &str, mut stack: Vec<String>) -> Vec<String> {
+fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
     match c {
         "dup" | "swap" | "pop" => { stack_op(c, stack) },
 
-        "print" | "read" => { simpleIO(c, stack) },
+        "print" | "read" => { simple_io(c, stack) },
 
-        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => { arithmetic(c, stack) },
+        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
+
+            // Adds the operator onto the stack
+            let mut new = stack.clone();
+            new.push(c.to_string());
+
+            // Adds the answer
+            stack.push(find_arithmetic(&mut new));
+
+            // Removes the two original variables
+            stack.remove(stack.len()-2);
+            stack.remove(stack.len()-2);
+
+            stack.to_vec()
+        },
 
         _ => {
             // If a stack operation was not typed in, push the value to the stack
             stack.push(c.to_string());
-            stack
+            stack.to_vec()
         }
     }
 }
 
 
-fn stack_op(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+
+
+fn stack_op(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 
     match elem {
 
@@ -76,11 +92,11 @@ fn stack_op(elem : &str, mut stack: Vec<String>) -> Vec<String> {
     }
 
     // Return the stack
-    stack
+    stack.to_owned()
 }
 
 
-fn simpleIO(elem : &str, mut stack: Vec<String>) -> Vec<String> {
+fn simple_io(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 
     match elem {
 
@@ -94,51 +110,86 @@ fn simpleIO(elem : &str, mut stack: Vec<String>) -> Vec<String> {
 
 
         // Reads an input, and adds it to the stack
-        "read" => { stack.push(getline()); },
+        "read" => { stack.push(get_line()); },
 
         _ => {}
 
     }
 
     // Return the stack
-    stack
+    stack.to_owned()
 }
 
 
-fn arithmetic(elem : &str, mut stack: Vec<String>) -> Vec<String> {
-    let top = stack.pop();
 
-    match elem {
+fn find_arithmetic(stack: &mut Vec<String>) -> String {
+    let c = stack.pop().unwrap();
+    let ops = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
-        "+" => {
+    if ops.contains(&&*c) {
+        let num1 = find_arithmetic(stack);
+        let num2 = find_arithmetic(stack);
 
-            let val1 = arithmetic(elem, stack);
+        if "".is {
+            arithmetic(&c, num1, num2)
+        }
 
-            if top.is_some()
+        else {
+            arithmetic(&c, num1, num2)
+        }
 
-            if let Some(str_ref) = top {
-                let val1: String = str_ref.to_owned();
-            } else {}
+    }
+    else {
+        c
+    }
+}
 
-            if let Some(str_ref) = stack.pop() {
-                let val2: String = str_ref.to_owned();
-            } else {}
+fn arithmetic(c:&str, x: String, y: String) -> String {
+
+    let v1: f64 = x.parse().unwrap();
+    let v2: f64 = y.parse().unwrap();
+
+    match c {
+
+        // Calculates the answers to the arithmetic operations
+
+        // Addition
+        "+" => { (v1 + v2).to_string() },
+
+        // Subtraction
+        "-" => { (v1 - v2).to_string() },
+
+        // Multiplication
+        "*" => { (v1 * v2).to_string() },
+
+        // Floating point division
+        "/" => { (v1 / v2).to_string() },
+
+        // Integer division
+        "div" => {
+            let a = v1 as i64;
+            let b = v2 as i64;
+
+            (a / b).to_string()
         },
 
+        // Smaller than
+        "<" => { (v1 < v2).to_string() },
 
-        // Reads an input, and adds it to the stack
-        "read" => { stack.push(getline()); },
+        // Bigger than
+        ">" => { (v1 > v2).to_string() },
 
-        _ => {}
+        // Equals
+        "==" => { (v1 == v2).to_string() },
+
+        _ => panic!("Invalid input!")
 
     }
-
-    // Return the stack
-    stack
 }
 
 
-fn getline() -> String {
+
+fn get_line() -> String {
     let mut input = String::new();
 
     io::stdin()
@@ -147,3 +198,4 @@ fn getline() -> String {
 
     input.trim_end().to_string()
 }
+
