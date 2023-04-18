@@ -45,6 +45,9 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
         "print" | "read" => { simple_io(c, stack) },
 
+//        "True" | "False" | "not" |
+        "&&" | "||" => { logical_op(stack, c) },
+
         "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
 
             // Adds the operator onto the stack
@@ -123,6 +126,48 @@ fn simple_io(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 }
 
 
+fn logical_op(stack: &mut Vec<String>, c:&str) -> Vec<String> {
+
+    let x = if stack.is_empty() {"".to_string()}
+    else {
+        // Remove top element and store it
+        stack.pop().unwrap()
+    };
+
+    let y = if stack.is_empty() {"".to_string()}
+    else {
+        // Remove top element and store it
+        stack.pop().unwrap()
+    };
+
+    // If there is only 1 variable, it gets pushed back on, and the stack returns
+    // If there are none the stack returns without any changes
+
+    if x.is_empty() {}
+    else if y.is_empty() { stack.push(x); }
+
+    else {
+        match c {
+
+            // Checks whether both predicates are True or not
+            "&&" => {
+                if x == "True" && y == "True" { stack.push("True".to_string()) } else { stack.push("False".to_string()) }
+            },
+
+            // Checks whether at least one of the predicates are True or not
+            "||" => {
+                if x == "True" || y == "True" { stack.push("True".to_string()) } else { stack.push("False".to_string()) }
+            },
+
+            _ => {}
+        }
+    }
+
+    // Return the stack
+    stack.to_owned()
+}
+
+
 
 fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
@@ -137,8 +182,6 @@ fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String>
 
     let ops = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
-
-
     if c == "".to_string() {
         vec![]
     }
@@ -146,8 +189,8 @@ fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String>
     // Checks if it is an operator
     else if ops.contains(&&*c) {
         // Loops through and finds the next two numbers
-        let num1 = find_arithmetic(stack, og);
         let num2 = find_arithmetic(stack, og);
+        let num1 = find_arithmetic(stack, og);
 
         if !num1.is_empty() && !num2.is_empty() {
             arithmetic(og, &c, num1.first().unwrap(), num2.first().unwrap())
@@ -159,8 +202,11 @@ fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String>
 
     }
 
-
     else if c.as_bytes()[0].is_ascii_digit() {
+        vec![c]
+    }
+
+    else if c.contains('-') && c.as_bytes()[1].is_ascii_digit() {
         vec![c]
     }
 
@@ -199,13 +245,13 @@ fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<St
         },
 
         // Smaller than
-        "<" => { (v1 < v2).to_string() },
+        "<" => { (if v1 < v2 {"True"} else {"False"}).to_string() },
 
         // Bigger than
-        ">" => { (v1 > v2).to_string() },
+        ">" => { (if v1 > v2 {"True"} else {"False"}).to_string() },
 
         // Equals
-        "==" => { (v1 == v2).to_string() },
+        "==" => { (if v1 == v2 {"True"} else {"False"}).to_string() },
 
         _ => panic!("Invalid input!")
 
