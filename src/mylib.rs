@@ -15,11 +15,18 @@ pub fn main() {
         let input = get_line();
 
 
+        // Splits up the different input variables
         let new_el: Vec<&str> = input.split_whitespace().collect();
 
 
+        let old_stack = stack.clone();
+
         for i in new_el {
             stack = check_operator(i, &mut stack);
+        }
+
+        if stack == old_stack {
+            println!("\nSyntax error, try again!\n");
         }
 
         println!("Stack: ");
