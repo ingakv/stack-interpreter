@@ -8,8 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Fix: Removes the original variables when an arithmetic operation has been done">
-      <change beforePath="$PROJECT_DIR$/../../.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../HaskellCheatSheet.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Haskell/Lab2" beforeDir="false" afterPath="$PROJECT_DIR$/../../Haskell/Lab2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Haskell/Lab3" beforeDir="false" afterPath="$PROJECT_DIR$/../../Haskell/Lab3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Assignment2_prog.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Assignment2_prog.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -59,6 +61,9 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2OC84fT0h6pcJxlCav0xeBfApXo" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -77,10 +82,10 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "project.structure.last.edited": "Project",
+    "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "vcs.Git",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -123,6 +128,7 @@
       <workItem from="1681053014943" duration="9953000" />
       <workItem from="1681153354505" duration="5235000" />
       <workItem from="1681655961711" duration="317000" />
+      <workItem from="1681738522562" duration="1439000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -157,5 +163,16 @@
     <MESSAGE value="Feat: Program can loop through the arithmetics several times" />
     <MESSAGE value="Fix: Removes the original variables when an arithmetic operation has been done" />
     <option name="LAST_COMMIT_MESSAGE" value="Fix: Removes the original variables when an arithmetic operation has been done" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
+          <line>133</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -130,13 +130,8 @@ fn find_arithmetic(stack: &mut Vec<String>) -> String {
         let num1 = find_arithmetic(stack);
         let num2 = find_arithmetic(stack);
 
-        if "".is {
-            arithmetic(&c, num1, num2)
-        }
 
-        else {
-            arithmetic(&c, num1, num2)
-        }
+        arithmetic(&c, num1, num2)
 
     }
     else {
