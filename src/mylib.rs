@@ -45,14 +45,10 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
             let mut new = stack.clone();
             new.push(c.to_string());
 
-            // Adds the answer
-            stack.push(find_arithmetic(&mut new));
+            let mut new2 = new.clone();
 
-            // Removes the two original variables
-            stack.remove(stack.len()-2);
-            stack.remove(stack.len()-2);
 
-            stack.to_vec()
+            find_arithmetic(&mut new, &mut new2)
         },
 
         _ => {
@@ -122,29 +118,39 @@ fn simple_io(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 
 
 
-fn find_arithmetic(stack: &mut Vec<String>) -> String {
+fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
+
+    // Remove top element and store it
     let c = stack.pop().unwrap();
     let ops = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
+    // Checks if it is an operator
     if ops.contains(&&*c) {
-        let num1 = find_arithmetic(stack);
-        let num2 = find_arithmetic(stack);
+        // Loops through and finds the next two numbers
+        let num1 = find_arithmetic(stack, og);
+        let num2 = find_arithmetic(stack, og);
 
 
-        arithmetic(&c, num1, num2)
+        arithmetic(og, &c, num1.first().unwrap(), num2.first().unwrap())
 
     }
+
+
+    else if c.as_bytes()[0].is_ascii_digit() {
+        vec![c]
+    }
+
     else {
-        c
+        find_arithmetic(stack, og)
     }
 }
 
-fn arithmetic(c:&str, x: String, y: String) -> String {
+fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<String> {
 
     let v1: f64 = x.parse().unwrap();
     let v2: f64 = y.parse().unwrap();
 
-    match c {
+    let new = match c {
 
         // Calculates the answers to the arithmetic operations
 
@@ -179,7 +185,18 @@ fn arithmetic(c:&str, x: String, y: String) -> String {
 
         _ => panic!("Invalid input!")
 
+    };
+
+    if let Some(str_ref) = stack.iter().position(|r| r == x) {
+        stack.remove(str_ref);
     }
+    if let Some(str_ref) = stack.iter().position(|r| r == y) {
+        stack.remove(str_ref);
+    }
+
+    stack.pop();
+    stack.push(new);
+    stack.to_owned()
 }
 
 
