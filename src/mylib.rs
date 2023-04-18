@@ -1,7 +1,6 @@
 
 use std::io;
 use std::io::{Write};
-use std::num;
 
 
 
@@ -187,6 +186,11 @@ fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<St
 
     };
 
+
+
+    // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
+    stack.reverse();
+
     if let Some(str_ref) = stack.iter().position(|r| r == x) {
         stack.remove(str_ref);
     }
@@ -194,8 +198,14 @@ fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<St
         stack.remove(str_ref);
     }
 
+    // Reverse it back
+    stack.reverse();
+
+
+    // Removes the operator and adds the new variable
     stack.pop();
     stack.push(new);
+
     stack.to_owned()
 }
 
