@@ -119,18 +119,36 @@ fn simple_io(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
 
 fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
-    // Remove top element and store it
-    let c = stack.pop().unwrap();
+
+    let c = if stack.is_empty() {
+        "".to_string()
+    }
+    else {
+        // Remove top element and store it
+        stack.pop().unwrap()
+    };
+
     let ops = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
+
+
+    if c == "".to_string() {
+        vec![]
+    }
+
     // Checks if it is an operator
-    if ops.contains(&&*c) {
+    else if ops.contains(&&*c) {
         // Loops through and finds the next two numbers
         let num1 = find_arithmetic(stack, og);
         let num2 = find_arithmetic(stack, og);
 
-
-        arithmetic(og, &c, num1.first().unwrap(), num2.first().unwrap())
+        if !num1.is_empty() && !num2.is_empty() {
+            arithmetic(og, &c, num1.first().unwrap(), num2.first().unwrap())
+        }
+        else {
+            og.pop();
+            og.to_vec()
+        }
 
     }
 
