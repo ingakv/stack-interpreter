@@ -7,7 +7,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feature: Strings that contains several words can now be recognised as sentences, and not individual words">
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feature: Lists and sublists are now recognized">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
     </list>
@@ -139,7 +139,7 @@
       <workItem from="1681655961711" duration="1228000" />
       <workItem from="1681837159309" duration="31759000" />
       <workItem from="1681899965056" duration="13145000" />
-      <workItem from="1681915508445" duration="9476000" />
+      <workItem from="1681915508445" duration="10754000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -195,7 +195,13 @@
       <option name="presentableId" value="LOCAL−00009" />
       <updated>1681903755909</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL−00010" summary="Feature: Lists and sublists are now recognized">
+      <created>1681929345800</created>
+      <option name="number" value="LOCAL−00010" />
+      <option name="presentableId" value="LOCAL−00010" />
+      <updated>1681929345800</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -222,7 +228,8 @@
     <MESSAGE value="Feature: Prints an error message if the user doesn't follow the syntax" />
     <MESSAGE value="Feature: Implemented all logical operations except for &quot;not&quot;" />
     <MESSAGE value="Feature: Strings that contains several words can now be recognised as sentences, and not individual words" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feature: Strings that contains several words can now be recognised as sentences, and not individual words" />
+    <MESSAGE value="Feature: Lists and sublists are now recognized" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feature: Lists and sublists are now recognized" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -169,6 +169,7 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
         "print" | "read" => { simple_io(c, stack) },
 
 //        "True" | "False" | "not" |
+
         "&&" | "||" => { logical_op(stack, c) },
 
         "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
@@ -184,8 +185,20 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
         },
 
         _ => {
+
+
+            let lower = c.to_lowercase();
+
+            // Forces bools to have a capitalized first letter
+            let new =
+                match lower.as_str() {
+                    "true" => {"True"}
+                    "false" => {"False"}
+                    _ => {c}
+                };
+
             // If a stack operation was not typed in, push the value to the stack
-            stack.push(c.to_string());
+            stack.push(new.to_string());
             stack.to_vec()
         }
     }
