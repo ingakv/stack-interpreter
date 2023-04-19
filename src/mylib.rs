@@ -1,5 +1,5 @@
 
-use std::{io, mem};
+use std::{io};
 use std::io::{Write};
 
 
@@ -19,42 +19,107 @@ pub fn main() {
         let old_stack = stack.clone();
 
         // Splits up the different input variables
-        let mut new_el: Vec<&str> =
-//            if input.contains(']') {input.split_inclusive(']').collect()} else
-            {input.split_whitespace().collect()};
+        let new_el: Vec<&str> = { input.split_whitespace().collect() };
 
-        // Variables to help join the strings together
-        let mut buffer:Vec<&str> = vec![];
-        let mut str: bool = false;
+
+        // Variables to help join the elements together
+        let mut str_buf: Vec<&str> = vec![];
+        let mut is_str: bool = false;
+
+
+        let mut li_buf: Vec<&str> = vec![];
+        let mut is_list: bool = false;
 
         for i in new_el {
 
+            // If it is the start or the end of a list
+            if i.contains('[') {
+                is_list = true;
+
+                // Add opening bracket
+                li_buf.push("[");
+            }
+
+//////////////// List /////////////////
+
+            // If it is the end of the list
+            else if i.contains(']') {
+
+                // Remove the last comma
+                li_buf.pop();
+
+                // Add closing bracket
+                li_buf.push("]");
+
+                // If the list is not a sublist, set is_list to false
+                if li_buf.iter().filter(|&n| *n == "[").count() == li_buf.iter().filter(|&n| *n == "]").count() {
+
+                    // Join the vector together to form a list, and send it to the stack
+                    check_operator(li_buf.concat().as_str(), &mut stack);
+
+                    is_list = false;
+
+                    // Reset the buffer so that a potential new list can be read
+                    li_buf.clear();
+                }
+
+                // If the list is a sublist, continue reading it
+                else { li_buf.push(","); }
+
+            }
+
+
+//////////////// String /////////////////
+
             // If it is the start or the end of a string
-            if i.contains('"') {
+            else if i.contains('"') {
 
                 // If it is the end of the string
-                if str {
+                if is_str {
 
                     // Remove the last whitespace
-                    buffer.pop();
+                    str_buf.pop();
+
+
+                    // Copy the elements into a combined list
+                    // If there is no list, there are no extra elements added, so str_buf can get set to the new list
+
+                    str_buf = push_to_vec(li_buf.clone(), str_buf.clone());
+
+                    // If we are in a list, copy the new list over
+                    if is_list{
+
+                        li_buf = str_buf.clone();
+                        li_buf.pop();
+                        li_buf.push(", ")
+                    }
+
 
                     // Join the vector together to form a sentence / string, and send it to the stack
-                    check_operator(buffer.concat().as_str(), &mut stack);
+                    else { check_operator(str_buf.concat().as_str(), &mut stack); }
 
-                    // Reset the buffer so that a potential nwe string can be read
-                    buffer.clear();
+
+                    // Reset the buffer so that a potential new string can be read
+                    str_buf.clear();
 
                 }
 
                 // Flip the boolean
-                str = !str;
+                is_str = !is_str;
 
             }
 
             // If a string is currently being read, push it to the buffer, with a whitespace after
-            else if str {
-                buffer.push(i);
-                buffer.push(" ");
+            else if is_str {
+                str_buf.push(i);
+                str_buf.push(" ");
+            }
+
+
+            // If a list is currently being read, push it to the buffer, with a comma after
+            else if is_list {
+                li_buf.push(i);
+                li_buf.push(",");
             }
 
             else { stack = check_operator(i, &mut stack); }
@@ -76,42 +141,55 @@ pub fn main() {
 
 }
 
+
+fn push_to_vec<'a>(mut old_vec: Vec<&'a str>, mut vec: Vec<&'a str>) -> Vec<&'a str> {
+
+    let mut nvec = old_vec.clone();
+
+    nvec.push( "\"" );
+    for el in vec {
+        nvec.push(el);
+    }
+    nvec.push("\"");
+    nvec.push(" ");
+    nvec
+
+}
+
+
 fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
-    // Ignores brackets
-//    if c.contains('[') || c.contains(']')  {
-//        check_operator(c.trim_matches(|x| x == '[' || x == ' ' || x == ']'), stack)
-//    }
+    match c {
 
-    //else
-    {
-        match c {
-            "dup" | "swap" | "pop" => { stack_op(c, stack) },
+        // Ignores ""
+        "" => {stack.to_vec()}
 
-            "print" | "read" => { simple_io(c, stack) },
+        "dup" | "swap" | "pop" => { stack_op(c, stack) },
+
+        "print" | "read" => { simple_io(c, stack) },
 
 //        "True" | "False" | "not" |
-            "&&" | "||" => { logical_op(stack, c) },
+        "&&" | "||" => { logical_op(stack, c) },
 
-            "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
+        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
 
-                // Adds the operator onto the stack
-                let mut new = stack.clone();
-                new.push(c.to_string());
+            // Adds the operator onto the stack
+            let mut new = stack.clone();
+            new.push(c.to_string());
 
-                let mut new2 = new.clone();
+            let mut new2 = new.clone();
 
 
-                find_arithmetic(&mut new, &mut new2)
-            },
+            find_arithmetic(&mut new, &mut new2)
+        },
 
-            _ => {
-                // If a stack operation was not typed in, push the value to the stack
-                stack.push(c.to_string());
-                stack.to_vec()
-            }
+        _ => {
+            // If a stack operation was not typed in, push the value to the stack
+            stack.push(c.to_string());
+            stack.to_vec()
         }
     }
+
 }
 
 
