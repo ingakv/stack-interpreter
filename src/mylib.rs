@@ -1,5 +1,5 @@
 
-use std::io;
+use std::{io, mem};
 use std::io::{Write};
 
 
@@ -9,26 +9,64 @@ pub fn main() {
     let mut stack: Vec<String> = Vec::new();
 
     loop {
-        print!("bprog> ");
+        print!("\nbprog> ");
         io::stdout().flush().unwrap();
 
+        // Reads user input
         let input = get_line();
-
-
-        // Splits up the different input variables
-        let new_el: Vec<&str> = input.split_whitespace().collect();
 
 
         let old_stack = stack.clone();
 
+        // Splits up the different input variables
+        let mut new_el: Vec<&str> =
+//            if input.contains(']') {input.split_inclusive(']').collect()} else
+            {input.split_whitespace().collect()};
+
+        // Variables to help join the strings together
+        let mut buffer:Vec<&str> = vec![];
+        let mut str: bool = false;
+
         for i in new_el {
-            stack = check_operator(i, &mut stack);
+
+            // If it is the start or the end of a string
+            if i.contains('"') {
+
+                // If it is the end of the string
+                if str {
+
+                    // Remove the last whitespace
+                    buffer.pop();
+
+                    // Join the vector together to form a sentence / string, and send it to the stack
+                    check_operator(buffer.concat().as_str(), &mut stack);
+
+                    // Reset the buffer so that a potential nwe string can be read
+                    buffer.clear();
+
+                }
+
+                // Flip the boolean
+                str = !str;
+
+            }
+
+            // If a string is currently being read, push it to the buffer, with a whitespace after
+            else if str {
+                buffer.push(i);
+                buffer.push(" ");
+            }
+
+            else { stack = check_operator(i, &mut stack); }
+
         }
 
+        // If nothing changed, display this message
         if stack == old_stack {
             println!("\nSyntax error, try again!\n");
         }
 
+        // Prints the stack
         println!("Stack: ");
         for i in stack.iter().rev() {
             println!("{}",i);
@@ -40,30 +78,38 @@ pub fn main() {
 
 fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
-    match c {
-        "dup" | "swap" | "pop" => { stack_op(c, stack) },
+    // Ignores brackets
+//    if c.contains('[') || c.contains(']')  {
+//        check_operator(c.trim_matches(|x| x == '[' || x == ' ' || x == ']'), stack)
+//    }
 
-        "print" | "read" => { simple_io(c, stack) },
+    //else
+    {
+        match c {
+            "dup" | "swap" | "pop" => { stack_op(c, stack) },
+
+            "print" | "read" => { simple_io(c, stack) },
 
 //        "True" | "False" | "not" |
-        "&&" | "||" => { logical_op(stack, c) },
+            "&&" | "||" => { logical_op(stack, c) },
 
-        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
+            "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
 
-            // Adds the operator onto the stack
-            let mut new = stack.clone();
-            new.push(c.to_string());
+                // Adds the operator onto the stack
+                let mut new = stack.clone();
+                new.push(c.to_string());
 
-            let mut new2 = new.clone();
+                let mut new2 = new.clone();
 
 
-            find_arithmetic(&mut new, &mut new2)
-        },
+                find_arithmetic(&mut new, &mut new2)
+            },
 
-        _ => {
-            // If a stack operation was not typed in, push the value to the stack
-            stack.push(c.to_string());
-            stack.to_vec()
+            _ => {
+                // If a stack operation was not typed in, push the value to the stack
+                stack.push(c.to_string());
+                stack.to_vec()
+            }
         }
     }
 }
