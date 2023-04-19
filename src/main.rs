@@ -3,6 +3,7 @@ use std::io::Write;
 use crate::mylib::{check_operator, get_line, push_to_vec};
 
 pub mod mylib;
+mod operators;
 
 
 //mod test;
