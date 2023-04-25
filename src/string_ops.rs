@@ -1,5 +1,11 @@
 use crate::mylib::{get_line};
 
+pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
+
+pub(crate) const IO_OPS: [&str; 2] = ["print", "read"];
+
+pub(crate) const STRING_OPS: [&str; 3] = ["parseInteger", "parseFloat", "words"];
+
 
 
 pub(crate) fn parse_string(elem : &str, stack: &mut Vec<String>) -> Vec<String> {
@@ -22,7 +28,7 @@ pub(crate) fn parse_string(elem : &str, stack: &mut Vec<String>) -> Vec<String> 
             } else {}
         },
 
-        // Converts a string to a float
+        // Divides the string into words, and puts them in a list
         "words" => {
             if let Some(str_ref) = stack.pop() {
                 let str_val: Vec<&str> = str_ref.split_whitespace().collect();

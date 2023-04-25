@@ -1,9 +1,10 @@
 
 use std::{io};
 use std::io::Write;
-use crate::arithmetic_ops::find_arithmetic;
-use crate::logical_ops::find_logical;
-use crate::operations::{parse_string, simple_io, stack_op};
+use crate::arithmetic_ops::{ARITHMETIC_OPS, find_arithmetic};
+use crate::list_ops::{find_list, LIST_OPS};
+use crate::logical_ops::{find_logical, LOGICAL_OPS};
+use crate::string_ops::{IO_OPS, parse_string, simple_io, stack_op, STACK_OPS, STRING_OPS};
 
 
 
@@ -148,59 +149,75 @@ pub(crate) fn run_program() {
 
 fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
-    match c {
-
-        // Ignores ""
-        "" => {stack.to_vec()}
-
-        "dup" | "swap" | "pop" => { stack_op(c, stack) },
-
-        "print" | "read" => { simple_io(c, stack) },
-
-        "parseInteger" | "parseFloat" | "words" => { parse_string(c, stack) },
-
-        "&&" | "||" | "not" => {
-
-            // Adds the operator onto the stack
-            let mut new = stack.clone();
-            new.push(c.to_string());
-
-            let mut new2 = new.clone();
+    // Ignores ""
+    if c == "" { stack.to_vec() }
 
 
-            find_logical(&mut new, &mut new2)
-        },
+    else if LOGICAL_OPS.contains(&c) {
+
+        // Adds the operator onto the stack
+        let mut new = stack.clone();
+        new.push(c.to_string());
+
+        let mut new2 = new.clone();
 
 
-        "+" | "-" | "*" | "/" | "div" | "<" | ">" | "==" => {
-
-            // Adds the operator onto the stack
-            let mut new = stack.clone();
-            new.push(c.to_string());
-
-            let mut new2 = new.clone();
+        find_logical(&mut new, &mut new2)
+    }
 
 
-            find_arithmetic(&mut new, &mut new2)
-        },
 
-        _ => {
+    else if ARITHMETIC_OPS.contains(&c) {
+
+        // Adds the operator onto the stack
+        let mut new = stack.clone();
+        new.push(c.to_string());
+
+        let mut new2 = new.clone();
 
 
-            let lower = c.to_lowercase();
+        find_arithmetic(&mut new, &mut new2)
+    }
 
-            // Forces bools to have a capitalized first letter
-            let new =
-                match lower.as_str() {
-                    "true" => {"True"}
-                    "false" => {"False"}
-                    _ => {c}
-                };
 
-            // If a stack operation was not typed in, push the value to the stack
-            stack.push(new.to_string());
-            stack.to_vec()
-        }
+
+    else if LIST_OPS.contains(&c) {
+
+        // Adds the operator onto the stack
+        let mut new = stack.clone();
+        new.push(c.to_string());
+
+        let mut new2 = new.clone();
+
+
+        find_list(&mut new, &mut new2)
+    }
+
+
+    else if STACK_OPS.contains(&c) { stack_op(c, stack) }
+
+    else if IO_OPS.contains(&c) { simple_io(c, stack) }
+
+    else if STRING_OPS.contains(&c) { parse_string(c, stack) }
+
+
+
+    else {
+
+        let lower = c.to_lowercase();
+
+        // Forces bools to have a capitalized first letter
+        let new =
+            match lower.as_str() {
+                "true" => {"True"}
+                "false" => {"False"}
+                _ => {c}
+            };
+
+        // If a stack operation was not typed in, push the value to the stack
+        stack.push(new.to_string());
+        stack.to_vec()
+
     }
 
 }

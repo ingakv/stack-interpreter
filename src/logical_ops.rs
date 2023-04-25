@@ -1,5 +1,8 @@
 use crate::mylib::{is_literal};
 
+
+pub(crate) const LOGICAL_OPS: [&str; 3] = ["&&", "||", "not"];
+
 pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
 
@@ -11,15 +14,13 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
         stack.pop().unwrap()
     };
 
-    let ops = ["&&", "||", "not"];
-
     // Skips if the stack is empty
     if c == "".to_string() {
         vec![]
     }
 
     // Checks if it is an operator
-    else if ops.contains(&&*c) {
+    else if LOGICAL_OPS.contains(&&*c) {
         // Loops through and finds the next two literals
         let num2 = find_logical(stack, og);
         let num1 = find_logical(stack, og);

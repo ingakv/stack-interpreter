@@ -1,5 +1,8 @@
 use crate::mylib::is_number;
 
+
+pub(crate) const ARITHMETIC_OPS: [&str; 8] = ["+", "-", "*", "/", "div", "<", ">", "=="];
+
 pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
 
@@ -11,7 +14,6 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
         stack.pop().unwrap()
     };
 
-    let ops = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
     // Skips if the stack is empty
     if c == "".to_string() {
@@ -19,7 +21,7 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
     }
 
     // Checks if it is an operator
-    else if ops.contains(&&*c) {
+    else if ARITHMETIC_OPS.contains(&&*c) {
         // Loops through and finds the next two numbers
         let num2 = find_arithmetic(stack, og);
         let num1 = find_arithmetic(stack, og);
@@ -52,9 +54,8 @@ fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<St
     let v1: f64 = x.parse().unwrap();
     let v2: f64 = y.parse().unwrap();
 
+    // Calculates the answers to the arithmetic operations
     let new = match c {
-
-        // Calculates the answers to the arithmetic operations
 
         // Addition
         "+" => { (v1 + v2).to_string() },
