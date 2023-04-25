@@ -3,8 +3,8 @@ use crate::mylib::{run_program};
 
 pub mod mylib;
 mod operations;
-mod arithmetic;
-mod logical_op;
+mod arithmetic_ops;
+mod logical_ops;
 
 
 //mod test;

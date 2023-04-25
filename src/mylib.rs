@@ -1,9 +1,9 @@
 
 use std::{io};
 use std::io::Write;
-use crate::arithmetic::find_arithmetic;
-use crate::logical_op::find_logical;
-use crate::operations::{simple_io, stack_op};
+use crate::arithmetic_ops::find_arithmetic;
+use crate::logical_ops::find_logical;
+use crate::operations::{parse_string, simple_io, stack_op};
 
 
 
@@ -157,6 +157,8 @@ fn check_operator(c : &str, stack: &mut Vec<String>) -> Vec<String> {
 
         "print" | "read" => { simple_io(c, stack) },
 
+        "parseInteger" | "parseFloat" | "words" => { parse_string(c, stack) },
+
         "&&" | "||" | "not" => {
 
             // Adds the operator onto the stack
@@ -233,9 +235,11 @@ fn push_to_vec<'a>(old_vec: Vec<&'a str>, vec: Vec<&'a str>) -> Vec<&'a str> {
 
 }
 
+
 pub(crate) fn is_literal(el: String) -> bool {
     return if el == "True" || el == "False" { true } else { false }
 }
+
 
 pub(crate) fn is_number(el: String) -> bool {
     return if el.as_bytes()[0].is_ascii_digit() || (el.contains('-') && el.as_bytes()[1].is_ascii_digit()) { true } else { false }
