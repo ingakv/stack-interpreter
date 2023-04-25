@@ -8,10 +8,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Chore">
-      <change afterPath="$PROJECT_DIR$/src/operators.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Assignment2_prog.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Assignment2_prog.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/operators.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/operations.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/test.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +69,10 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="showPreview" value="true" />
+  </component>
   <component name="ProjectId" id="2OC84fT0h6pcJxlCav0xeBfApXo" />
   <component name="ProjectLevelVcsManager">
     <OptionsSetting value="false" id="Update" />
@@ -91,7 +98,8 @@
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -199,7 +207,10 @@
       <workItem from="1681655961711" duration="1228000" />
       <workItem from="1681837159309" duration="31759000" />
       <workItem from="1681899965056" duration="13145000" />
-      <workItem from="1681915508445" duration="12226000" />
+      <workItem from="1681915508445" duration="14613000" />
+      <workItem from="1681939137443" duration="17000" />
+      <workItem from="1682016704196" duration="1073000" />
+      <workItem from="1682447263992" duration="4245000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -273,7 +284,13 @@
       <option name="presentableId" value="LOCAL−00012" />
       <updated>1681931627429</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL−00013" summary="Chore">
+      <created>1681932417903</created>
+      <option name="number" value="LOCAL−00013" />
+      <option name="presentableId" value="LOCAL−00013" />
+      <updated>1681932417903</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -306,6 +323,20 @@
     <option name="LAST_COMMIT_MESSAGE" value="Chore" />
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/operations.rs</url>
+          <line>59</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
+          <line>253</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
       <configuration name="CargoCommandRunConfiguration">
         <watch expression="li_buf" />

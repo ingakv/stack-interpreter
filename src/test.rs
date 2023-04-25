@@ -16,6 +16,7 @@ fn apply_to_3<F>(f: F) -> i32 where
     f(3)
 }
 
+//noinspection SpellCheckingInspection
 fn main() {
     use std::mem;
 
