@@ -6,6 +6,7 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
     let c = if stack.is_empty() {
         "".to_string()
     }
+
     else {
         // Remove top element and store it
         stack.pop().unwrap()
@@ -15,6 +16,7 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
     if c == "".to_string() {
         vec![]
     }
+
     // Checks if it is an operator
     else if ARITHMETIC_OPS.contains(&&*c) {
         // Loops through and finds the next two numbers
