@@ -1,11 +1,8 @@
 use crate::mylib::is_number;
 
-
 pub(crate) const ARITHMETIC_OPS: [&str; 8] = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
 pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
-
-
     let c = if stack.is_empty() {
         "".to_string()
     }
@@ -14,12 +11,10 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
         stack.pop().unwrap()
     };
 
-
     // Skips if the stack is empty
     if c == "".to_string() {
         vec![]
     }
-
     // Checks if it is an operator
     else if ARITHMETIC_OPS.contains(&&*c) {
         // Loops through and finds the next two numbers
@@ -29,7 +24,6 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
         if !num1.is_empty() && !num2.is_empty() {
             arithmetic(og, &c, num1.first().unwrap(), num2.first().unwrap())
         }
-
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
         else {
@@ -48,26 +42,23 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
     }
 }
 
-
-fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<String> {
-
+fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<String> {
     let v1: f64 = x.parse().unwrap();
     let v2: f64 = y.parse().unwrap();
 
     // Calculates the answers to the arithmetic operations
     let new = match c {
-
         // Addition
-        "+" => { (v1 + v2).to_string() },
+        "+" => (v1 + v2).to_string(),
 
         // Subtraction
-        "-" => { (v1 - v2).to_string() },
+        "-" => (v1 - v2).to_string(),
 
         // Multiplication
-        "*" => { (v1 * v2).to_string() },
+        "*" => (v1 * v2).to_string(),
 
         // Floating point division
-        "/" => { (v1 / v2).to_string() },
+        "/" => (v1 / v2).to_string(),
 
         // Integer division
         "div" => {
@@ -78,19 +69,16 @@ fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<St
         },
 
         // Smaller than
-        "<" => { (if v1 < v2 {"True"} else {"False"}).to_string() },
+        "<" => (if v1 < v2 { "True" } else { "False" }).to_string(),
 
         // Bigger than
-        ">" => { (if v1 > v2 {"True"} else {"False"}).to_string() },
+        ">" => (if v1 > v2 { "True" } else { "False" }).to_string(),
 
         // Equals
-        "==" => { (if v1 == v2 {"True"} else {"False"}).to_string() },
+        "==" => (if v1 == v2 { "True" } else { "False" }).to_string(),
 
-        _ => panic!("Invalid input!")
-
+        _ => panic!("Invalid input!"),
     };
-
-
 
     // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
     stack.reverse();
@@ -105,12 +93,9 @@ fn arithmetic(stack: &mut Vec<String>, c:&str, x: &String, y: &String) -> Vec<St
     // Reverse it back
     stack.reverse();
 
-
     // Removes the operator and adds the new variable
     stack.pop();
     stack.push(new);
 
     stack.to_owned()
 }
-
-

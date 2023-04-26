@@ -418,6 +418,31 @@ is exactly the same. Note however, that this:
 is not the same as the code above.  This code, puts three things onto the stack: on top we will have quotation, then we will have 20 and then 10 at the bottom.
 
 
+### Case five
+
+```
+[ 1 2 3 ] map { 10 * }
+```
+This program produces a list `[ 10 20 30 ]` on the stack.
+
+
+```
+[ 1 2 3 ] each { 10 * }
+```
+This program produces values `30`, `20` and `10` on the stack (`30` on top).
+
+How those programs should behave, when the function passed to `each` or `map` takes more than a single argument? 
+
+1. It should be illegal. `each` and `map` should ONLY take a unary funcion as argument. 
+2. It should be legal, and the missing arguments to those functions should be taken from the operand stack, each time the function is run.
+3. It should be illegal for `map`. For `each f`, the call to the function `f` should be done for each of the list elements, with the current stack, such that the function can consume the missing elements from the stack, and put the partial results back to the stack. For example: `0 [ 1 2 3 ] each +` will execute as follows:
+   - 0 and list goes onto the stack
+   - each is executed with a function `+` on the element 1, and, the missing element is taken from the stack, in which case it is 0.
+   - the result from the previous step is put onto the stack, and, the next item from the list is given to `+`. `2 +` is missing an element, and it is taken from the stack again, and `2 + 1`, which results to 3 is put back onto the stack.
+   - the final list element, `3` is given to function `+`. Because again it is missing an operand and the current operand on the stack is 3, we end up with `3+3` wich results in final `6` put onto the stack.
+
+
+
 
 # Tests
 

@@ -1,10 +1,10 @@
+
 use crate::mylib::{is_literal};
 
 
 pub(crate) const LOGICAL_OPS: [&str; 3] = ["&&", "||", "not"];
 
 pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
-
 
     let c = if stack.is_empty() {
         "".to_string()
@@ -18,7 +18,6 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
     if c == "".to_string() {
         vec![]
     }
-
     // Checks if it is an operator
     else if LOGICAL_OPS.contains(&&*c) {
         // Loops through and finds the next two literals
@@ -28,12 +27,10 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
         if !num1.is_empty() && !num2.is_empty() {
             logical_op(og, &c, num2.first().unwrap(), num1.first().unwrap())
         }
-
         // If there is only 1 variable, it gets pushed back on, and the stack returns, unless "not" is used
         else if c == "not" {
             logical_op(og, &c, num2.first().unwrap(), num2.first().unwrap())
         }
-
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
         else {
@@ -52,18 +49,11 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
     }
 }
 
-
-
-
-fn logical_op(stack: &mut Vec<String>, c:&str, a: &String, b: &String) -> Vec<String> {
-
-
+fn logical_op(stack: &mut Vec<String>, c: &str, a: &String, b: &String) -> Vec<String> {
     let x: String = a.to_string();
     let y: String = b.to_string();
 
-
     let new = match c {
-
         // Checks whether both predicates are True or not
         "&&" => {
             if x == "True" && y == "True" { "True".to_string() } else { "False".to_string() }
@@ -80,10 +70,8 @@ fn logical_op(stack: &mut Vec<String>, c:&str, a: &String, b: &String) -> Vec<St
             if x == "True" { "False".to_string() } else { "True".to_string() }
         }
 
-        _ => panic!("Invalid input!")
+        _ => panic!("Invalid input!"),
     };
-
-
 
     // Ensures that if there are duplicates of the predicates, the ones removed are the ones in the back
     stack.reverse();
@@ -100,13 +88,10 @@ fn logical_op(stack: &mut Vec<String>, c:&str, a: &String, b: &String) -> Vec<St
     // Reverse it back
     stack.reverse();
 
-
     // Removes the operator and adds the new variable
     stack.pop();
     stack.push(new);
 
-
     // Return the stack
     stack.to_owned()
 }
-

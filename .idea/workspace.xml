@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_INJECTED_CODE" value="false" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
@@ -7,14 +10,18 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feat: Implemented string parsing">
-      <change afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feat: Implemented lists">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/operations.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/string_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,18 +95,18 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/ingak/Desktop/Programmering/prog shit/Assignment2_prog/src",
+    "last_opened_file_path": "C:/Users/ingak/Desktop/Programmering/prog shit/Assignment2_prog",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "project.structure.last.edited": "Modules",
+    "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "settings.editor.selected.configurable": "language.rust.build.tool.cargo",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -109,8 +116,8 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
+      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     </key>
   </component>
   <component name="RunManager" selected="Cargo.Run">
@@ -184,6 +191,8 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Build bprog" />
+        <item itemvalue="Cargo.Run bprog" />
         <item itemvalue="Cargo.Test tests" />
         <item itemvalue="Cargo.Run bprog" />
         <item itemvalue="Cargo.Build bprog" />
@@ -210,7 +219,9 @@
       <workItem from="1681915508445" duration="14613000" />
       <workItem from="1681939137443" duration="17000" />
       <workItem from="1682016704196" duration="1073000" />
-      <workItem from="1682447263992" duration="13684000" />
+      <workItem from="1682447263992" duration="17385000" />
+      <workItem from="1682465487960" duration="927000" />
+      <workItem from="1682466434815" duration="4877000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -302,7 +313,13 @@
       <option name="presentableId" value="LOCAL−00015" />
       <updated>1682456606888</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL−00016" summary="Feat: Implemented lists">
+      <created>1682461337410</created>
+      <option name="number" value="LOCAL−00016" />
+      <option name="presentableId" value="LOCAL−00016" />
+      <updated>1682461337410</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -334,15 +351,16 @@
     <MESSAGE value="Chore" />
     <MESSAGE value="Feat: Implemented the not operation" />
     <MESSAGE value="Feat: Implemented string parsing" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feat: Implemented string parsing" />
+    <MESSAGE value="Feat: Implemented lists" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: Implemented lists" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>5</line>
-          <option name="timeStamp" value="53" />
+          <line>128</line>
+          <option name="timeStamp" value="87" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -350,6 +368,7 @@
       <configuration name="CargoCommandRunConfiguration">
         <watch expression="li_buf" />
         <watch expression="str_buf" />
+        <watch expression="stack" language="Rust" />
       </configuration>
     </watches-manager>
   </component>
@@ -358,6 +377,6 @@
     <select />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Assignment2_prog$Run.info" NAME="Run Coverage Results" MODIFIED="1682460691596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
+    <SUITE FILE_PATH="coverage/Assignment2_prog$Run.info" NAME="Run Coverage Results" MODIFIED="1682466411293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
   </component>
 </project>
