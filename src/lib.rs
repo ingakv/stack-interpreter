@@ -1,4 +1,14 @@
-// integration testing
+mod arithmetic_ops;
+mod list_ops;
+mod logical_ops;
+mod mylib;
+mod string_ops;
+
+
+use std::collections::VecDeque;
+
+use mylib::*;
+
 pub fn t(input: &str) -> String {
     // Warning: don't move this function to another module, as integration tests in
     // directory `tests` with `cargo test` will only look into lib.rs, so make your parse and
@@ -8,6 +18,12 @@ pub fn t(input: &str) -> String {
     // 1. invoke parser (+lexer) with input string
     // 2. invoke interpreter with tokens from parser as input
     // 3. transform the result to a string (tip: implement Display traits)
+    let mut list: VecDeque<String> = VecDeque::new();
 
-    input.to_string()
+//    add_stack(&mut list, input.to_string());
+
+//    exec_stack(&mut list);
+
+    list.pop_back().unwrap()
+
 }

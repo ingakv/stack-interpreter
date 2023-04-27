@@ -5,7 +5,7 @@ use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{BufRead, Write};
-
+use std::ptr::replace;
 
 
 pub(crate) fn run_program(rep: bool) {
@@ -17,27 +17,27 @@ pub(crate) fn run_program(rep: bool) {
 fn normal() {
     let mut stack: Vec<String> = Vec::new();
 
-    let stdin = io::stdin();
-    let mut lines = stdin.lock().lines();
-
     loop {
 
-        print!("\nbprog> ");
+        print!(":q to quit\nbprog> ");
         io::stdout().flush().unwrap();
 
         // Reads user input
-        if let Some(Ok(line)) = lines.next() {
 
-            if !line.is_empty() {
-                stack = program_loop(line, stack.clone(), false);
-            }
+        let input = get_line();
+
+        if input != ":q" {
+            stack = program_loop(input, stack.clone(), false);
         }
+
 
         else {
             // Ctrl + D pressed, execute your code here
-            println!("Ctrl + D pressed, exiting...");
+            let mut new = stack.clone();
+            new.retain(|x| !x.contains(","));
 
-            stack = program_loop(stack.concat(), stack.clone(), true);
+            stack = program_loop((new.into_iter().flat_map(|i| [i, " ".to_string()]).collect()), vec![], true);
+
 
             // Prints the stack
             println!("Stack: ");
@@ -113,9 +113,13 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
                 == li_buf.iter().filter(|&n| *n == "]").count()
             {
                 // Join the vector together to form a list, and send it to the stack
-                if repl { check_operator(li_buf.concat().as_str(), &mut stack); }
-                else { stack.push(li_buf.concat()); }
+                if repl { stack = check_operator(li_buf.concat().as_str(), &mut stack); }
 
+                else {
+                    for item in li_buf.clone() {
+                        stack.push(item.to_string())
+                    }
+                }
 
                 is_list = false;
 
@@ -146,15 +150,21 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
                     li_buf = str_buf.clone();
                     li_buf.push(", ")
                 }
+
                 // Join the vector together to form a sentence / string, and send it to the stack
                 else {
-                    if repl { check_operator(str_buf.concat().as_str(), &mut stack); }
-                    else { stack.push(str_buf.concat()); }
+                    if repl { stack = check_operator(str_buf.concat().as_str(), &mut stack); }
 
+                    else {
+                        for item in str_buf.clone() {
+                            stack.push(item.to_string())
+                        }
+                    }
                 }
 
                 // Reset the buffer so that a potential new string can be read
                 str_buf.clear();
+
             }
 
             // Flip the boolean
@@ -172,7 +182,7 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
         }
 
         else {
-            if repl { check_operator(i, &mut stack); }
+            if repl { stack = check_operator(i, &mut stack); }
             else { stack.push(i.to_string()); }
 
         }
@@ -190,9 +200,9 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
 
 
 fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
+
     // Ignores ""
     if c == "" { stack.to_vec() }
-
 
     else if LOGICAL_OPS.contains(&c) {
         // Adds the operator onto the stack
@@ -235,10 +245,8 @@ fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
     else {
 
-        let lower = c.to_lowercase();
-
         // Forces bools to have a capitalized first letter
-        let new = match lower.as_str() {
+        let new = match c.to_lowercase().as_str() {
             "true" => "True",
             "false" => "False",
             _ => c,

@@ -122,7 +122,7 @@ pub(crate) fn find_string(stack: &mut Vec<String>) -> Vec<String> {
         vec![]
     }
 
-    else if !c.contains("[") {
+    else if c.contains("\"") && !c.contains("[") {
         vec![c]
     }
 

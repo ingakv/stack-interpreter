@@ -8,10 +8,7 @@ mod test_literals {
 
     #[test]
     fn test_literal_long_int() {
-        assert_eq!(
-            t("121231324135634563456363567"),
-            "121231324135634563456363567"
-        )
+        assert_eq!(t("121231324135634563456363567"), "121231324135634563456363567")
     }
 
     #[test]
@@ -56,10 +53,7 @@ mod test_literals {
 
     #[test]
     fn test_literal_string() {
-        assert_eq!(
-            t("\" [ so { not if ] and } \""),
-            "\"[ so { not if ] and }\""
-        )
+        assert_eq!(t("\" [ so { not if ] and } \""), "\"[ so { not if ] and }\"")
     }
 
     #[test]
@@ -69,10 +63,7 @@ mod test_literals {
 
     #[test]
     fn test_literal_list_of_blocks() {
-        assert_eq!(
-            t("[ { + } { 10 + } { 20 10 + } ]"),
-            "[{ + },{ 10 + },{ 20 10 + }]"
-        )
+        assert_eq!(t("[ { + } { 10 + } { 20 10 + } ]"), "[{ + },{ 10 + },{ 20 10 + }]")
     }
 }
 
@@ -98,6 +89,7 @@ mod test_simple_arithmetic {
     fn test_float_division() {
         assert_eq!(t("20 2 /"), "10.0");
     }
+
 }
 
 mod test_arithmetic_with_type_coercion {
@@ -269,10 +261,7 @@ mod test_string_parsing {
 
     #[test]
     fn test_words() {
-        assert_eq!(
-            t("\" adam bob charlie \" words"),
-            "[\"adam\",\"bob\",\"charlie\"]"
-        );
+        assert_eq!(t("\" adam bob charlie \" words"), "[\"adam\",\"bob\",\"charlie\"]");
     }
 }
 
@@ -355,10 +344,7 @@ mod test_list_quotations {
 
     #[test]
     fn test_map_conditional() {
-        assert_eq!(
-            t("[ 1 2 3 4 ] map { dup 2 > if { 10 * } { 2 * } }"),
-            "[2,4,30,40]"
-        );
+        assert_eq!(t("[ 1 2 3 4 ] map { dup 2 > if { 10 * } { 2 * } }"), "[2,4,30,40]");
     }
 
     #[test]
@@ -378,18 +364,12 @@ mod test_list_quotations {
 
     #[test]
     fn test_each_parse_integer() {
-        assert_eq!(
-            t("[ \" 1 \" \" 2 \" \" 3 \" ] each { parseInteger } [ ] cons cons cons"),
-            "[1,2,3]"
-        );
+        assert_eq!(t("[ \" 1 \" \" 2 \" \" 3 \" ] each { parseInteger } [ ] cons cons cons"), "[1,2,3]");
     }
 
     #[test]
     fn test_each_parse_integer_3_times() {
-        assert_eq!(
-            t("[ \" 1 \" \" 2 \" \" 3 \" ] each parseInteger [ ] 3 times cons"),
-            "[1,2,3]"
-        );
+        assert_eq!(t("[ \" 1 \" \" 2 \" \" 3 \" ] each parseInteger [ ] 3 times cons"), "[1,2,3]");
     }
 
     #[test]
@@ -429,6 +409,7 @@ mod test_assignments {
     fn test_variable_update() {
         assert_eq!(t("age 20 := [ 10 age ]"), "[10,20]");
     }
+
 }
 
 mod test_quotations {
@@ -552,26 +533,17 @@ mod test_loop {
 
     #[test]
     fn test_loop_with_conditional() {
-        assert_eq!(
-            t("1 loop { dup 4 > } { dup 1 + } [ ] 5 times { cons }"),
-            "[1,2,3,4,5]"
-        );
+        assert_eq!(t("1 loop { dup 4 > } { dup 1 + } [ ] 5 times { cons }"), "[1,2,3,4,5]");
     }
 
     #[test]
     fn test_loop_condensed_with_conditional() {
-        assert_eq!(
-            t("1 loop { dup 4 > } { dup 1 + } [ ] 5 times cons"),
-            "[1,2,3,4,5]"
-        );
+        assert_eq!(t("1 loop { dup 4 > } { dup 1 + } [ ] 5 times cons"), "[1,2,3,4,5]");
     }
 
     #[test]
     fn test_loop_with_conditional_length() {
-        assert_eq!(
-            t("[ 1 ] loop { dup length 9 > } { dup head 1 + swap cons }"),
-            "[10,9,8,7,6,5,4,3,2,1]"
-        );
+        assert_eq!(t("[ 1 ] loop { dup length 9 > } { dup head 1 + swap cons }"), "[10,9,8,7,6,5,4,3,2,1]");
     }
 }
 
@@ -580,52 +552,35 @@ mod test_functions {
 
     #[test]
     fn test_odd_function() {
-        assert_eq!(
-            t("odd { dup 2 div swap 2 / == if False True } fun \
-                  2 odd"),
-            "False"
-        );
+        assert_eq!(t("odd { dup 2 div swap 2 / == if False True } fun \
+                  2 odd"), "False");
     }
 
     #[test]
     fn test_odd_function_true_case() {
-        assert_eq!(
-            t("odd { dup 2 div swap 2 / == if False True } fun \
-                  3 odd"),
-            "True"
-        );
+        assert_eq!(t("odd { dup 2 div swap 2 / == if False True } fun \
+                  3 odd"), "True");
     }
 
     #[test]
     fn test_to_list_function() {
-        assert_eq!(
-            t("toList { [ ] swap times cons } fun \
+        assert_eq!(t("toList { [ ] swap times cons } fun \
                   1 2 3 4 \
-                  4 toList"),
-            "[1,2,3,4]"
-        );
+                  4 toList"), "[1,2,3,4]");
     }
 
     #[test]
     fn test_gen1to_num_function() {
-        assert_eq!(
-            t(
-                "gen1toNum { max swap := 1 loop { dup max > } { dup 1 + } } fun \
-                  3 gen1toNum + + +"
-            ),
-            "10"
-        );
+        assert_eq!(t("gen1toNum { max swap := 1 loop { dup max > } { dup 1 + } } fun \
+                  3 gen1toNum + + +"), "10");
     }
 
     #[test]
     fn test_odd_to_list_gen1to_num_functions_combined() {
-        assert_eq!(
-            t("odd { dup 2 div swap 2 / == if False True } fun \
+        assert_eq!(t("odd { dup 2 div swap 2 / == if False True } fun \
                   toList { [ ] swap times cons } fun \
                   gen1toNum { max swap := 1 loop { dup max > } { dup 1 + } } fun \
-                  4 gen1toNum 5 toList map odd"),
-            "[True,False,True,False,True]"
-        );
+                  4 gen1toNum 5 toList map odd"), "[True,False,True,False,True]");
     }
 
     #[test]

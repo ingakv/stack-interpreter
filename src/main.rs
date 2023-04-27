@@ -11,8 +11,11 @@ mod string_ops;
 
 fn main() {
 
-    // Run with
+    // For REPL mode, run with
     // cargo run -- REPL
+
+    // For normal mode, run with
+    // cargo run
 
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 {
