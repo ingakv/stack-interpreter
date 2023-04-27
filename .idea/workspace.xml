@@ -10,10 +10,11 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feat: Implemented lists">
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feat: Seperated between REPL mode and normal mode">
+      <change beforePath="$PROJECT_DIR$/../../Haskell/Lab2" beforeDir="false" afterPath="$PROJECT_DIR$/../../Haskell/Lab2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Haskell/Lab3" beforeDir="false" afterPath="$PROJECT_DIR$/../../Haskell/Lab3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -100,7 +101,7 @@
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
     &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.build.tool.cargo&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -114,7 +115,7 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Run REPL">
+  <component name="RunManager" selected="Cargo.Run NORMAL">
     <configuration name="Build bprog" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="build --package bprog --lib" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -219,6 +220,7 @@
       <workItem from="1682447263992" duration="17385000" />
       <workItem from="1682465487960" duration="927000" />
       <workItem from="1682466434815" duration="4877000" />
+      <workItem from="1682545571048" duration="2939000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -316,7 +318,21 @@
       <option name="presentableId" value="LOCAL−00016" />
       <updated>1682461337410</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Feat: Seperated between REPL mode and normal mode">
+      <created>1682542549179</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1682542549179</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Feat: Seperated between REPL mode and normal mode">
+      <created>1682542610791</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1682542610791</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -349,18 +365,10 @@
     <MESSAGE value="Feat: Implemented the not operation" />
     <MESSAGE value="Feat: Implemented string parsing" />
     <MESSAGE value="Feat: Implemented lists" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feat: Implemented lists" />
+    <MESSAGE value="Feat: Seperated between REPL mode and normal mode" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: Seperated between REPL mode and normal mode" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>128</line>
-          <option name="timeStamp" value="87" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="CargoCommandRunConfiguration">
         <watch expression="li_buf" />
