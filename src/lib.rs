@@ -5,9 +5,8 @@ mod mylib;
 mod string_ops;
 
 
-use std::collections::VecDeque;
+use crate::mylib::program_loop;
 
-use mylib::*;
 
 pub fn t(input: &str) -> String {
     // Warning: don't move this function to another module, as integration tests in
@@ -18,12 +17,15 @@ pub fn t(input: &str) -> String {
     // 1. invoke parser (+lexer) with input string
     // 2. invoke interpreter with tokens from parser as input
     // 3. transform the result to a string (tip: implement Display traits)
-    let mut list: VecDeque<String> = VecDeque::new();
+
+    let mut stack: Vec<String> = Vec::new();
+
+    stack = program_loop(input.to_string(), stack.clone(), true);
 
 //    add_stack(&mut list, input.to_string());
 
 //    exec_stack(&mut list);
 
-    list.pop_back().unwrap()
+    stack.pop().unwrap()
 
 }

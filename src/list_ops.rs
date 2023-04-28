@@ -16,6 +16,7 @@ pub(crate) const LIST_OPS: [&str; 9] = [
 pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
     let c = if stack.is_empty() { "".to_string() }
+
     else {
         // Remove top element and store it
         stack.pop().unwrap()
@@ -36,15 +37,22 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
         // Loops through and finds the next non-list (AKA string)
         let mut new_li = og.clone();
         new_li.pop();
-        let str = find_string(&mut new_li);
+        let mut str = find_string(&mut new_li);
+
+        if str.is_empty() && list2.is_empty() && !stack.is_empty() { str = vec![stack.pop().unwrap()]; }
 
 
-        // Ensures that both the list and the string is not empty
+        // Ensures that both the list and the string / list2 is not empty
         if c == "append" {
 
             if !list.is_empty() && !str.is_empty() {
                 list_op(og, &c, list.first().unwrap(), str.first().unwrap())
             }
+
+            else if !list.is_empty() && !list2.is_empty() {
+                list_op(og, &c, list.first().unwrap(), list2.first().unwrap())
+            }
+
             else { og.pop(); og.to_vec() }
 
         }
@@ -82,8 +90,8 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
 fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<String> {
 
     let mut list: Vec<&str> = li
-        .trim_start_matches('[')
-        .trim_end_matches(']')
+        .split_at(1).1
+        .split_at(li.len()-2).0
         .split_terminator(',')
         .collect();
 
@@ -93,12 +101,18 @@ fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<St
     }
     list = new_li;
 
+    let limit:&[_] = &['[',']'];
+
     let new = match c {
         // Returns the first item of the list
         "head" => list.first().unwrap().to_string(),
 
         // Returns the last item of the list
-        "tail" => list.last().unwrap().to_string(),
+        "tail" => {
+            let mut new = li.split_at(3).1.to_string().clone();
+            new.insert(0,'[');
+            new
+        },
 
         // Returns whether or not the list is empty
         "empty" => {
@@ -115,20 +129,33 @@ fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<St
 
         // Inserts the string onto the front of the list
         "append" => {
+
             new_li = vec![];
             new_li.push(li.split_at(1).0);
+
             new_li.push(el);
-            new_li.push(", ");
+            if !li.trim_matches(limit).is_empty() { new_li.push(","); }
             new_li.push(li.split_at(1).1);
             new_li.concat()
+
         }
 
 
         // Combines the two lists
         "cons" => {
-            // Ignores the brackets between the lists
-            new_li = vec![li.split_at(li.len()-1).0, ", ", el.split_at(1).1];
-            new_li.concat()
+
+            // Return the other list if one of them is empty
+
+            if el.trim_matches(limit).is_empty() { li.to_string() }
+
+            else if li.trim_matches(limit).is_empty() { el.to_string() }
+
+            else {
+                // Ignores the brackets between the lists
+                new_li = vec![el.split_at(el.len() - 1).0, ",", li.split_at(1).1];
+                new_li.concat()
+
+            }
         }
 
         _ => panic!("Invalid input!"),

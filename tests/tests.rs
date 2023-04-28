@@ -305,27 +305,27 @@ mod test_lists {
 
     #[test]
     fn test_list_cons() {
-        assert_eq!(t("1 [ ] cons"), "[1]");
+        assert_eq!(t("1 [ ] append"), "[1]");
     }
 
     #[test]
     fn test_list_cons_append() {
-        assert_eq!(t("1 [ 2 3 ] cons"), "[1,2,3]");
+        assert_eq!(t("1 [ 2 3 ] append"), "[1,2,3]");
     }
 
     #[test]
     fn test_list_append() {
-        assert_eq!(t("[ 1 ] [ 2 3 ] append"), "[1,2,3]");
+        assert_eq!(t("[ 1 ] [ 2 3 ] cons"), "[1,2,3]");
     }
 
     #[test]
     fn test_list_append_empty() {
-        assert_eq!(t("[ 1 2 ] [ ] append"), "[1,2]");
+        assert_eq!(t("[ 1 2 ] [ ] cons"), "[1,2]");
     }
 
     #[test]
     fn test_list_nested_cons() {
-        assert_eq!(t("[ 1 ] [ 2 3 ] cons"), "[[1],2,3]");
+        assert_eq!(t("[ 1 ] [ 2 3 ] append"), "[[1],2,3]");
     }
 }
 

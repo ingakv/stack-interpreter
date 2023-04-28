@@ -1,17 +1,18 @@
-use crate::mylib::get_line;
+use crate::mylib::{get_line, is_number};
 
 pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
 
 pub(crate) const IO_OPS: [&str; 2] = ["print", "read"];
 
-pub(crate) const STRING_OPS: [&str; 3] = ["parseInteger", "parseFloat", "words"];
+pub(crate) const STRING_OPS: [&str; 4] = ["parseInteger", "parseFloat", "words", "length"];
 
 pub(crate) fn parse_string(elem: &str, stack: &mut Vec<String>) -> Vec<String> {
+
     match elem {
         // Converts a string to an integer
         "parseInteger" => {
             if let Some(str_ref) = stack.pop() {
-                let str_val: i64 = str_ref.parse().unwrap();
+                let str_val: i64 = str_ref.trim_matches('\"').parse().unwrap();
                 stack.push(str_val.to_string());
             } else {
             }
@@ -20,7 +21,7 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Vec<String>) -> Vec<String> {
         // Converts a string to a float
         "parseFloat" => {
             if let Some(str_ref) = stack.pop() {
-                let str_val: f64 = str_ref.parse().unwrap();
+                let str_val: f64 = str_ref.trim_matches('\"').parse().unwrap();
                 stack.push(str_val.to_string());
             } else {
             }
@@ -31,21 +32,30 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Vec<String>) -> Vec<String> {
             if let Some(str_ref) = stack.pop() {
                 let str_val: Vec<&str> = str_ref.split_whitespace().collect();
 
-                let mut new_li = vec!["[ "];
+                let mut new_li = vec!["["];
 
                 for i in str_val {
                     new_li.push("\"");
-
                     new_li.push(i.trim_matches('\"'));
-                    new_li.push("\" ");
+                    new_li.push("\"");
+                    new_li.push(",");
                 }
-
+                new_li.pop();
                 new_li.push("]");
 
                 stack.push(new_li.concat());
             } else {
             }
         }
+
+        // Returns the length of the string
+        "length" => {
+            let mut top = stack.last().unwrap().clone();
+
+            top = top.trim_matches('\"').to_string();
+
+            stack.push(top.len().to_string())
+        },
 
         _ => {}
     }
@@ -108,6 +118,7 @@ pub(crate) fn simple_io(elem: &str, stack: &mut Vec<String>) -> Vec<String> {
 }
 
 pub(crate) fn find_string(stack: &mut Vec<String>) -> Vec<String> {
+
     let c = if stack.is_empty() {
         "".to_string()
     }
@@ -123,6 +134,10 @@ pub(crate) fn find_string(stack: &mut Vec<String>) -> Vec<String> {
     }
 
     else if c.contains("\"") && !c.contains("[") {
+        vec![c]
+    }
+
+    else if is_number(c.clone()) {
         vec![c]
     }
 

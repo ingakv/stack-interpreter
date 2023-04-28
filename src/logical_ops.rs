@@ -1,8 +1,8 @@
 
-use crate::mylib::{is_literal};
+use crate::mylib::{is_literal, is_number};
 
 
-pub(crate) const LOGICAL_OPS: [&str; 3] = ["&&", "||", "not"];
+pub(crate) const LOGICAL_OPS: [&str; 4] = ["&&", "||", "not", "=="];
 
 pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
@@ -40,6 +40,10 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
 
     }
 
+    else if og.last().unwrap() == "==" && (is_number(c.clone()) || c.is_ascii()) {
+        vec![c]
+    }
+
     else if is_literal(c.clone()) {
         vec![c]
     }
@@ -50,8 +54,13 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
 }
 
 fn logical_op(stack: &mut Vec<String>, c: &str, a: &String, b: &String) -> Vec<String> {
-    let x: String = a.to_string();
-    let y: String = b.to_string();
+
+    let mut x: String = a.to_string();
+    let mut y: String = b.to_string();
+
+    // Shortens rounded floating numbers
+    if x.contains(".0") {x = x.trim_end_matches(|r| r != '.').to_string(); x.pop();}
+    if y.contains(".0") {y = y.trim_end_matches(|r| r != '.').to_string(); y.pop();}
 
     let new = match c {
         // Checks whether both predicates are True or not
@@ -69,6 +78,9 @@ fn logical_op(stack: &mut Vec<String>, c: &str, a: &String, b: &String) -> Vec<S
         "not" => {
             if x == "True" { "False".to_string() } else { "True".to_string() }
         }
+
+        // Equals
+        "==" => (if x == y { "True" } else { "False" }).to_string(),
 
         _ => panic!("Invalid input!"),
     };

@@ -4,8 +4,7 @@ use crate::list_ops::{find_list, LIST_OPS};
 use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
-use std::io::{BufRead, Write};
-use std::ptr::replace;
+use std::io::{Write};
 
 
 pub(crate) fn run_program(rep: bool) {
@@ -36,7 +35,9 @@ fn normal() {
             let mut new = stack.clone();
             new.retain(|x| !x.contains(","));
 
-            stack = program_loop((new.into_iter().flat_map(|i| [i, " ".to_string()]).collect()), vec![], true);
+            let new2 = new.into_iter().flat_map(|i| [i, " ".to_string()]).collect();
+
+            stack = program_loop(new2, vec![], true);
 
 
             // Prints the stack
@@ -76,7 +77,7 @@ fn repl() {
 }
 
 
-fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String> {
+pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String> {
 
     let old_stack = stack.clone();
 
@@ -102,8 +103,11 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
 
         // If it is the end of the list
         else if i.contains(']') {
-            // Remove the last comma
-            li_buf.pop();
+
+            if li_buf.last().unwrap() != &"[" {
+                // Remove the last comma
+                li_buf.pop();
+            }
 
             // Add closing bracket
             li_buf.push("]");
@@ -128,7 +132,7 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
             }
             // If the list is a sublist, continue reading it
             else {
-                li_buf.push(", ");
+                li_buf.push(",");
             }
         }
         //////////////// String /////////////////
@@ -175,6 +179,7 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
             str_buf.push(i);
             str_buf.push(" ");
         }
+
         // If a list is currently being read, push it to the buffer, with a comma after
         else if is_list {
             li_buf.push(i);
@@ -201,37 +206,46 @@ fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String
 
 fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
+    let mut ans = vec![];
+
     // Ignores ""
-    if c == "" { stack.to_vec() }
+    if c == "" { ans = stack.to_vec() }
 
-    else if LOGICAL_OPS.contains(&c) {
+    else if ARITHMETIC_OPS.contains(&c) && ans.len() != 1 {
         // Adds the operator onto the stack
         let mut new = stack.clone();
         new.push(c.to_string());
 
         let mut new2 = new.clone();
 
-        find_logical(&mut new, &mut new2)
+        ans = find_arithmetic(&mut new, &mut new2);
     }
 
-    else if ARITHMETIC_OPS.contains(&c) {
+    if LOGICAL_OPS.contains(&c) {
         // Adds the operator onto the stack
         let mut new = stack.clone();
         new.push(c.to_string());
 
         let mut new2 = new.clone();
 
-        find_arithmetic(&mut new, &mut new2)
+        ans = find_logical(&mut new, &mut new2);
+
     }
 
-    else if LIST_OPS.contains(&c) {
+    else if STRING_OPS.contains(&c) {
+        ans = parse_string(c, stack);
+    }
+
+    if LIST_OPS.contains(&c) {
         // Adds the operator onto the stack
         let mut new = stack.clone();
         new.push(c.to_string());
 
         let mut new2 = new.clone();
 
-        find_list(&mut new, &mut new2)
+        ans = vec![find_list(&mut new, &mut new2).last().unwrap().clone()];
+
+        ans
     }
 
 
@@ -239,9 +253,7 @@ fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
     else if IO_OPS.contains(&c) { simple_io(c, stack) }
 
-    else if STRING_OPS.contains(&c) { parse_string(c, stack) }
-
-
+    else if !ans.is_empty() { ans.clone() }
 
     else {
 

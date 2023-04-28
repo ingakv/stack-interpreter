@@ -3,6 +3,7 @@ use crate::mylib::is_number;
 pub(crate) const ARITHMETIC_OPS: [&str; 8] = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
 pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
+
     let c = if stack.is_empty() {
         "".to_string()
     }
@@ -45,11 +46,12 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
 }
 
 fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<String> {
+
     let v1: f64 = x.parse().unwrap();
     let v2: f64 = y.parse().unwrap();
 
     // Calculates the answers to the arithmetic operations
-    let new = match c {
+    let mut new = match c {
         // Addition
         "+" => (v1 + v2).to_string(),
 
@@ -81,6 +83,12 @@ fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<S
 
         _ => panic!("Invalid input!"),
     };
+
+    // Turns the answer into a float if it is an even number and at least one of the variables is a float
+    if  c == "/" || (x.contains(".0") || y.contains(".0")) && (c == "+" || c == "-" || c == "*") {
+        new.push('.');
+        new.push('0');
+    }
 
     // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
     stack.reverse();
