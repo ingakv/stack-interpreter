@@ -10,9 +10,12 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Test: All features are now passing the tests">
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Fix: Improved normal mode">
+      <change afterPath="$PROJECT_DIR$/Assignment_description.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notes.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,8 +107,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
+      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
@@ -197,7 +200,9 @@
       <workItem from="1682545571048" duration="2939000" />
       <workItem from="1682613558583" duration="8770000" />
       <workItem from="1682623179607" duration="14131000" />
-      <workItem from="1682637490863" duration="6803000" />
+      <workItem from="1682637490863" duration="7780000" />
+      <workItem from="1682645729918" duration="36000" />
+      <workItem from="1682703177139" duration="2024000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -339,7 +344,13 @@
       <option name="presentableId" value="LOCAL−00023" />
       <updated>1682642295453</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL−00024" summary="Fix: Improved normal mode">
+      <created>1682644681218</created>
+      <option name="number" value="LOCAL−00024" />
+      <option name="presentableId" value="LOCAL−00024" />
+      <updated>1682644681218</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -375,7 +386,8 @@
     <MESSAGE value="Feat: Seperated between REPL mode and normal mode" />
     <MESSAGE value="Fix: Fixed normal mode" />
     <MESSAGE value="Test: All features are now passing the tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Test: All features are now passing the tests" />
+    <MESSAGE value="Fix: Improved normal mode" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix: Improved normal mode" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -417,12 +429,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>84</line>
+          <line>86</line>
           <option name="timeStamp" value="168" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>251</line>
+          <line>253</line>
           <option name="timeStamp" value="172" />
         </line-breakpoint>
       </breakpoints>

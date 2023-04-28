@@ -22,10 +22,6 @@ pub fn t(input: &str) -> String {
 
     stack = program_loop(input.to_string(), stack.clone(), true);
 
-//    add_stack(&mut list, input.to_string());
-
-//    exec_stack(&mut list);
-
     stack.pop().unwrap()
 
 }
