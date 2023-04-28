@@ -40,10 +40,16 @@ fn normal() {
             stack = program_loop(new2, vec![], true);
 
 
-            // Prints the stack
-            println!("Stack: ");
-            for i in stack.iter().rev() {
-                println!("{}", i);
+            // Prints the result of the operations
+            let result = stack.pop();
+            println!("\n{}", result.unwrap());
+
+            if !stack.is_empty() {
+                // Prints the stack
+                println!("\nError: stack not empty;");
+                for i in stack.iter().rev() {
+                    println!("{}", i);
+                }
             }
 
             break;
@@ -243,7 +249,7 @@ fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
         let mut new2 = new.clone();
 
-        ans = vec![find_list(&mut new, &mut new2).last().unwrap().clone()];
+        ans = find_list(&mut new, &mut new2);
 
         ans
     }
