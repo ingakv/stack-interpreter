@@ -1,8 +1,9 @@
-
+use crate::error_handling::Error::{ExpectedVariable};
+use crate::error_handling::print_error;
 use crate::mylib::{is_literal, is_number};
 
 
-pub(crate) const LOGICAL_OPS: [&str; 4] = ["&&", "||", "not", "=="];
+pub(crate) const LOGICAL_OPS: [&str; 3] = ["&&", "||", "not"];
 
 pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
@@ -34,17 +35,14 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
         else {
+            print_error(ExpectedVariable);
             og.pop();
             og.to_vec()
         }
 
     }
 
-    else if og.last().unwrap() == "==" && (is_number(c.clone()) || c.is_ascii()) {
-        vec![c]
-    }
-
-    else if is_literal(c.clone()) {
+    else if (og.last().unwrap() == "==" && (is_number(c.clone()) || c.is_ascii())) || is_literal(c.clone()) {
         vec![c]
     }
 
@@ -78,9 +76,6 @@ fn logical_op(stack: &mut Vec<String>, c: &str, a: &String, b: &String) -> Vec<S
         "not" => {
             if x == "True" { "False".to_string() } else { "True".to_string() }
         }
-
-        // Equals
-        "==" => (if x == y { "True" } else { "False" }).to_string(),
 
         _ => panic!("Invalid input!"),
     };

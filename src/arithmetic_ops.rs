@@ -1,6 +1,34 @@
+
+use crate::error_handling::{print_error};
+use crate::error_handling::Error::{DivisionByZero, ExpectedNumber};
 use crate::mylib::is_number;
 
-pub(crate) const ARITHMETIC_OPS: [&str; 8] = ["+", "-", "*", "/", "div", "<", ">", "=="];
+pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">"];
+
+
+
+// By making this a separate function, several datatypes can be compared
+pub(crate) fn compare(stack: &mut Vec<String>) -> Vec<String> {
+
+    let num1 = stack.pop().unwrap();
+    let num2 = stack.pop().unwrap();
+
+    // This ensures that ie 10.0 and 10 is considered as equal
+    let ans = if is_number(num1.clone()) && is_number(num2.clone()) {
+        let v1: f64 = num1.parse().unwrap();
+        let v2: f64 = num2.parse().unwrap();
+
+        (if v1 == v2 { "True" } else { "False" }).to_string()
+    }
+
+    else { (if num1 == num2 { "True" } else { "False" }).to_string() };
+
+
+    stack.push(ans);
+    stack.to_owned()
+
+}
+
 
 pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
@@ -30,6 +58,7 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
         else {
+            print_error(ExpectedNumber);
             og.pop();
             og.to_vec()
         }
@@ -44,6 +73,7 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
         find_arithmetic(stack, og)
     }
 }
+
 
 fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<String> {
 
@@ -62,14 +92,29 @@ fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<S
         "*" => (v1 * v2).to_string(),
 
         // Floating point division
-        "/" => (v1 / v2).to_string(),
+        "/" => {
+            if v2 == 0.0 {
+                print_error(DivisionByZero);
+                stack.push(x.to_string());
+                stack.push(y.to_string());
+                "".to_string()
+            }
+
+            else { (v1 / v2).to_string() }
+        },
 
         // Integer division
         "div" => {
             let a = v1 as i64;
             let b = v2 as i64;
 
-            (a / b).to_string()
+            if b == 0 {
+                print_error(DivisionByZero);
+                stack.push(x.to_string());
+                stack.push(y.to_string());
+                "".to_string()
+            }
+            else { (a / b).to_string() }
         },
 
         // Smaller than
@@ -78,14 +123,11 @@ fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<S
         // Bigger than
         ">" => (if v1 > v2 { "True" } else { "False" }).to_string(),
 
-        // Equals
-        "==" => (if v1 == v2 { "True" } else { "False" }).to_string(),
-
         _ => panic!("Invalid input!"),
     };
 
     // Turns the answer into a float if it is an even number and at least one of the variables is a float
-    if  c == "/" || (x.contains(".0") || y.contains(".0")) && (c == "+" || c == "-" || c == "*") {
+    if  c == "/" || ((x.contains(".0") || y.contains(".0")) && (c == "+" || c == "-" || c == "*")) {
         new.push('.');
         new.push('0');
     }
@@ -105,7 +147,7 @@ fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<S
 
     // Removes the operator and adds the new variable
     stack.pop();
-    stack.push(new);
+    if new != "" { stack.push(new); }
 
     stack.to_owned()
 }

@@ -4,7 +4,7 @@ pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
 
 pub(crate) const IO_OPS: [&str; 2] = ["print", "read"];
 
-pub(crate) const STRING_OPS: [&str; 4] = ["parseInteger", "parseFloat", "words", "length"];
+pub(crate) const STRING_OPS: [&str; 3] = ["parseInteger", "parseFloat", "words"];
 
 pub(crate) fn parse_string(elem: &str, stack: &mut Vec<String>) -> Vec<String> {
 

@@ -1,17 +1,35 @@
+use crate::error_handling::Error::{ExpectedList, ExpectedVariable};
+use crate::error_handling::{Error, print_error};
+use crate::string_ops::{find_string, parse_string};
 
-use crate::string_ops::find_string;
-
-pub(crate) const LIST_OPS: [&str; 9] = [
+pub(crate) const LIST_OPS: [&str; 8] = [
     "head",
     "tail",
     "empty",
-    "length",
     "cons",
     "append",
     "each quotation",
     "map quotation",
     "foldl quotation",
 ];
+
+
+
+
+// Returns the length of the list or string
+pub(crate) fn length(stack: &mut Vec<String>) -> Vec<String> {
+
+    let mut og = stack.clone();
+
+    let elem = stack.pop().unwrap();
+
+    let top = elem.split_at(1).0;
+
+    if top == "\"" { parse_string("length", &mut og) }
+    else if top == "[" { list_op(&mut og.clone(), "length", og.first().unwrap(), &"".to_string()) }
+    else { print_error(Error::ExpectedListOrString); og.to_owned() }
+}
+
 
 pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
@@ -53,7 +71,7 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
                 list_op(og, &c, list.first().unwrap(), list2.first().unwrap())
             }
 
-            else { og.pop(); og.to_vec() }
+            else { print_error(ExpectedVariable); og.pop(); og.to_vec() }
 
         }
 
@@ -63,7 +81,7 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
             if !list.is_empty() && !list2.is_empty() {
                 list_op(og, &c, list.first().unwrap(), list2.first().unwrap())
             }
-            else { og.pop(); og.to_vec() }
+            else { print_error(ExpectedList); og.pop(); og.to_vec() }
         }
 
 
@@ -73,6 +91,7 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
 
         // If there are no lists in the stack, the original stack gets sent back
         else {
+            print_error(ExpectedList);
             og.pop();
             og.to_vec()
         }
@@ -180,7 +199,6 @@ fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<St
     // Removes the operator and adds the new variable
     stack.pop();
     stack.push(new);
-
 
 
     // Return the stack

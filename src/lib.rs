@@ -1,9 +1,10 @@
+
 mod arithmetic_ops;
 mod list_ops;
 mod logical_ops;
 mod mylib;
 mod string_ops;
-
+mod error_handling;
 
 use crate::mylib::program_loop;
 

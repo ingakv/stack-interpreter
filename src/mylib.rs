@@ -1,10 +1,12 @@
 
-use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS};
-use crate::list_ops::{find_list, LIST_OPS};
+use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS, compare};
+use crate::list_ops::{find_list, length, LIST_OPS};
 use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{Write};
+use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, StackEmpty};
+use crate::error_handling::print_error;
 
 
 pub(crate) fn run_program(rep: bool) {
@@ -85,10 +87,10 @@ fn repl() {
 
 pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<String> {
 
-    let old_stack = stack.clone();
-
     // Splits up the different input variables
     let new_el: Vec<&str> = { input.split_whitespace().collect() };
+
+    if new_el.is_empty() { print_error(StackEmpty); }
 
     // Variables to help join the elements together
     let mut str_buf: Vec<&str> = vec![];
@@ -98,53 +100,13 @@ pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<St
     let mut is_list: bool = false;
 
     for i in new_el {
-        // If it is the start or the end of a list
-        if i.contains('[') {
-            is_list = true;
 
-            // Add opening bracket
-            li_buf.push("[");
-        }
-        //////////////// List /////////////////
 
-        // If it is the end of the list
-        else if i.contains(']') {
-
-            if li_buf.last().unwrap() != &"[" {
-                // Remove the last comma
-                li_buf.pop();
-            }
-
-            // Add closing bracket
-            li_buf.push("]");
-
-            // If the list is not a sublist, set is_list to false
-            if li_buf.iter().filter(|&n| *n == "[").count()
-                == li_buf.iter().filter(|&n| *n == "]").count()
-            {
-                // Join the vector together to form a list, and send it to the stack
-                if repl { stack = check_operator(li_buf.concat().as_str(), &mut stack); }
-
-                else {
-                    for item in li_buf.clone() {
-                        stack.push(item.to_string())
-                    }
-                }
-
-                is_list = false;
-
-                // Reset the buffer so that a potential new list can be read
-                li_buf.clear();
-            }
-            // If the list is a sublist, continue reading it
-            else {
-                li_buf.push(",");
-            }
-        }
         //////////////// String /////////////////
 
+
         // If it is the start or the end of a string
-        else if i.contains('"') {
+        if i.contains('"') {
             // If it is the end of the string
             if is_str {
                 // Remove the last whitespace
@@ -180,10 +142,61 @@ pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<St
             // Flip the boolean
             is_str = !is_str;
         }
+
+
+
         // If a string is currently being read, push it to the buffer, with a whitespace after
         else if is_str {
             str_buf.push(i);
             str_buf.push(" ");
+        }
+
+
+        //////////////// List /////////////////
+
+
+        // If it is the start or the end of a list
+        else if i.contains('[') {
+            is_list = true;
+
+            // Add opening bracket
+            li_buf.push("[");
+        }
+
+
+        // If it is the end of the list
+        else if i.contains(']') {
+
+            if li_buf.last().unwrap() != &"[" {
+                // Remove the last comma
+                li_buf.pop();
+            }
+
+            // Add closing bracket
+            li_buf.push("]");
+
+            // If the list is not a sublist, set is_list to false
+            if li_buf.iter().filter(|&n| *n == "[").count()
+                == li_buf.iter().filter(|&n| *n == "]").count()
+            {
+                // Join the vector together to form a list, and send it to the stack
+                if repl { stack = check_operator(li_buf.concat().as_str(), &mut stack); }
+
+                else {
+                    for item in li_buf.clone() {
+                        stack.push(item.to_string())
+                    }
+                }
+
+                is_list = false;
+
+                // Reset the buffer so that a potential new list can be read
+                li_buf.clear();
+            }
+            // If the list is a sublist, continue reading it
+            else {
+                li_buf.push(",");
+            }
         }
 
         // If a list is currently being read, push it to the buffer, with a comma after
@@ -199,11 +212,6 @@ pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<St
         }
     }
 
-    // If nothing changed, display this message
-    if stack == old_stack {
-        println!("\nSyntax error, try again!\n");
-    }
-
     stack
 
 }
@@ -212,10 +220,31 @@ pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<St
 
 fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
-    let mut ans = vec![];
+    let ans = vec![];
 
     // Ignores ""
-    if c == "" { ans = stack.to_vec() }
+    if c == "" { stack.to_vec() }
+
+    else if c == "==" {
+
+        if stack.len() > 1 {
+            compare(stack)
+        }
+
+        else { print_error(ExpectedNumber); stack.to_vec() }
+
+    }
+
+
+    else if c == "length" {
+
+        if !stack.is_empty() {
+            length(stack)
+        }
+
+        else { print_error(ExpectedListOrString); stack.to_vec() }
+
+    }
 
     else if ARITHMETIC_OPS.contains(&c) && ans.len() != 1 {
         // Adds the operator onto the stack
@@ -224,34 +253,31 @@ fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
         let mut new2 = new.clone();
 
-        ans = find_arithmetic(&mut new, &mut new2);
+        find_arithmetic(&mut new, &mut new2)
     }
 
-    if LOGICAL_OPS.contains(&c) {
+    else if LOGICAL_OPS.contains(&c) {
         // Adds the operator onto the stack
         let mut new = stack.clone();
         new.push(c.to_string());
 
         let mut new2 = new.clone();
 
-        ans = find_logical(&mut new, &mut new2);
-
+        find_logical(&mut new, &mut new2)
     }
 
     else if STRING_OPS.contains(&c) {
-        ans = parse_string(c, stack);
+        parse_string(c, stack)
     }
 
-    if LIST_OPS.contains(&c) {
+    else if LIST_OPS.contains(&c) {
         // Adds the operator onto the stack
         let mut new = stack.clone();
         new.push(c.to_string());
 
         let mut new2 = new.clone();
 
-        ans = find_list(&mut new, &mut new2);
-
-        ans
+        find_list(&mut new, &mut new2)
     }
 
 
