@@ -19,10 +19,6 @@ pub fn t(input: &str) -> String {
     // 2. invoke interpreter with tokens from parser as input
     // 3. transform the result to a string (tip: implement Display traits)
 
-    let mut stack: Vec<String> = Vec::new();
-
-    stack = program_loop(input.to_string(), stack.clone(), true);
-
-    stack.pop().unwrap()
+    program_loop(input.to_string(), vec![], true).pop().unwrap()
 
 }

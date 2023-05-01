@@ -1,3 +1,5 @@
+use crate::error_handling::Error::{ExpectedNumber, ExpectedString};
+use crate::error_handling::print_error;
 use crate::mylib::{get_line, is_number};
 
 pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
@@ -12,9 +14,12 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Vec<String>) -> Vec<String> {
         // Converts a string to an integer
         "parseInteger" => {
             if let Some(str_ref) = stack.pop() {
-                let str_val: i64 = str_ref.trim_matches('\"').parse().unwrap();
-                stack.push(str_val.to_string());
-            } else {
+                let str_val = str_ref.trim_matches('\"').to_string();
+                if is_number(str_val.clone()) {
+                    stack.push(str_val);
+                }
+                else { print_error(ExpectedNumber); stack.push(str_ref); }
+            } else { print_error(ExpectedString)
             }
         }
 
@@ -100,7 +105,7 @@ pub(crate) fn simple_io(elem: &str, stack: &mut Vec<String>) -> Vec<String> {
     match elem {
         // Prints the top element to standard output
         "print" => {
-            if let Some(str_ref) = stack.last() {
+            if let Some(str_ref) = stack.pop() {
                 let str_val: String = str_ref.to_owned();
                 println!("{}\n", str_val);
             } else {}

@@ -1,21 +1,15 @@
 
-use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS, compare};
-use crate::list_ops::{find_list, length, LIST_OPS};
+use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS};
+use crate::list_ops::{find_list, list_op, LIST_OPS};
 use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{Write};
 use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, StackEmpty};
-use crate::error_handling::print_error;
+use crate::error_handling::{print_error};
 
 
-pub(crate) fn run_program(rep: bool) {
-    if rep { repl(); }
-    else { normal(); }
-}
-
-
-fn normal() {
+pub(crate) fn normal() {
     let mut stack: Vec<String> = Vec::new();
 
     loop {
@@ -63,7 +57,7 @@ fn normal() {
 
 
 // REPL mode (looping through and executing the code for each user input)
-fn repl() {
+pub(crate) fn repl() {
     let mut stack: Vec<String> = Vec::new();
 
     loop {
@@ -100,7 +94,6 @@ pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<St
     let mut is_list: bool = false;
 
     for i in new_el {
-
 
         //////////////// String /////////////////
 
@@ -220,8 +213,6 @@ pub fn program_loop(input: String, mut stack: Vec<String>, repl: bool) -> Vec<St
 
 fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
-    let ans = vec![];
-
     // Ignores ""
     if c == "" { stack.to_vec() }
 
@@ -246,7 +237,7 @@ fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
 
     }
 
-    else if ARITHMETIC_OPS.contains(&c) && ans.len() != 1 {
+    else if ARITHMETIC_OPS.contains(&c) {
         // Adds the operator onto the stack
         let mut new = stack.clone();
         new.push(c.to_string());
@@ -284,8 +275,6 @@ fn check_operator(c: &str, stack: &mut Vec<String>) -> Vec<String> {
     else if STACK_OPS.contains(&c) { stack_op(c, stack) }
 
     else if IO_OPS.contains(&c) { simple_io(c, stack) }
-
-    else if !ans.is_empty() { ans.clone() }
 
     else {
 
@@ -340,3 +329,43 @@ pub(crate) fn is_number(el: String) -> bool {
         false
     };
 }
+
+
+
+// Returns the length of the list or string
+pub(crate) fn length(stack: &mut Vec<String>) -> Vec<String> {
+
+    let mut og = stack.clone();
+
+    let elem = stack.pop().unwrap();
+
+    let top = elem.split_at(1).0;
+
+    if top == "\"" { parse_string("length", &mut og) }
+    else if top == "[" { list_op(&mut og.clone(), "length", og.first().unwrap(), &"".to_string()) }
+    else { print_error(ExpectedListOrString); og.to_owned() }
+}
+
+
+// By making this a separate function, several datatypes can be compared
+pub(crate) fn compare(stack: &mut Vec<String>) -> Vec<String> {
+
+    let num1 = stack.pop().unwrap();
+    let num2 = stack.pop().unwrap();
+
+    // This ensures that ie 10.0 and 10 is considered as equal
+    let ans = if is_number(num1.clone()) && is_number(num2.clone()) {
+        let v1: f64 = num1.parse().unwrap();
+        let v2: f64 = num2.parse().unwrap();
+
+        (if v1 == v2 { "True" } else { "False" }).to_string()
+    }
+
+    else { (if num1 == num2 { "True" } else { "False" }).to_string() };
+
+
+    stack.push(ans);
+    stack.to_owned()
+
+}
+

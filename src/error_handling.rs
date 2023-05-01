@@ -5,7 +5,7 @@ pub(crate) enum Error {
     StackEmpty,
     UnknownSymbol,
     ExpectedNumber,
-    ExpectedBoolOrNumber,
+    ExpectedString,
     ExpectedListOrString,
     ExpectedQuotation,
     ExpectedList,
@@ -29,7 +29,7 @@ pub(crate) fn print_error(err: Error) {
 
         ExpectedNumber => print!("\n\tError: Expected a number!\n\n"),
 
-        ExpectedBoolOrNumber => print!("\n\tError: Expected a bool or a number!\n\n"),
+        ExpectedString => print!("\n\tError: Expected a string!\n\n"),
 
         ExpectedListOrString => print!("\n\tError: Expected an enum!\n\n"),
 
@@ -43,7 +43,7 @@ pub(crate) fn print_error(err: Error) {
 
         ProgramFinishedWithMultipleValues => print!("\n\tError: Program finished with multiple values!\n\n"),
 
-        NumberConversionError => print!("\n\tError: Number couldn't be converted!\n\n"),
+        NumberConversionError => print!("\n\tError: String couldnt be converted to a number!\n\n"),
 
         IncompleteString => print!("\n\tError: Incomplete string!\n\n"),
 
@@ -51,7 +51,7 @@ pub(crate) fn print_error(err: Error) {
 
         IncompleteQuotation => print!("\n\tError: Incomplete quotation!\n\n"),
 
-        _ => print!("\n\tError: Syntax error, try again!\n\n"),
+//        _ => print!("\n\tError: Syntax error, try again!\n\n"),
     }
 }
 

@@ -1,5 +1,5 @@
 use std::env;
-use crate::mylib::run_program;
+use crate::mylib::{normal, repl};
 
 mod arithmetic_ops;
 mod list_ops;
@@ -23,18 +23,18 @@ fn main() {
 
         if arg == "REPL" {
             println!("Running whole file...");
-            run_program(true);
+            repl();
         }
 
         else {
             println!("Unknown argument... starting interpreter");
-            run_program(false);
+            normal();
         }
     }
 
     else {
         println!("No argument given... starting interpreter");
-        run_program(false);
+        normal();
     }
 
 }

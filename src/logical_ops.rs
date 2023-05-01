@@ -20,18 +20,20 @@ pub(crate) fn find_logical(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec
         vec![]
     }
     // Checks if it is an operator
-    else if LOGICAL_OPS.contains(&&*c) {
+    else if LOGICAL_OPS.contains(&c.as_str()) {
         // Loops through and finds the next two literals
         let num2 = find_logical(stack, og);
         let num1 = find_logical(stack, og);
 
-        if !num1.is_empty() && !num2.is_empty() {
-            logical_op(og, &c, num2.first().unwrap(), num1.first().unwrap())
+        if let (Some(x), Some(y)) = (num1.first(), num2.first()) {
+            logical_op(og, &c, x, y)
         }
+
         // If there is only 1 variable, it gets pushed back on, and the stack returns, unless "not" is used
         else if c == "not" {
             logical_op(og, &c, num2.first().unwrap(), num2.first().unwrap())
         }
+
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
         else {
@@ -77,7 +79,7 @@ fn logical_op(stack: &mut Vec<String>, c: &str, a: &String, b: &String) -> Vec<S
             if x == "True" { "False".to_string() } else { "True".to_string() }
         }
 
-        _ => panic!("Invalid input!"),
+        _ => panic!("An error occurred in logical_ops!"),
     };
 
     // Ensures that if there are duplicates of the predicates, the ones removed are the ones in the back

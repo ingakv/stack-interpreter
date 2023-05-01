@@ -7,28 +7,6 @@ pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">
 
 
 
-// By making this a separate function, several datatypes can be compared
-pub(crate) fn compare(stack: &mut Vec<String>) -> Vec<String> {
-
-    let num1 = stack.pop().unwrap();
-    let num2 = stack.pop().unwrap();
-
-    // This ensures that ie 10.0 and 10 is considered as equal
-    let ans = if is_number(num1.clone()) && is_number(num2.clone()) {
-        let v1: f64 = num1.parse().unwrap();
-        let v2: f64 = num2.parse().unwrap();
-
-        (if v1 == v2 { "True" } else { "False" }).to_string()
-    }
-
-    else { (if num1 == num2 { "True" } else { "False" }).to_string() };
-
-
-    stack.push(ans);
-    stack.to_owned()
-
-}
-
 
 pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
 
@@ -47,14 +25,15 @@ pub(crate) fn find_arithmetic(stack: &mut Vec<String>, og: &mut Vec<String>) -> 
     }
 
     // Checks if it is an operator
-    else if ARITHMETIC_OPS.contains(&&*c) {
+    else if ARITHMETIC_OPS.contains(&c.as_str()) {
         // Loops through and finds the next two numbers
         let num2 = find_arithmetic(stack, og);
         let num1 = find_arithmetic(stack, og);
 
-        if !num1.is_empty() && !num2.is_empty() {
-            arithmetic(og, &c, num1.first().unwrap(), num2.first().unwrap())
+        if let (Some(x), Some(y)) = (num1.first(), num2.first()) {
+            arithmetic(og, &c, x, y)
         }
+
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
         else {
@@ -123,7 +102,7 @@ fn arithmetic(stack: &mut Vec<String>, c: &str, x: &String, y: &String) -> Vec<S
         // Bigger than
         ">" => (if v1 > v2 { "True" } else { "False" }).to_string(),
 
-        _ => panic!("Invalid input!"),
+        _ => panic!("An error occurred in arithmetic_ops!"),
     };
 
     // Turns the answer into a float if it is an even number and at least one of the variables is a float

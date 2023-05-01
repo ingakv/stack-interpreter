@@ -16,13 +16,13 @@
 * [Assignment walkthrough video](https://youtu.be/Dw0dWN3yehM)
 * Check Lecture from February 27, 2023.
 * Check `haskell/rpn-calc` project for basics for parsing and using stack to represent your program state.
-* check `haskell/fib-state` project for basics of how to incoroporate State monad into your program.
+* check `haskell/fib-state` project for basics of how to incorporate State monad into your program.
 
 ## Important
 
 * **DO NOT USE** `parsec` library. All programs **must** be parsed simply by `words`.
 * Report in your specification document all the design decisions and assumptions.
-* Precisely report in your self-assessemnt what features are implemented and tested, and what you have not implemented and why.
+* Precisely report in your self-assessment what features are implemented and tested, and what you have not implemented and why.
 
 
 ## Overview
@@ -40,7 +40,7 @@ In addition, it can have "standard library" functions, defined in the language i
 
 The `bprog` program is represented as a sequence of arguments and operations. This sequence from text needs to be `parsed` and converted into an internal representation that can subsequently be used and manipulated by the interpreter. The interpreter needs two things - the program, and the current version of the operand stack (where the arguments to operations are stored). To make it simple, 
 
-## Tokeniser (Lexer)
+## Tokenizer (Lexer)
 
 Instead of implementing a proper lexer, we will simply use the Haskell command `words`, and use space as a delimiter for all tokens in the language.
 
@@ -392,7 +392,7 @@ odd { dup 2 div swap 2 / == if False True } fun
 4 5 odd swap odd
 ```
 
-The first line is composed of the symbol `odd` that is put onto the stack. Because the symbol `odd` is not bound to anything, it is treated as if it is preceeded with a tick. So the first line is exactly the same as if it was written:
+The first line is composed of the symbol `odd` that is put onto the stack. Because the symbol `odd` is not bound to anything, it is treated as if it is proceeded with a tick. So the first line is exactly the same as if it was written:
 
 ```
 ' odd { dup 2 div swap 2 / == if False True } fun
@@ -433,13 +433,13 @@ This program produces values `30`, `20` and `10` on the stack (`30` on top).
 
 How those programs should behave, when the function passed to `each` or `map` takes more than a single argument? 
 
-1. It should be illegal. `each` and `map` should ONLY take a unary funcion as argument. 
+1. It should be illegal. `each` and `map` should ONLY take a unary function as argument. 
 2. It should be legal, and the missing arguments to those functions should be taken from the operand stack, each time the function is run.
 3. It should be illegal for `map`. For `each f`, the call to the function `f` should be done for each of the list elements, with the current stack, such that the function can consume the missing elements from the stack, and put the partial results back to the stack. For example: `0 [ 1 2 3 ] each +` will execute as follows:
    - 0 and list goes onto the stack
    - each is executed with a function `+` on the element 1, and, the missing element is taken from the stack, in which case it is 0.
    - the result from the previous step is put onto the stack, and, the next item from the list is given to `+`. `2 +` is missing an element, and it is taken from the stack again, and `2 + 1`, which results to 3 is put back onto the stack.
-   - the final list element, `3` is given to function `+`. Because again it is missing an operand and the current operand on the stack is 3, we end up with `3+3` wich results in final `6` put onto the stack.
+   - the final list element, `3` is given to function `+`. Because again it is missing an operand and the current operand on the stack is 3, we end up with `3+3` which results in final `6` put onto the stack.
 
 
 

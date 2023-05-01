@@ -1,6 +1,6 @@
 use crate::error_handling::Error::{ExpectedList, ExpectedVariable};
-use crate::error_handling::{Error, print_error};
-use crate::string_ops::{find_string, parse_string};
+use crate::error_handling::{print_error};
+use crate::string_ops::{find_string};
 
 pub(crate) const LIST_OPS: [&str; 8] = [
     "head",
@@ -14,21 +14,6 @@ pub(crate) const LIST_OPS: [&str; 8] = [
 ];
 
 
-
-
-// Returns the length of the list or string
-pub(crate) fn length(stack: &mut Vec<String>) -> Vec<String> {
-
-    let mut og = stack.clone();
-
-    let elem = stack.pop().unwrap();
-
-    let top = elem.split_at(1).0;
-
-    if top == "\"" { parse_string("length", &mut og) }
-    else if top == "[" { list_op(&mut og.clone(), "length", og.first().unwrap(), &"".to_string()) }
-    else { print_error(Error::ExpectedListOrString); og.to_owned() }
-}
 
 
 pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
@@ -47,7 +32,7 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
     }
 
     // Checks if it is a list
-    else if LIST_OPS.contains(&&*c) {
+    else if LIST_OPS.contains(&c.as_str()) {
         // Loops through and finds the next lists
         let list = find_list(stack, og);
         let list2 = find_list(stack, og);
@@ -60,15 +45,16 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
         if str.is_empty() && list2.is_empty() && !stack.is_empty() { str = vec![stack.pop().unwrap()]; }
 
 
+
         // Ensures that both the list and the string / list2 is not empty
         if c == "append" {
 
-            if !list.is_empty() && !str.is_empty() {
-                list_op(og, &c, list.first().unwrap(), str.first().unwrap())
+            if let (Some(x), Some(y)) = (list.first(), str.first()) {
+                list_op(og, &c, x, y)
             }
 
-            else if !list.is_empty() && !list2.is_empty() {
-                list_op(og, &c, list.first().unwrap(), list2.first().unwrap())
+            else if let (Some(x), Some(y)) = (list.first(), list2.first()) {
+                list_op(og, &c, x, y)
             }
 
             else { print_error(ExpectedVariable); og.pop(); og.to_vec() }
@@ -78,8 +64,8 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
 
         // Ensures that both lists are not empty
         else if c == "cons" {
-            if !list.is_empty() && !list2.is_empty() {
-                list_op(og, &c, list.first().unwrap(), list2.first().unwrap())
+            if let (Some(x), Some(y)) = (list.first(), list2.first()) {
+                list_op(og, &c, x, y)
             }
             else { print_error(ExpectedList); og.pop(); og.to_vec() }
         }
@@ -106,7 +92,7 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
     }
 }
 
-fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<String> {
+pub(crate) fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<String> {
 
     let mut list: Vec<&str> = li
         .split_at(1).1
@@ -177,7 +163,7 @@ fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<St
             }
         }
 
-        _ => panic!("Invalid input!"),
+        _ => panic!("An error occurred in list_ops!"),
     };
 
     // Ensures that if there are duplicates of the predicates, the ones removed are the ones in the back
