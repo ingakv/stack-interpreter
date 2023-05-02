@@ -5,7 +5,7 @@ use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{Write};
-use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, StackEmpty};
+use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
 
 
@@ -14,19 +14,14 @@ pub(crate) fn normal() {
 
     loop {
 
-        print!(":q to quit\nbprog> ");
+        print!("\n:q to quit\n:s to print the stack\nbprog> ");
         io::stdout().flush().unwrap();
 
         // Reads user input
 
         let input = get_line();
 
-        if input != ":q" {
-            stack = program_loop(input, stack.clone(), false);
-        }
-
-
-        else {
+        if input == ":q" {
             // Ctrl + D pressed, execute your code here
             let mut new = stack.clone();
             new.retain(|x| !x.contains(","));
@@ -37,19 +32,44 @@ pub(crate) fn normal() {
 
 
             // Prints the result of the operations
-            let result = stack.pop();
-            println!("\n{}", result.unwrap());
+            if stack.is_empty() { print_error(StackEmpty); }
+            else {
 
+                let result = stack.pop();
+                println!("\n{}", result.unwrap());
+
+                if !stack.is_empty() {
+                    // Prints the stack
+                    print_error(ProgramFinishedWithMultipleValues);
+                    println!("Stack: ");
+                    for i in stack.iter().rev() {
+                        println!("{}", i);
+                    }
+                }
+                else { print_error(StackEmpty); }
+
+            }
+            break;
+        }
+
+        // Prints the stack
+        else if input == ":s" {
+
+            println!("Stack: ");
             if !stack.is_empty() {
-                // Prints the stack
-                println!("\nError: stack not empty;");
                 for i in stack.iter().rev() {
                     println!("{}", i);
                 }
             }
-
-            break;
+            else { print_error(StackEmpty); }
         }
+
+        else {
+            stack = program_loop(input, stack.clone(), false);
+        }
+
+
+
     }
 }
 

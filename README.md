@@ -31,11 +31,12 @@ The print function does not remove the element being printed from the list. All 
 
 * The program can run in two different modes:
   * **NORMAL mode**
-    * Write the input in postfix line for line. When you want to see the result, type in `:q`. 
+    * Write the input in postfix line for line. When you want to see the result, type in `:q`.
+    * To see the stack without exiting, type `:s`
     * There should only be 1 variable left on the stack when the program is ended, if used correctly
   * **REPL mode**
     * For each line of input, the stack will be printed. The program loops forever.
-
+  
 * Literals are pushed onto the stack (integers, floats, bools, strings, lists)
 
 * The program should be able to perform operations

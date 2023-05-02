@@ -1,4 +1,4 @@
-use crate::error_handling::Error::{ExpectedList, ExpectedVariable};
+use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
 use crate::error_handling::{print_error};
 use crate::string_ops::{find_string};
 
@@ -49,6 +49,7 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
         // Ensures that both the list and the string / list2 is not empty
         if c == "append" {
 
+
             if let (Some(x), Some(y)) = (list.first(), str.first()) {
                 list_op(og, &c, x, y)
             }
@@ -57,7 +58,7 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
                 list_op(og, &c, x, y)
             }
 
-            else { print_error(ExpectedVariable); og.pop(); og.to_vec() }
+            else { print_error(ExpectedListOrString); og.pop(); og.to_vec() }
 
         }
 
