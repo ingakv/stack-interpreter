@@ -1,6 +1,7 @@
-use std::any::{Any};
+
 use crate::error_handling::{print_error};
 use crate::error_handling::Error::{DivisionByZero, ExpectedNumber};
+use crate::mylib::{is_float, is_number};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, Float_, Int_, String_};
 
@@ -13,7 +14,6 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> 
 
     // Remove top element and store it
     let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
-
 
     // Skips if the stack is empty
     if c == String_("".to_string()) {
@@ -41,9 +41,8 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> 
     }
 
 
-
-    else if c.is_number() {
-        Stack{ elements: vec![] }
+    else if is_number(c.type_to_string().as_str()) {
+        Stack{ elements: vec![c] }
     }
 
     else {
@@ -60,9 +59,7 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
     let a = x.type_to_int();
     let b = y.type_to_int();
 
-
-    let is_float = [x.type_id(), y.type_id()].contains(&Float_.type_id());
-
+    let is_float = is_float(x.type_to_string().as_str()) || is_float(y.type_to_string().as_str());
 
 
     // Calculates the answers to the arithmetic operations

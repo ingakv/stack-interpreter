@@ -8,7 +8,7 @@ use crate::structs::Type::*;
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum Type {
     Int_(i128),
     Float_(f64),
@@ -60,23 +60,11 @@ impl Type{
     }
 
 
-    pub fn clone(&self) -> Self {
-        self.clone()
-    }
-
-
     // Prints a single variable
     pub fn print(&self) {
-        println!("\n{}", self.type_to_string())
-    }
 
-    pub fn len(&self) -> usize {
-        self.len()
-    }
-
-
-    pub fn is_number(&self) -> bool {
-        (self.type_id() == Int_.type_id()) || (self.type_id() == Float_.type_id())
+        if self.is_string() { println!("\"{}\"", self.type_to_string()) }
+        println!("{}", self.type_to_string())
     }
 
     pub fn is_bool(&self) -> bool {
@@ -112,28 +100,33 @@ impl Stack<Type>{
         Stack { elements: Vec::new() }
     }
 
-    pub fn len(&self) -> i128 {
-        self.len()
+    pub fn len(&self) -> usize {
+        self.elements.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.is_empty()
+        self.elements.is_empty()
     }
 
     pub fn first(&self) -> Option<Type> {
-        self.first()
+        self.elements.first().cloned()
     }
 
     pub fn last(&self) -> Option<Type> {
-        self.last()
+        self.elements.last().cloned()
     }
 
-    pub fn pop(&self) -> Option<Type> {
-        self.pop()
+    pub fn pop(&mut self) -> Option<Type> {
+        self.elements.pop()
     }
 
-    pub fn swap(&self, pos1: i128, pos2: i128) -> Option<Type> {
-        self.swap(pos1, pos2)
+    pub fn swap(&mut self, pos1: usize, pos2: usize) -> Option<Stack<Type>> {
+
+        if self.len() > 1 {
+            self.elements.swap(pos1, pos2);
+            Some(self.to_owned())
+        }
+        else { None }
     }
 
 
@@ -149,17 +142,11 @@ impl Stack<Type>{
     }
 
 
-    pub fn push(&mut self, i: Type) {
-        self.push(i);
-    }
+    pub fn push(&mut self, i: Type) { self.elements.push(i); }
 
-    pub fn clone(&self) -> Self {
-        self.clone()
-    }
+//    pub fn clone(&self) { self.elements.clone() }
 
-    pub fn reverse(&self) -> Self {
-        self.reverse()
-    }
+    pub fn reverse(&mut self) { self.elements.reverse() }
 
 
     // Removes the last element of the stack that matches the one given
@@ -186,7 +173,6 @@ impl Stack<Type>{
 
         if !self.is_empty() {
             // Prints the stack
-            print_error(ProgramFinishedWithMultipleValues);
             println!("Stack: ");
             for i in self.elements.iter().rev() {
                 i.print();

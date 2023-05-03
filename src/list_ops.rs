@@ -156,9 +156,10 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
 
             // Return the other list if one of them is empty
 
-            if el.len() == 0 { stack.push(List_(li)); }
+//            if el == 0 { stack.push(List_(li)); }
 
-            else if li.is_empty() { stack.push(List_(vec![el])); }
+//            else
+            if li.is_empty() { stack.push(List_(vec![el])); }
 
             else {
                 let new_li = vec![el, List_(li)];

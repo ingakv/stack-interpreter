@@ -1,6 +1,5 @@
 use std::env;
 use crate::mylib::{normal, repl};
-use crate::structs::{Stack, Type};
 
 mod arithmetic_ops;
 mod list_ops;

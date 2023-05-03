@@ -5,7 +5,7 @@ use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{Write};
-use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, StackEmpty};
+use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, Float_, Int_, List_, String_};
@@ -52,7 +52,8 @@ pub fn normal() {
         }
 
         else {
-            stack = program_loop(input, stack.clone(), false);
+            if stack.len() > 1 { print_error(ProgramFinishedWithMultipleValues); }
+            else { stack = program_loop(input, stack.clone(), false); }
         }
 
     }
@@ -109,28 +110,10 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
                 // Remove the last whitespace
                 str_buf.pop();
 
-                // Copy the elements into a combined list
-                // If there is no list, there are no extra elements added, so str_buf can get set to the new list
-
-//                str_buf = push_to_vec(li_buf.clone(), str_buf.clone());
-
-
-                let mut nvec = vec![];
-
-                nvec.push("\"");
-                for el in str_buf {
-                    nvec.push(el);
-                }
-                nvec.push("\"");
-
-                str_buf = nvec.clone();
-
-
-
 
                 // If we are in a list, copy the new list over
                 if is_list {
-                    li_buf.push(String_(nvec.concat()));
+                    li_buf.push(String_(str_buf.concat()));
                 }
 
                 // Join the vector together to form a sentence / string, and send it to the stack
@@ -229,13 +212,13 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 // Chooses which type to put the variable in
 pub fn string_to_type(var: &str) -> Type {
 
-    if is_number(var) {return Int_(var.parse().unwrap())}
+    if is_float(var) {Float_(var.parse().unwrap())}
 
-    else if is_float(var) {return Float_(var.parse().unwrap())}
+    else if is_number(var) {Int_(var.parse().unwrap())}
 
-    else if is_literal(var) {return Bool_(var.parse().unwrap())}
+    else if is_literal(var) {Bool_(var.parse().unwrap())}
 
-    else {return String_(var.to_owned())};
+    else {String_(var.to_owned())}
 }
 
 
@@ -317,7 +300,7 @@ fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
         // If a stack operation was not typed in, push the value to the stack
         stack.push(string_to_type(new));
 
-        stack.clone()
+        stack.to_owned()
     }
 }
 
@@ -336,11 +319,17 @@ pub(crate) fn is_literal(el: &str) -> bool {
     return el == "True" || el == "False"
 }
 
-// Checks whether or not the variable is a number
+// Checks whether or not the variable is a valid number
 // Returns true for both ints and floats
 pub(crate) fn is_number(el: &str) -> bool {
-    el.as_bytes()[0].is_ascii_digit()
-        || (el.contains('-') && el.as_bytes()[1].is_ascii_digit())
+    let mut is_num = true;
+
+    let st: String =  el.split_terminator('.').collect();
+
+    for i in st.trim_start_matches('-').as_bytes() {
+        if !i.is_ascii_digit() {is_num = false}
+    }
+    is_num
 }
 
 // Checks whether or not the variable is a float

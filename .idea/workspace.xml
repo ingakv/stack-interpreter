@@ -11,15 +11,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Refactor: Converted to a custom datatype stack. (it doesnt work)">
-      <change afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/string_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/structs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +127,7 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\tests" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Run REPL">
+  <component name="RunManager" selected="Cargo.Test tests">
     <configuration name="Run NORMAL" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="run" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/src" />
@@ -226,7 +224,9 @@
       <workItem from="1682963062211" duration="3925000" />
       <workItem from="1683021153680" duration="2145000" />
       <workItem from="1683023334660" duration="16204000" />
-      <workItem from="1683064228020" duration="16597000" />
+      <workItem from="1683064228020" duration="16634000" />
+      <workItem from="1683124958856" duration="1898000" />
+      <workItem from="1683127846055" duration="3685000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -404,7 +404,13 @@
       <option name="presentableId" value="LOCAL−00029" />
       <updated>1683021306697</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL−00030" summary="Refactor: Converted to a custom datatype stack. (it doesnt work)">
+      <created>1683081020615</created>
+      <option name="number" value="LOCAL−00030" />
+      <option name="presentableId" value="LOCAL−00030" />
+      <updated>1683081020615</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -452,11 +458,43 @@
     <integration-enabled>false</integration-enabled>
     <settings-migrated>true</settings-migrated>
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
+          <line>85</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
+          <line>226</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/arithmetic_ops.rs</url>
+          <line>55</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/arithmetic_ops.rs</url>
+          <line>14</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/lib.rs</url>
+          <line>14</line>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
     <select />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Assignment2_prog$Run_REPL.info" NAME="Run REPL Coverage Results" MODIFIED="1683129262120" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     <SUITE FILE_PATH="coverage/Assignment2_prog$Run_NORMAL.info" NAME="Run NORMAL Coverage Results" MODIFIED="1682627641840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     <SUITE FILE_PATH="coverage/Assignment2_prog$Run.info" NAME="Run Coverage Results" MODIFIED="1682466411293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
   </component>
