@@ -1,5 +1,6 @@
 use std::env;
 use crate::mylib::{normal, repl};
+use crate::structs::{Stack, Type};
 
 mod arithmetic_ops;
 mod list_ops;
@@ -7,6 +8,7 @@ mod logical_ops;
 mod mylib;
 mod string_ops;
 mod error_handling;
+mod structs;
 
 fn main() {
 

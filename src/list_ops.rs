@@ -1,6 +1,8 @@
 use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
 use crate::error_handling::{print_error};
 use crate::string_ops::{find_string};
+use crate::structs::{Stack, Type};
+use crate::structs::Type::{Bool_, Int_, List_, String_};
 
 pub(crate) const LIST_OPS: [&str; 8] = [
     "head",
@@ -16,76 +18,94 @@ pub(crate) const LIST_OPS: [&str; 8] = [
 
 
 
-pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<String> {
+pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
 
-    let c = if stack.is_empty() { "".to_string() }
+    let c = if stack.is_empty() { String_("".to_string()) }
 
     else {
         // Remove top element and store it
-        stack.pop().unwrap()
+        stack.elements.pop().unwrap_or_else(|| String_("".to_string()))
     };
 
 
     // Skips if the stack is empty
-    if c == "".to_string() {
-        vec![]
+    if c == String_("".to_string()) {
+        Stack::new()
     }
 
     // Checks if it is a list
-    else if LIST_OPS.contains(&c.as_str()) {
+    else if LIST_OPS.contains(&c.type_to_string().as_str()) {
         // Loops through and finds the next lists
         let list = find_list(stack, og);
         let list2 = find_list(stack, og);
 
         // Loops through and finds the next non-list (AKA string)
         let mut new_li = og.clone();
-        new_li.pop();
-        let mut str = find_string(&mut new_li);
+        new_li.elements.pop();
+        let str = find_string(&mut new_li);
 
-        if str.is_empty() && list2.is_empty() && !stack.is_empty() { str = vec![stack.pop().unwrap()]; }
+//        if str.is_empty() && list2.is_empty() && !stack.is_empty() { str = Stack { vec![stack.elements.pop().unwrap_or_else(|| String_("".to_string()));]} }
 
 
 
         // Ensures that both the list and the string / list2 is not empty
-        if c == "append" {
+        if c.type_to_string().as_str() == "append" {
 
 
-            if let (Some(x), Some(y)) = (list.first(), str.first()) {
-                list_op(og, &c, x, y)
+            if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
+
+                og.remove_last_match(list.first().unwrap());
+                og.remove_last_match(str.first().unwrap());
+
+                list_op(og, &c.type_to_string(), x, y)
             }
 
-            else if let (Some(x), Some(y)) = (list.first(), list2.first()) {
-                list_op(og, &c, x, y)
+            else if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
+
+                og.remove_last_match(list.first().unwrap());
+                og.remove_last_match(list2.first().unwrap());
+
+                list_op(og, &c.type_to_string(), x, y)
             }
 
-            else { print_error(ExpectedListOrString); og.pop(); og.to_vec() }
+            else { print_error(ExpectedListOrString); og.pop(); og.clone() }
 
         }
-
 
         // Ensures that both lists are not empty
-        else if c == "cons" {
-            if let (Some(x), Some(y)) = (list.first(), list2.first()) {
-                list_op(og, &c, x, y)
+        else if c.type_to_string().as_str() == "cons" {
+            if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
+
+                og.remove_last_match(list.first().unwrap());
+                og.remove_last_match(list2.first().unwrap());
+
+                list_op(og, &c.type_to_string().as_str(), x, y)
             }
-            else { print_error(ExpectedList); og.pop(); og.to_vec() }
+            else { print_error(ExpectedList); og.pop(); og.clone() }
         }
 
-
         else if !list.is_empty() {
-            list_op(og, &c, list.first().unwrap(), &"".to_owned())
+
+            if let Some(List_(x)) = list.first() {
+
+                og.remove_last_match(list.first().unwrap());
+
+                list_op(og, &c.type_to_string().as_str(), x, String_("".to_owned()))
+            }
+            else { print_error(ExpectedList); og.pop(); og.clone() }
+
         }
 
         // If there are no lists in the stack, the original stack gets sent back
         else {
             print_error(ExpectedList);
             og.pop();
-            og.to_vec()
+            og.clone()
         }
     }
 
-    else if c.contains("[") {
-        vec![c]
+    else if c.is_list() {
+        Stack{ elements: vec![] }
     }
 
     else {
@@ -93,56 +113,40 @@ pub(crate) fn find_list(stack: &mut Vec<String>, og: &mut Vec<String>) -> Vec<St
     }
 }
 
-pub(crate) fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String) -> Vec<String> {
+pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type) -> Stack<Type> {
 
-    let mut list: Vec<&str> = li
-        .split_at(1).1
-        .split_at(li.len()-2).0
-        .split_terminator(',')
-        .collect();
+    let head = li.first().unwrap().to_owned();
 
-    let mut new_li = vec![];
-    for i in list.iter() {
-        new_li.push(i.trim_matches('\"'));
-    }
-    list = new_li;
-
-    let limit:&[_] = &['[',']'];
-
-    let new = match c {
+    match c {
         // Returns the first item of the list
-        "head" => list.first().unwrap().to_string(),
+        "head" => { stack.push(head) },
 
         // Returns the last item of the list
         "tail" => {
-            let mut new = li.split_at(3).1.to_string().clone();
-            new.insert(0,'[');
-            new
+            let mut new_li = vec![];
+            for i in li {
+                if i != head {new_li.push(i)}
+            }
+            stack.push(List_(new_li));
         },
 
         // Returns whether or not the list is empty
-        "empty" => {
-            if list.is_empty() {
-                "True".to_string()
-            } else {
-                "False".to_string()
-            }
-        }
+        "empty" => stack.push(Bool_(li.is_empty())),
 
         // Returns the length of the list
-        "length" => list.len().to_string(),
+        "length" => stack.push(Int_(li.len() as i128)),
 
 
         // Inserts the string onto the front of the list
         "append" => {
 
-            new_li = vec![];
-            new_li.push(li.split_at(1).0);
+            let mut list: Vec<Type> = vec![];
+            list.push(li.first().unwrap().clone());
 
-            new_li.push(el);
-            if !li.trim_matches(limit).is_empty() { new_li.push(","); }
-            new_li.push(li.split_at(1).1);
-            new_li.concat()
+            list.push(el);
+
+            list.push(li.first().unwrap().clone());
+            stack.push(List_(list));
 
         }
 
@@ -152,14 +156,14 @@ pub(crate) fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String
 
             // Return the other list if one of them is empty
 
-            if el.trim_matches(limit).is_empty() { li.to_string() }
+            if el.len() == 0 { stack.push(List_(li)); }
 
-            else if li.trim_matches(limit).is_empty() { el.to_string() }
+            else if li.is_empty() { stack.push(List_(vec![el])); }
 
             else {
-                // Ignores the brackets between the lists
-                new_li = vec![el.split_at(el.len() - 1).0, ",", li.split_at(1).1];
-                new_li.concat()
+                let new_li = vec![el, List_(li)];
+
+                stack.push(List_(new_li));
 
             }
         }
@@ -167,28 +171,12 @@ pub(crate) fn list_op(stack: &mut Vec<String>, c: &str, li: &String, el: &String
         _ => panic!("An error occurred in list_ops!"),
     };
 
-    // Ensures that if there are duplicates of the predicates, the ones removed are the ones in the back
-    stack.reverse();
-
-    if c == "append" || c == "cons" {
-        if let Some(str_ref) = stack.iter().position(|r| r == li) {
-            stack.remove(str_ref);
-        }
-
-        if let Some(str_ref) = stack.iter().position(|r| r == el) {
-            stack.remove(str_ref);
-        }
-    }
-
-    // Reverse it back
-    stack.reverse();
 
     // Removes the operator and adds the new variable
     stack.pop();
-    stack.push(new);
 
 
     // Return the stack
-    stack.to_owned()
+    stack.clone()
 
 }

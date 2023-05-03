@@ -10,12 +10,16 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Perf: Fixed a few things based on the peer reviews">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Refactor: Converted to a custom datatype stack. (it doesnt work)">
+      <change afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/string_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,8 +124,8 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
+      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\tests" />
     </key>
   </component>
@@ -220,6 +224,9 @@
       <workItem from="1682908246551" duration="4000" />
       <workItem from="1682908283903" duration="371000" />
       <workItem from="1682963062211" duration="3925000" />
+      <workItem from="1683021153680" duration="2145000" />
+      <workItem from="1683023334660" duration="16204000" />
+      <workItem from="1683064228020" duration="16597000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -391,7 +398,13 @@
       <option name="presentableId" value="LOCAL−00028" />
       <updated>1682908651205</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL−00029" summary="Feat: Added :s to print stack">
+      <created>1683021306697</created>
+      <option name="number" value="LOCAL−00029" />
+      <option name="presentableId" value="LOCAL−00029" />
+      <updated>1683021306697</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -431,7 +444,9 @@
     <MESSAGE value="Docs: Added README" />
     <MESSAGE value="Feature: Added better error handling" />
     <MESSAGE value="Perf: Fixed a few things based on the peer reviews" />
-    <option name="LAST_COMMIT_MESSAGE" value="Perf: Fixed a few things based on the peer reviews" />
+    <MESSAGE value="Feat: Added :s to print stack" />
+    <MESSAGE value="Refactor: Converted to a custom datatype stack. (it doesnt work)" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor: Converted to a custom datatype stack. (it doesnt work)" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
