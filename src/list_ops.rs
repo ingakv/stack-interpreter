@@ -43,47 +43,27 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         new_li.elements.pop();
         let str = find_string(&mut new_li);
 
-//        if str.is_empty() && list2.is_empty() && !stack.is_empty() { str = Stack { vec![stack.elements.pop().unwrap_or_else(|| String_("".to_string()));]} }
+        if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
+            match op {
+                "append" | "cons" => { do_list_op(og, &op, list, list2, x, y) }
+                _ => { do_list_op(og, &op, list.clone(), list.clone(), x, String_("".to_owned())) }
+            }
+        }
 
+        else if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
+            match op {
+                "append" => { do_list_op(og, &op, list, str, x, y) }
+                _ => { do_list_op(og, &op, list.clone(), list.clone(), x, String_("".to_owned())) }
+            }
+        }
 
+        else if let Some(List_(x)) = list.first() { do_list_op(og, &op, list.clone(), list.clone(), x, String_("".to_owned())) }
 
         // Ensures that both the list and the string / list2 is not empty
-        if op == "append" {
-
-
-            if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
-
-                do_list_op(og, &op, list, str, x, y)
-            }
-
-            else if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
-
-                do_list_op(og, &op, list, list2, x, y)
-            }
-
-            else { print_error(ExpectedListOrString); og.pop(); og.clone() }
-
-        }
+        else if op == "append" { print_error(ExpectedListOrString); og.pop(); og.clone() }
 
         // Ensures that both lists are not empty
-        else if op == "cons" {
-            if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
-
-                do_list_op(og, &op, list, list2, x, y)
-            }
-            else { print_error(ExpectedList); og.pop(); og.clone() }
-        }
-
-
-        else if !list.is_empty() {
-
-            if let Some(List_(x)) = list.first() {
-
-                do_list_op(og, &op, list.clone(), list.clone(), x, String_("".to_owned()))
-            }
-            else { print_error(ExpectedList); og.pop(); og.clone() }
-
-        }
+        else if op == "cons" { print_error(ExpectedList); og.pop(); og.clone() }
 
         // If there are no lists in the stack, the original stack gets sent back
         else {
@@ -104,10 +84,10 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
 
 fn do_list_op(stack: &mut Stack<Type>, c: &str, list: Stack<Type>, list2: Stack<Type>, li: Vec<Type>, el: Type) -> Stack<Type> {
 
-    let len = list_op(stack, c, li, el);
+    let mut len = list_op(stack, c, li, el);
 
-    stack.remove_last_match(list.first().unwrap().to_owned());
-    stack.remove_last_match(list2.first().unwrap().to_owned());
+    len.remove_last_match(list.first().unwrap().to_owned());
+    len.remove_last_match(list2.first().unwrap().to_owned());
 
     len
 }
@@ -185,8 +165,6 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
 
         _ => panic!("An error occurred in list_ops!"),
     };
-
-
 
 
     // Return the stack

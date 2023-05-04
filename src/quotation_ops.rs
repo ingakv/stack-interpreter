@@ -3,7 +3,7 @@ use crate::error_handling::Error::{ExpectedQuotation, ExpectedVariable};
 use crate::error_handling::{print_error};
 use crate::mylib::{check_operator, is_block, pop_front};
 use crate::structs::{Stack, Type};
-use crate::structs::Type::{Bool_, Float_, Int_, String_};
+use crate::structs::Type::{Block_, Bool_, Float_, Int_, String_};
 
 pub(crate) const QUOTATION_OPS: [&str; 4] = [
     "exec",
@@ -32,7 +32,7 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
         let block = find_block(stack, og);
 
         if let Some(x) = block.first() {
-            quotation(stack, op, vec![x])
+            quotation(stack, op, x)
         }
 
         // If there are no code blocks in the stack, the original stack gets sent back
@@ -56,9 +56,9 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
 
 
 
-pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Vec<Type>) -> Stack<Type> {
+pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type) -> Stack<Type> {
 
-    if c == "length" {stack.push(Int_(block.len() as i128)); return stack.to_owned() }
+    if c == "length" {stack.push(Int_(block.type_to_string().len() as i128)); return stack.to_owned() }
 
     let code = match c {
 
@@ -91,9 +91,6 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Vec<Type>) -> S
         };
     }
 
-    // Calculates the answers to the arithmetic operations
-//    let new_el = match block { _ => panic!("An error occurred in quotation_ops!"), };
-
     stack.to_owned()
 
 }
@@ -101,33 +98,28 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Vec<Type>) -> S
 
 
 
-pub(crate) fn exec(block: Vec<Type>) -> Stack<Type> {
+pub(crate) fn exec(block: Type) -> Stack<Type> {
 
     let mut code = Stack::new();
 
     let mut old_block = block.clone();
 
 
-    if is_block(old_block.to_owned()) {
+    loop {
+        match pop_front(old_block.to_owned()) {
 
-        loop {
-            match pop_front(old_block.to_owned()) {
+            (Some(x), rem) => {
+                old_block = rem;
 
-                (Some(x), rem) => {
-                    old_block = rem;
-
-                    let st = x.type_to_string();
-                    let op = st.trim_start_matches("\"").trim_end_matches("\"");
-                    code = check_operator(op, &mut code.to_owned());
-                }
-
-                _ => {break}
+                let st = x.type_to_string();
+                let op = st.trim_start_matches("\"").trim_end_matches("\"");
+                code = check_operator(op, &mut code.to_owned());
             }
+
+            _ => {break}
         }
-
-
     }
-    else { print_error(ExpectedQuotation) }
+
 
     code
 

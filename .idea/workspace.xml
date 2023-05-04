@@ -11,20 +11,13 @@
     <cargoProject FILE="$PROJECT_DIR$/Assignment2_prog1/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Fix: All of the implemented features now passes the tests">
-      <change afterPath="$PROJECT_DIR$/Assignment2_prog.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/quotation_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Assignment2_prog.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Assignment2_prog.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feat: Implemented code blocks">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/error_handling.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/error_handling.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/quotation_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/quotation_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/string_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/structs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
     </list>
@@ -149,7 +142,7 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Test tests">
+  <component name="RunManager" selected="Cargo.Run REPL">
     <configuration name="Run NORMAL" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="run" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/src" />
@@ -255,7 +248,7 @@
       <workItem from="1683144483092" duration="13305000" />
       <workItem from="1683211871561" duration="1592000" />
       <workItem from="1683213494126" duration="635000" />
-      <workItem from="1683226006413" duration="10414000" />
+      <workItem from="1683226006413" duration="16439000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -457,7 +450,13 @@
       <option name="presentableId" value="LOCAL−00033" />
       <updated>1683226632720</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL−00034" summary="Feat: Implemented code blocks">
+      <created>1683236621180</created>
+      <option name="number" value="LOCAL−00034" />
+      <option name="presentableId" value="LOCAL−00034" />
+      <updated>1683236621180</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -487,7 +486,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fix: Removes the original variables when an arithmetic operation has been done" />
     <MESSAGE value="Change structure" />
     <MESSAGE value="Fix: Stacks are now updated correctly after an operation" />
     <MESSAGE value="Fix: In the case of duplicate variables, the ones in the back are removed when used in an arithmetic operation" />
@@ -512,7 +510,8 @@
     <MESSAGE value="Refactor: Converted to a custom datatype stack. (it doesnt work)" />
     <MESSAGE value="Fix: Adapted to the new datatype" />
     <MESSAGE value="Fix: All of the implemented features now passes the tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix: All of the implemented features now passes the tests" />
+    <MESSAGE value="Feat: Implemented code blocks" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: Implemented code blocks" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
@@ -523,22 +522,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>163</line>
+          <line>143</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>255</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>478</line>
+          <line>473</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>506</line>
+          <line>496</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -547,24 +541,34 @@
           <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>84</line>
-          <option name="timeStamp" value="19" />
+          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
+          <line>36</line>
+          <option name="timeStamp" value="62" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>31</line>
-          <option name="timeStamp" value="21" />
+          <line>254</line>
+          <option name="timeStamp" value="63" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/lib.rs</url>
-          <line>40</line>
-          <option name="timeStamp" value="41" />
+          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
+          <line>96</line>
+          <option name="timeStamp" value="65" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/structs.rs</url>
-          <line>25</line>
-          <option name="timeStamp" value="42" />
+          <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
+          <line>101</line>
+          <option name="timeStamp" value="69" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
+          <line>33</line>
+          <option name="timeStamp" value="72" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
+          <line>59</line>
+          <option name="timeStamp" value="73" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -576,7 +580,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Assignment2_prog$Run_REPL.info" NAME="Run REPL Coverage Results" MODIFIED="1683224152542" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     <SUITE FILE_PATH="coverage/Assignment2_prog$Test_test_literals__test_literal_list_of_blocks.info" NAME="Test test_literals::test_literal_list_of_blocks Coverage Results" MODIFIED="1683234677253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
-    <SUITE FILE_PATH="coverage/Assignment2_prog$Run_NORMAL.info" NAME="Run NORMAL Coverage Results" MODIFIED="1682627641840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
+    <SUITE FILE_PATH="coverage/Assignment2_prog$Run_NORMAL.info" NAME="Run NORMAL Coverage Results" MODIFIED="1683238591664" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     <SUITE FILE_PATH="coverage/Assignment2_prog$Run.info" NAME="Run Coverage Results" MODIFIED="1682466411293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     <SUITE FILE_PATH="coverage/Assignment2_prog$Test_test_literals__test_literal_bool_false.info" NAME="Test test_literals::test_literal_bool_false Coverage Results" MODIFIED="1683144917965" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
   </component>

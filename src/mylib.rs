@@ -26,9 +26,10 @@ pub fn normal() {
 
         if input == ":q" {
 
-            let new = stack.clone();
+            let mut new = stack.clone();
 
-            let new2 = new.stack_to_string();
+            new.pop();
+            let new2 = stack.stack_to_string();
 
             stack = program_loop(new2, Stack{ elements: vec![] }, true);
 
@@ -41,6 +42,7 @@ pub fn normal() {
                 let result = stack.pop().unwrap_or_else(|| String_("".to_string()));
                 result.print();
 
+                println!();
                 stack.print_stack();
 
             }
@@ -50,10 +52,7 @@ pub fn normal() {
         // Prints the stack
         else if input == ":s" { stack.print_stack(); }
 
-        else {
-            if stack.len() > 1 { print_error(ProgramFinishedWithMultipleValues); }
-            else { stack = program_loop(input, stack.clone(), false); }
-        }
+        else { stack = program_loop(input, stack.clone(), false); }
 
     }
 }
@@ -449,27 +448,23 @@ pub(crate) fn invert_number(el: &str) -> Type {
 
 
 
-pub fn pop_front(t: Vec<Type>) -> (Option<Type>, Vec<Type>) {
+pub fn pop_front(t: Type) -> (Option<Type>, Type) {
 
-    if !t.is_empty() {
+    match t {
 
-        match Block_(t.to_owned()) {
+        Block_(val) => {
 
-            Block_(val) => {
+            let mut new = val.clone();
 
-                let mut new = val.clone();
+            new.reverse();
+            let el = new.pop();
+            new.reverse();
 
-                new.reverse();
-                let el = new.pop();
-                new.reverse();
+            (el, Block_(new))
 
-                (el, new)
-
-            }
-            _ => { (None, t.to_owned()) }
         }
+        _ => { (None, t) }
     }
-    else { (None, t.to_owned()) }
 }
 
 
@@ -482,10 +477,6 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
     let elem = stack.pop().unwrap_or_else(|| String_("".to_string()));
 
 
-    // If it is a string
-//    if is_string(elem.to_owned()) { parse_string("length", &mut og) }
-
-
     // If it is a list
     if let List_(x) = elem.to_owned() {
 
@@ -495,12 +486,11 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
     }
 
+
+    // If it is a code block
     else if let Block_(x) = elem.to_owned() {
-
         og.remove_last_match(elem.to_owned());
-
-        quotation(&mut og.to_owned(), "length", x)
-
+        quotation(&mut og.to_owned(), "length", elem)
     }
 
 

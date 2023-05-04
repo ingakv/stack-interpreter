@@ -1,6 +1,7 @@
 
 use crate::error_handling::Error::{ExpectedNumber, StackEmpty};
 use crate::error_handling::print_error;
+use crate::mylib::is_op;
 use crate::structs::Type::*;
 
 
@@ -33,7 +34,10 @@ impl Type{
                 if str.to_string() == "true" { "True".to_string()}
                 else { "False".to_string() }
             }
-            String_(str) => {str.to_string()}
+            String_(str) => {
+                if !is_op(str.as_str()) { ("\"".to_owned() + &str + "\"").to_string() }
+                else { str.to_string() }
+            }
             List_(str) => {
 
                 let mut new_li: Vec<String> = vec![];
@@ -130,10 +134,7 @@ impl Type{
     }
 
     // Prints a single variable
-    pub fn print(&self) {
-        if self.is_string() { println!("\"{}\"", self.type_to_string()) }
-        println!("{}", self.type_to_string())
-    }
+    pub fn print(&self) {println!("{}", self.type_to_string())}
 
 }
 
@@ -209,16 +210,12 @@ impl Stack<Type>{
 
 
     pub fn print_stack(&self) {
-
         if !self.is_empty() {
             // Prints the stack
             println!("Stack: ");
-            for i in self.elements.iter().rev() {
-                i.print();
-            }
+            for i in self.elements.iter().rev() { i.print(); }
         }
         else { print_error(StackEmpty); }
-
     }
 
 
@@ -227,16 +224,31 @@ impl Stack<Type>{
     pub fn stack_to_string(&self) -> String {
 
         if !self.is_empty() {
-            // Prints the stack
-
-            let mut stack = vec![];
+            let mut buf = vec![];
 
             for i in self.elements.iter() {
-                stack.push(i.type_to_string());
-                stack.push(" ".to_string());
+
+                match i {
+                    List_(_) | String_(_) => {
+
+                        let mut new_li = i.type_to_string();
+                        new_li = new_li.replace("[", "[ ");
+                        new_li = new_li.replace("]", " ]");
+                        new_li = new_li.replace(",", " ");
+                        new_li = new_li.replace("\"", " \" ");
+
+                        buf.push(new_li)
+
+                    }
+//                            Block_(_) => {}
+                    _ => {
+                        buf.push(i.type_to_string());
+                        buf.push(" ".to_string());
+                    }
+                }
+
             }
-            stack.pop();
-            stack.concat()
+            buf.concat()
         }
         else { print_error(StackEmpty); "".to_string() }
     }

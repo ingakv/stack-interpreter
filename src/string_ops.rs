@@ -45,9 +45,9 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
         // Returns the length of the string
         "length" => {
-            stack.push(Int_(stack.last().unwrap_or_else(|| String_("".to_string())).type_to_string().len() as i128))
+            let st = stack.last().unwrap_or_else(|| String_("".to_string()));
+            stack.push(Int_(st.type_to_string().trim_matches('\"').len() as i128))
         }
-
 
         _ => {}
     }
@@ -110,25 +110,17 @@ pub(crate) fn simple_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
 pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
 
-    let c = if stack.is_empty() {
-        String_("".to_string())
-    }
+    let c = if stack.is_empty() { String_("".to_string()) }
 
-    else {
-        // Remove top element and store it
-        stack.pop().unwrap_or_else(|| String_("".to_string()))
-    };
+    // Remove top element and store it
+    else { stack.pop().unwrap_or_else(|| String_("".to_string())) };
 
     // Skips if the stack is empty
     if c == String_("".to_string()) {
         Stack{ elements: vec![] }
     }
 
-    else if c.is_string() {
-        Stack{ elements: vec![c] }
-    }
-
-    else if is_number(c.type_to_string().as_str()) {
+    else if c.is_string() || is_number(c.type_to_string().as_str()) {
         Stack{ elements: vec![c] }
     }
 
