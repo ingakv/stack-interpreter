@@ -1,7 +1,7 @@
 
 use crate::error_handling::Error::{ExpectedVariable};
 use crate::error_handling::print_error;
-use crate::mylib::{invert_number, is_number, string_to_type};
+use crate::mylib::{invert_number, is_bool, is_number};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, String_};
 
@@ -14,38 +14,48 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
     let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
 
 
+    let st = c.type_to_string();
+    let op = st.trim_start_matches("\"").trim_end_matches("\"");
+
+
     // Skips if the stack is empty
     if c == String_("".to_string()) {
         Stack{ elements: vec![] }
     }
 
     // Checks if it is an operator
-    else if LOGICAL_OPS.contains(&c.type_to_string().as_str()) {
+    else if LOGICAL_OPS.contains(&op) {
         // Loops through and finds the next two literals
         let num2 = find_logical(stack, og);
         let num1 = find_logical(stack, og);
+
+        let number = num2.first().unwrap();
 
         if let (Some(Bool_(x)), Some(Bool_(y))) = (num1.first(), num2.first()) {
 
             // Ensures that if there are duplicates of the predicates, the ones removed are the ones in the back
             og.remove_last_match(num1.first().unwrap());
-            og.remove_last_match(num2.first().unwrap());
+            og.remove_last_match(number);
 
-            logical_op(og, &c.type_to_string().as_str(), x, y)
+            logical_op(og, &op, x, y)
         }
 
         // If there is only 1 variable, it gets pushed back on, and the stack returns, unless "not" is used
-        else if c == String_("not".to_string()) && is_number(num2.first().unwrap().type_to_string().as_str()) {
+        else if c == String_("not".to_string()) &&
+            (is_number(number.type_to_string().as_str())
+          || is_bool(number.to_owned())) {
 
-            let number = num2.first().unwrap();
 
             stack.remove_last_match(number.clone());
 
-            let new_nr = invert_number(number.type_to_string().as_str());
+            let new_nr =
+            if is_bool(number.to_owned()) { if number.type_to_bool() { Bool_(false) } else { Bool_(true) } }
+            else { invert_number(number.type_to_string().as_str()) };
+
 
             // Removes the operator and adds the new variable
             stack.pop();
-            stack.push(string_to_type(new_nr.to_string().as_str()));
+            stack.push(new_nr);
             stack.clone()
 
         }
@@ -60,8 +70,8 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
 
     }
 
-    else if c.is_bool() {
-        Stack{ elements: vec![] }
+    else if is_bool(c.to_owned()) {
+        Stack{ elements: vec![c] }
     }
 
     else {

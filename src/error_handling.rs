@@ -3,7 +3,7 @@ use crate::error_handling::Error::*;
 #[derive(PartialEq)]
 pub(crate) enum Error {
     StackEmpty,
-    UnknownSymbol,
+    ExpectedBool,
     ExpectedNumber,
     ExpectedString,
     ExpectedListOrString,
@@ -25,7 +25,7 @@ pub(crate) fn print_error(err: Error) {
 
         StackEmpty => print!("\n\tError: Stack is empty!\n\n"),
 
-        UnknownSymbol => print!("\n\tError: Unknown symbol!\n\n"),
+        ExpectedBool => print!("\n\tError: Expected a bool!\n\n"),
 
         ExpectedNumber => print!("\n\tError: Expected a number!\n\n"),
 

@@ -15,19 +15,22 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> 
     // Remove top element and store it
     let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
 
+    let st = c.type_to_string();
+    let op = st.trim_start_matches("\"").trim_end_matches("\"");
+
     // Skips if the stack is empty
     if c == String_("".to_string()) {
         Stack{ elements: vec![] }
     }
 
     // Checks if it is an operator
-    else if ARITHMETIC_OPS.contains(&c.type_to_string().as_str()) {
+    else if ARITHMETIC_OPS.contains(&op) {
         // Loops through and finds the next two numbers
         let num2 = find_arithmetic(stack, og);
         let num1 = find_arithmetic(stack, og);
 
         if let (Some(x), Some(y)) = (num1.first(), num2.first()) {
-            arithmetic(og, &c.type_to_string().as_str(), x, y)
+            arithmetic(og, &op, x, y)
         }
 
         // If there are less than two valid numbers in the stack, the original stack gets sent back
@@ -41,7 +44,7 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> 
     }
 
 
-    else if is_number(c.type_to_string().as_str()) {
+    else if is_number(op) {
         Stack{ elements: vec![c] }
     }
 

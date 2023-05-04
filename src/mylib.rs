@@ -5,7 +5,7 @@ use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{Write};
-use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, ProgramFinishedWithMultipleValues, StackEmpty};
+use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, Float_, Int_, List_, String_};
@@ -96,7 +96,8 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
     let mut li_buf: Vec<Type> = vec![];
     let mut is_list: bool = false;
 
-    let mut sublist_count = 0;
+    let mut is_sublist = false;
+    let mut sublist: Vec<Type> = vec![];
 
     for i in new_el {
 
@@ -146,25 +147,26 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
         // If it is the start or the end of a list
         else if i.contains('[') {
-            is_list = true;
 
-            sublist_count = sublist_count + 1;
+            // If it is a sublist, push the sublist one to the list buffer
+            if is_list {
+                is_sublist = true;
+            }
+            is_list = true;
         }
 
 
         // If it is the end of the list
         else if i.contains(']') {
 
-            sublist_count = sublist_count - 1;
-
             // If the list is not a sublist, set is_list to false
             // If the list is a sublist, continue reading it
-            if sublist_count == 0 {
+            if !is_sublist {
 
                 // Join the vector together to form a list, and send it to the stack
-                if repl { stack.push(List_(li_buf.clone())); }
+                if repl { stack.push(List_(li_buf.to_owned())); }
 
-                else { stack.push(List_(li_buf.clone())) }
+                else { stack.push(List_(li_buf.to_owned())) }
 
                 is_list = false;
 
@@ -172,9 +174,27 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
                 li_buf.clear();
 
             }
+
+            else {
+                li_buf.push(List_(sublist.to_owned()));
+                sublist.clear();
+                is_sublist = false;
+            }
         }
 
-        // If a list is currently being read, push it to the buffer, with a comma after
+        // If a sublist is currently being read, push it to the buffer, with a comma after
+        else if is_sublist {
+
+            match string_to_type(i) {
+                Int_(i) => sublist.push(Int_(i.to_owned())),
+                Float_(i) => sublist.push(Float_(i.to_owned())),
+                Bool_(i) => sublist.push(Bool_(i.to_owned())),
+                String_(i) => sublist.push(String_(i.to_owned())),
+                _ => {}
+            };
+        }
+
+        // If it is not a sublist, push the element to the regular list
         else if is_list {
 
             match string_to_type(i) {
@@ -184,8 +204,6 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
                 String_(i) => li_buf.push(String_(i.to_owned())),
                 _ => {}
             };
-
-
         }
 
         else {
@@ -207,19 +225,6 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
 }
 
-
-
-// Chooses which type to put the variable in
-pub fn string_to_type(var: &str) -> Type {
-
-    if is_float(var) {Float_(var.parse().unwrap())}
-
-    else if is_number(var) {Int_(var.parse().unwrap())}
-
-    else if is_literal(var) {Bool_(var.parse().unwrap())}
-
-    else {String_(var.to_owned())}
-}
 
 
 
@@ -304,6 +309,28 @@ fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
     }
 }
 
+
+
+// Chooses which type to put the variable in
+pub fn string_to_type(var: &str) -> Type {
+
+    if is_float(var) {Float_(var.parse::<f64>().unwrap())}
+
+    else if is_number(var) {Int_(var.parse::<i128>().unwrap())}
+
+    else if is_literal(var) {
+        if var == "True" { return Bool_(true); }
+        else if var == "False" { return Bool_(false); }
+        else { print_error(ExpectedBool); String_("".to_owned()) }
+
+    }
+
+    else {String_(var.to_owned())}
+}
+
+
+
+
 pub(crate) fn get_line() -> String {
     let mut input = String::new();
 
@@ -337,14 +364,34 @@ pub(crate) fn is_float(el: &str) -> bool {
     is_number(el) && el.contains('.')
 }
 
-// Checks whether or not the variable is a float
-pub(crate) fn invert_number(el: &str) -> i128 {
 
-    if is_number(el) {
-        if el.contains('-') {el.trim_start_matches(|x| x != '-').parse().unwrap()}
-        else { let new = vec!["-", el]; new.concat().parse().unwrap() }
-    }
-    else { print_error(ExpectedNumber); 0 }
+// Checks whether or not the variable is a bool
+pub(crate) fn is_bool(el: Type) -> bool {
+    el == Bool_(true) || el == Bool_(false)
+}
+
+// Checks whether or not the variable is a string
+pub(crate) fn is_string(el: Type) -> bool {
+    el.type_to_string().contains("\"")
+}
+
+// Checks whether or not the variable is a list
+pub(crate) fn is_list(el: Type) -> bool {
+    el.type_to_string().contains("[") && el.type_to_string().contains("]")
+}
+
+
+// Turns a negative number positive, or the opposite
+pub(crate) fn invert_number(el: &str) -> Type {
+
+    let new_number =
+        if is_number(el) {
+            if el.contains('-') {el.trim_start_matches(|x| x != '-').parse().unwrap()}
+            else { let new = vec!["-", el]; new.concat().parse().unwrap() }
+        }
+        else { print_error(ExpectedNumber); 0 };
+
+    Int_(new_number)
 
 }
 
@@ -359,15 +406,16 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
     // If it is a string
-    if elem.is_string() { parse_string("length", &mut og) }
+    if is_string(elem.to_owned()) { parse_string("length", &mut og) }
 
 
     // If it is a list
-    else if let List_(x) = elem.clone() {
+    else if let List_(x) = elem.to_owned() {
 
-        og.remove_last_match(elem);
+        og.remove_last_match(elem.to_owned());
 
-        list_op(&mut og.clone(), "length", x, String_("".to_owned()))
+        list_op(&mut og.to_owned(), "length", x, String_("".to_owned()))
+
     }
 
 

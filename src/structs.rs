@@ -1,6 +1,7 @@
-use std::any::Any;
+
 use crate::error_handling::Error::{ExpectedNumber, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::print_error;
+use crate::mylib::is_string;
 use crate::structs::Type::*;
 
 
@@ -24,17 +25,30 @@ impl Type{
     pub fn type_to_string(&self) -> String {
         match self {
             Int_(str) => {str.to_string()}
-            Float_(str) => {str.to_string()}
-            Bool_(str) => {str.to_string()}
-            String_(str) => {str.to_string()}
+            Float_(str) => {
+                if !str.to_string().contains('.') { format!("{}.0", str.to_string())}
+                else { str.to_string() }
+            }
+            Bool_(str) => {
+                if str.to_string() == "true" { "True".to_string()}
+                else { "False".to_string() }
+            }
+            String_(str) => {"\"".to_string() + str + "\""}
             List_(str) => {
 
                 let mut new_li: Vec<String> = vec![];
-                for i in str {
-                    new_li.push(i.type_to_string());
-                    new_li.push(", ".to_string());
+
+                new_li.push("[".to_string());
+
+                if !str.is_empty() {
+                    for i in str {
+                        new_li.push(i.type_to_string());
+                        new_li.push(",".to_string());
+                    }
+                    new_li.pop();
                 }
-                new_li.pop();
+                new_li.push("]".to_string());
+
                 new_li.concat()
 
             }
@@ -59,28 +73,20 @@ impl Type{
         }
     }
 
+    // Returns the variable as a bool
+    pub fn type_to_bool(&self) -> bool {
+        match self {
+            Bool_(val) => {*val}
+            _ => {print_error(ExpectedNumber); panic!()}
+        }
+    }
+
 
     // Prints a single variable
     pub fn print(&self) {
-
-        if self.is_string() { println!("\"{}\"", self.type_to_string()) }
+        if is_string(self.to_owned()) { println!("\"{}\"", self.type_to_string()) }
         println!("{}", self.type_to_string())
     }
-
-    pub fn is_bool(&self) -> bool {
-        self.type_id() == Bool_.type_id()
-    }
-
-    pub fn is_string(&self) -> bool {
-        self.type_id() == String_.type_id()
-    }
-
-
-    pub fn is_list(&self) -> bool {
-        self.type_id() == List_.type_id()
-    }
-
-
 
 }
 

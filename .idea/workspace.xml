@@ -10,11 +10,13 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Refactor: Converted to a custom datatype stack. (it doesnt work)">
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Fix: Adapted to the new datatype">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/error_handling.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/error_handling.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/string_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/structs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
@@ -122,9 +124,9 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\tests" />
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
-      <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\tests" />
     </key>
   </component>
   <component name="RunManager" selected="Cargo.Test tests">
@@ -227,6 +229,12 @@
       <workItem from="1683064228020" duration="16634000" />
       <workItem from="1683124958856" duration="1898000" />
       <workItem from="1683127846055" duration="3685000" />
+      <workItem from="1683131659914" duration="5482000" />
+      <workItem from="1683143944438" duration="146000" />
+      <workItem from="1683144450795" duration="13000" />
+      <workItem from="1683144483092" duration="13305000" />
+      <workItem from="1683211871561" duration="1592000" />
+      <workItem from="1683213494126" duration="635000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -410,7 +418,13 @@
       <option name="presentableId" value="LOCAL−00030" />
       <updated>1683081020615</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL−00031" summary="Fix: Adapted to the new datatype">
+      <created>1683139283387</created>
+      <option name="number" value="LOCAL−00031" />
+      <option name="presentableId" value="LOCAL−00031" />
+      <updated>1683139283387</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -452,7 +466,8 @@
     <MESSAGE value="Perf: Fixed a few things based on the peer reviews" />
     <MESSAGE value="Feat: Added :s to print stack" />
     <MESSAGE value="Refactor: Converted to a custom datatype stack. (it doesnt work)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor: Converted to a custom datatype stack. (it doesnt work)" />
+    <MESSAGE value="Fix: Adapted to the new datatype" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix: Adapted to the new datatype" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
@@ -462,29 +477,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>85</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>226</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/arithmetic_ops.rs</url>
-          <line>55</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/arithmetic_ops.rs</url>
-          <line>14</line>
-          <option name="timeStamp" value="20" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/lib.rs</url>
-          <line>14</line>
-          <option name="timeStamp" value="26" />
+          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
+          <line>167</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -497,5 +492,6 @@
     <SUITE FILE_PATH="coverage/Assignment2_prog$Run_REPL.info" NAME="Run REPL Coverage Results" MODIFIED="1683129262120" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     <SUITE FILE_PATH="coverage/Assignment2_prog$Run_NORMAL.info" NAME="Run NORMAL Coverage Results" MODIFIED="1682627641840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
     <SUITE FILE_PATH="coverage/Assignment2_prog$Run.info" NAME="Run Coverage Results" MODIFIED="1682466411293" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
+    <SUITE FILE_PATH="coverage/Assignment2_prog$Test_test_literals__test_literal_bool_false.info" NAME="Test test_literals::test_literal_bool_false Coverage Results" MODIFIED="1683144917965" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="RsCoverageRunner" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" CONTEXT_FILE_PATH="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
   </component>
 </project>

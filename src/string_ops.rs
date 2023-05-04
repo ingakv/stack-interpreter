@@ -1,6 +1,6 @@
 use crate::error_handling::Error::{ExpectedList, ExpectedString};
 use crate::error_handling::print_error;
-use crate::mylib::{get_line, is_number, string_to_type};
+use crate::mylib::{get_line, is_number, is_string, string_to_type};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Float_, Int_, List_, String_};
 
@@ -125,7 +125,7 @@ pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
         Stack{ elements: vec![] }
     }
 
-    else if c.is_string() {
+    else if is_string(c.to_owned()) {
         Stack{ elements: vec![c] }
     }
 
