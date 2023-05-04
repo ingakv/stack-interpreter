@@ -31,7 +31,7 @@ pub(crate) fn print_error(err: Error) {
 
         ExpectedString => print!("\n\tError: Expected a string!\n\n"),
 
-        ExpectedListOrString => print!("\n\tError: Expected an enum!\n\n"),
+        ExpectedListOrString => print!("\n\tError: Expected a list or a string!\n\n"),
 
         ExpectedQuotation => print!("\n\tError: Expected a quotation!\n\n"),
 

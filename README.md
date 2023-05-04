@@ -82,6 +82,9 @@ The print function does not remove the element being printed from the list. All 
 - Logical operations
 - List operations
 - Parsing initial input
+- Error handling that explains what the user did wrong
+  - The program should never panic. I have rather implemented that the if an error occurs, i.e. the user tries to pop an empty stack, an appropriate error message will be printed out, but the program should not continue to run. In the case of any user-related error, the stack will not be changed.
+
 
 
 
@@ -89,7 +92,6 @@ The print function does not remove the element being printed from the list. All 
 
 - Control flow ( if, then, else, loop, times, break, block)
 - Assigning variables
-- Error handling that explains what the user did wrong
 
 
 

@@ -1,7 +1,6 @@
 
-use crate::error_handling::Error::{ExpectedNumber, ProgramFinishedWithMultipleValues, StackEmpty};
+use crate::error_handling::Error::{ExpectedNumber, StackEmpty};
 use crate::error_handling::print_error;
-use crate::mylib::is_string;
 use crate::structs::Type::*;
 
 
@@ -16,6 +15,7 @@ pub enum Type {
     Bool_(bool),
     String_(String),
     List_(Vec<Type>),
+    Block_(Vec<Type>),
 }
 
 // Type functions
@@ -33,7 +33,7 @@ impl Type{
                 if str.to_string() == "true" { "True".to_string()}
                 else { "False".to_string() }
             }
-            String_(str) => {"\"".to_string() + str + "\""}
+            String_(str) => {str.to_string()}
             List_(str) => {
 
                 let mut new_li: Vec<String> = vec![];
@@ -48,6 +48,25 @@ impl Type{
                     new_li.pop();
                 }
                 new_li.push("]".to_string());
+
+                new_li.concat()
+
+            }
+
+            Block_(str) => {
+
+                let mut new_li: Vec<String> = vec![];
+
+                new_li.push("{ ".to_string());
+
+                if !str.is_empty() {
+                    for i in str {
+                        new_li.push(i.type_to_string());
+                        new_li.push(" ".to_string());
+                    }
+                    new_li.pop();
+                }
+                new_li.push(" }".to_string());
 
                 new_li.concat()
 
@@ -81,10 +100,38 @@ impl Type{
         }
     }
 
+    // Checks whether or not the variable is a...
+    pub fn is_list(&self) -> bool {
+        match self {
+            List_(_) => {true}
+            _ => {false}
+        }
+    }
+
+    pub fn is_bool(&self) -> bool {
+        match self {
+            Bool_(_) => {true}
+            _ => {false}
+        }
+    }
+
+    pub fn is_string(&self) -> bool {
+        match self {
+            String_(_) => {true}
+            _ => {false}
+        }
+    }
+
+    pub fn is_block(&self) -> bool {
+        match self {
+            Block_(_) => {true}
+            _ => {false}
+        }
+    }
 
     // Prints a single variable
     pub fn print(&self) {
-        if is_string(self.to_owned()) { println!("\"{}\"", self.type_to_string()) }
+        if self.is_string() { println!("\"{}\"", self.type_to_string()) }
         println!("{}", self.type_to_string())
     }
 
@@ -136,21 +183,7 @@ impl Stack<Type>{
     }
 
 
-    pub fn pop_front(&mut self) -> Option<Type> {
-
-        if !self.is_empty() {
-            self.reverse();
-            let top = self.pop().unwrap();
-            self.reverse();
-            Some(top)
-        }
-        else { None }
-    }
-
-
     pub fn push(&mut self, i: Type) { self.elements.push(i); }
-
-//    pub fn clone(&self) { self.elements.clone() }
 
     pub fn reverse(&mut self) { self.elements.reverse() }
 
@@ -195,11 +228,10 @@ impl Stack<Type>{
 
         if !self.is_empty() {
             // Prints the stack
-            print_error(ProgramFinishedWithMultipleValues);
 
             let mut stack = vec![];
 
-            for i in self.elements.iter().rev() {
+            for i in self.elements.iter() {
                 stack.push(i.type_to_string());
                 stack.push(" ".to_string());
             }
@@ -207,14 +239,6 @@ impl Stack<Type>{
             stack.concat()
         }
         else { print_error(StackEmpty); "".to_string() }
-
     }
-
-
-
-
-
-
-
 }
 

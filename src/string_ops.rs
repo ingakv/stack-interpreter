@@ -1,6 +1,6 @@
 use crate::error_handling::Error::{ExpectedList, ExpectedString};
 use crate::error_handling::print_error;
-use crate::mylib::{get_line, is_number, is_string, string_to_type};
+use crate::mylib::{get_line, is_number, string_to_type};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Float_, Int_, List_, String_};
 
@@ -45,8 +45,7 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
         // Returns the length of the string
         "length" => {
-            if let Some(String_(str_ref)) = stack.last() { stack.push(Int_(str_ref.len() as i128)) }
-            else { print_error(ExpectedString) }
+            stack.push(Int_(stack.last().unwrap_or_else(|| String_("".to_string())).type_to_string().len() as i128))
         }
 
 
@@ -125,7 +124,7 @@ pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
         Stack{ elements: vec![] }
     }
 
-    else if is_string(c.to_owned()) {
+    else if c.is_string() {
         Stack{ elements: vec![c] }
     }
 

@@ -1,7 +1,7 @@
 
 use crate::error_handling::Error::{ExpectedVariable};
 use crate::error_handling::print_error;
-use crate::mylib::{invert_number, is_bool, is_number};
+use crate::mylib::{invert_number, is_number};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, String_};
 
@@ -43,13 +43,13 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
         // If there is only 1 variable, it gets pushed back on, and the stack returns, unless "not" is used
         else if c == String_("not".to_string()) &&
             (is_number(number.type_to_string().as_str())
-          || is_bool(number.to_owned())) {
+          || number.is_bool()) {
 
 
             stack.remove_last_match(number.clone());
 
             let new_nr =
-            if is_bool(number.to_owned()) { if number.type_to_bool() { Bool_(false) } else { Bool_(true) } }
+            if number.is_bool() { if number.type_to_bool() { Bool_(false) } else { Bool_(true) } }
             else { invert_number(number.type_to_string().as_str()) };
 
 
@@ -70,7 +70,7 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
 
     }
 
-    else if is_bool(c.to_owned()) {
+    else if c.is_bool() {
         Stack{ elements: vec![c] }
     }
 

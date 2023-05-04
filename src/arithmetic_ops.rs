@@ -8,8 +8,6 @@ use crate::structs::Type::{Bool_, Float_, Int_, String_};
 pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">"];
 
 
-
-
 pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
 
     // Remove top element and store it
@@ -109,11 +107,6 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
     };
 
 
-
-    // Turns the answer into a float if it is an even number and at least one of the variables is a float
-//    if  c == "/" || (is_float && (c == "+" || c == "-" || c == "*")) { new_el.push('.'); new_el.push('0'); }
-
-
     // Remove the original numbers
     stack.remove_last_match(x.clone());
     stack.remove_last_match(y.clone());
@@ -123,5 +116,5 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
     stack.pop();
     if new_el != String_("".to_string()) { stack.push(new_el); }
 
-    stack.clone()
+    stack.to_owned()
 }

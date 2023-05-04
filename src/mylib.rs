@@ -5,10 +5,11 @@ use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{Write};
-use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ProgramFinishedWithMultipleValues, StackEmpty};
+use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
+use crate::quotation_ops::{find_block, quotation, QUOTATION_OPS};
 use crate::structs::{Stack, Type};
-use crate::structs::Type::{Bool_, Float_, Int_, List_, String_};
+use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 
 
 pub fn normal() {
@@ -24,7 +25,7 @@ pub fn normal() {
         let input = get_line();
 
         if input == ":q" {
-            // Ctrl + D pressed, execute your code here
+
             let new = stack.clone();
 
             let new2 = new.stack_to_string();
@@ -36,6 +37,7 @@ pub fn normal() {
             if stack.is_empty() { print_error(StackEmpty); }
             else {
 
+                if stack.len() > 1 {print_error(ProgramFinishedWithMultipleValues)}
                 let result = stack.pop().unwrap_or_else(|| String_("".to_string()));
                 result.print();
 
@@ -46,10 +48,7 @@ pub fn normal() {
         }
 
         // Prints the stack
-        else if input == ":s" {
-
-            stack.print_stack();
-        }
+        else if input == ":s" { stack.print_stack(); }
 
         else {
             if stack.len() > 1 { print_error(ProgramFinishedWithMultipleValues); }
@@ -93,16 +92,18 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
     let mut str_buf: Vec<&str> = vec![];
     let mut is_str: bool = false;
 
+    let mut bl_buf: Vec<Type> = vec![];
+    let mut is_block: bool = false;
+
     let mut li_buf: Vec<Type> = vec![];
     let mut is_list: bool = false;
 
+    let mut sub_buf: Vec<Type> = vec![];
     let mut is_sublist = false;
-    let mut sublist: Vec<Type> = vec![];
 
     for i in new_el {
 
         //////////////// String /////////////////
-
 
         // If it is the start or the end of a string
         if i.contains('"') {
@@ -144,7 +145,6 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
         //////////////// List /////////////////
 
-
         // If it is the start or the end of a list
         else if i.contains('[') {
 
@@ -164,9 +164,7 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
             if !is_sublist {
 
                 // Join the vector together to form a list, and send it to the stack
-                if repl { stack.push(List_(li_buf.to_owned())); }
-
-                else { stack.push(List_(li_buf.to_owned())) }
+                stack.push(List_(li_buf.to_owned()));
 
                 is_list = false;
 
@@ -176,35 +174,61 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
             }
 
             else {
-                li_buf.push(List_(sublist.to_owned()));
-                sublist.clear();
+                li_buf.push(List_(sub_buf.to_owned()));
+                sub_buf.clear();
                 is_sublist = false;
             }
         }
 
-        // If a sublist is currently being read, push it to the buffer, with a comma after
-        else if is_sublist {
 
-            match string_to_type(i) {
-                Int_(i) => sublist.push(Int_(i.to_owned())),
-                Float_(i) => sublist.push(Float_(i.to_owned())),
-                Bool_(i) => sublist.push(Bool_(i.to_owned())),
-                String_(i) => sublist.push(String_(i.to_owned())),
-                _ => {}
-            };
+
+
+        //////////////// Code block AKA quotation /////////////////
+
+
+        // If it is the start of a block
+        else if i.contains('{') { is_block = true; }
+
+
+        // If it is the end of the block
+        else if i.contains('}') {
+
+            // If we are in a list, copy the new list over
+            if is_list {
+                li_buf.push(Block_(bl_buf.to_owned()));
+            }
+
+            // Push the code block to the stack or execute it
+            else { stack.push(Block_(bl_buf.to_owned())); }
+
+
+            is_block = false;
+
+            // Reset the buffer so that a potential new block can be read
+            bl_buf.clear();
+
         }
+
+
+
+
+
+        //////////////// Push to buffer /////////////////
+
+
+        // If a block is currently being read, push it to the buffer
+        else if is_block { bl_buf = push_to_vec(i, bl_buf.to_owned()); }
+
+        // If a sublist is currently being read, push it to the buffer, with a comma after
+        else if is_sublist { sub_buf = push_to_vec(i, sub_buf.to_owned()); }
 
         // If it is not a sublist, push the element to the regular list
-        else if is_list {
+        else if is_list { li_buf = push_to_vec(i, li_buf.to_owned()); }
 
-            match string_to_type(i) {
-                Int_(i) => li_buf.push(Int_(i.to_owned())),
-                Float_(i) => li_buf.push(Float_(i.to_owned())),
-                Bool_(i) => li_buf.push(Bool_(i.to_owned())),
-                String_(i) => li_buf.push(String_(i.to_owned())),
-                _ => {}
-            };
-        }
+
+
+        //////////////// Push to stack /////////////////
+
 
         else {
             if repl { stack = check_operator(i, &mut stack); }
@@ -228,7 +252,7 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
 
 
-fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
     // Ignores ""
     if c == "" { stack.clone() }
@@ -293,6 +317,16 @@ fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
     else if IO_OPS.contains(&c) { simple_io(c, stack) }
 
+    else if QUOTATION_OPS.contains(&c) {
+        // Adds the operator onto the stack
+        let mut new = stack.clone();
+        new.push(String_(c.to_string()));
+
+        let mut new2 = new.clone();
+
+        find_block(&mut new, &mut new2)
+    }
+
     else {
 
         // Forces bools to have a capitalized first letter
@@ -311,6 +345,21 @@ fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
 
 
+// Pattern match the types to push to vector
+pub(crate) fn push_to_vec(i: &str, mut stack: Vec<Type>) -> Vec<Type> {
+    match string_to_type(i) {
+        Int_(i) => stack.push(Int_(i.to_owned())),
+        Float_(i) => stack.push(Float_(i.to_owned())),
+        Bool_(i) => stack.push(Bool_(i.to_owned())),
+        String_(i) => stack.push(String_(i.to_owned())),
+        _ => { print_error(ExpectedVariable) }
+    };
+    stack
+}
+
+
+
+
 // Chooses which type to put the variable in
 pub fn string_to_type(var: &str) -> Type {
 
@@ -322,7 +371,6 @@ pub fn string_to_type(var: &str) -> Type {
         if var == "True" { return Bool_(true); }
         else if var == "False" { return Bool_(false); }
         else { print_error(ExpectedBool); String_("".to_owned()) }
-
     }
 
     else {String_(var.to_owned())}
@@ -365,19 +413,21 @@ pub(crate) fn is_float(el: &str) -> bool {
 }
 
 
-// Checks whether or not the variable is a bool
-pub(crate) fn is_bool(el: Type) -> bool {
-    el == Bool_(true) || el == Bool_(false)
+// Checks whether or not the variable is a quotation
+pub(crate) fn is_block(el: Vec<Type>) -> bool {
+    for i in el { if !i.is_block() {return false} }
+    true
 }
 
-// Checks whether or not the variable is a string
-pub(crate) fn is_string(el: Type) -> bool {
-    el.type_to_string().contains("\"")
-}
 
-// Checks whether or not the variable is a list
-pub(crate) fn is_list(el: Type) -> bool {
-    el.type_to_string().contains("[") && el.type_to_string().contains("]")
+pub(crate) fn is_op(el: &str) -> bool {
+    QUOTATION_OPS.contains(&el) ||
+    IO_OPS.contains(&el) ||
+    STACK_OPS.contains(&el) ||
+    STRING_OPS.contains(&el) ||
+    ARITHMETIC_OPS.contains(&el) ||
+    LOGICAL_OPS.contains(&el) ||
+    LIST_OPS.contains(&el)
 }
 
 
@@ -397,6 +447,33 @@ pub(crate) fn invert_number(el: &str) -> Type {
 
 
 
+
+
+pub fn pop_front(t: Vec<Type>) -> (Option<Type>, Vec<Type>) {
+
+    if !t.is_empty() {
+
+        match Block_(t.to_owned()) {
+
+            Block_(val) => {
+
+                let mut new = val.clone();
+
+                new.reverse();
+                let el = new.pop();
+                new.reverse();
+
+                (el, new)
+
+            }
+            _ => { (None, t.to_owned()) }
+        }
+    }
+    else { (None, t.to_owned()) }
+}
+
+
+
 // Returns the length of the list or string
 pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
@@ -406,11 +483,11 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
     // If it is a string
-    if is_string(elem.to_owned()) { parse_string("length", &mut og) }
+//    if is_string(elem.to_owned()) { parse_string("length", &mut og) }
 
 
     // If it is a list
-    else if let List_(x) = elem.to_owned() {
+    if let List_(x) = elem.to_owned() {
 
         og.remove_last_match(elem.to_owned());
 
@@ -418,8 +495,16 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
     }
 
+    else if let Block_(x) = elem.to_owned() {
 
-    else {print_error(ExpectedListOrString); og}
+        og.remove_last_match(elem.to_owned());
+
+        quotation(&mut og.to_owned(), "length", x)
+
+    }
+
+
+    else { parse_string("length", &mut og) }
 
 }
 

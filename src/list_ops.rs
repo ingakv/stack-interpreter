@@ -1,19 +1,15 @@
 use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
 use crate::error_handling::{print_error};
-use crate::mylib::is_list;
 use crate::string_ops::{find_string};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, Int_, List_, String_};
 
-pub(crate) const LIST_OPS: [&str; 8] = [
+pub(crate) const LIST_OPS: [&str; 5] = [
     "head",
     "tail",
     "empty",
     "cons",
     "append",
-    "each quotation",
-    "map quotation",
-    "foldl quotation",
 ];
 
 
@@ -97,7 +93,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         }
     }
 
-    else if is_list(c.to_owned()) {
+    else if c. is_list(){
         Stack{ elements: vec![c] }
     }
 
@@ -171,9 +167,7 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
 
             else {
 
-
                 let mut list = vec![];
-
 
                 match el {
                     List_(i) => { list = i }
