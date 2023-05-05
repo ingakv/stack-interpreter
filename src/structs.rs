@@ -203,7 +203,7 @@ impl Stack<Type>{
         // Reverse it back
         self.reverse();
 
-        self.clone()
+        self.to_owned()
 
     }
 

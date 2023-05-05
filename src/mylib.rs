@@ -262,7 +262,7 @@ pub(crate) fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
             compare(stack)
         }
 
-        else { print_error(ExpectedNumber); stack.clone() }
+        else { print_error(ExpectedNumber); stack.to_owned() }
 
     }
 
@@ -273,7 +273,7 @@ pub(crate) fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
             length(stack)
         }
 
-        else { print_error(ExpectedListOrString); stack.clone() }
+        else { print_error(ExpectedListOrString); stack.to_owned() }
 
     }
 
@@ -488,7 +488,8 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
     // If it is a code block
-    else if let Block_(x) = elem.to_owned() {
+
+    else if is_block(vec![elem.to_owned()]) {
         og.remove_last_match(elem.to_owned());
         quotation(&mut og.to_owned(), "length", elem)
     }
@@ -518,7 +519,7 @@ pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
     stack.push(Bool_(ans));
-    stack.clone()
+    stack.to_owned()
 
 }
 

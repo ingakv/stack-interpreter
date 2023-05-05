@@ -3,13 +3,15 @@ use crate::error_handling::Error::{ExpectedQuotation, ExpectedVariable};
 use crate::error_handling::{print_error};
 use crate::mylib::{check_operator, is_block, pop_front};
 use crate::structs::{Stack, Type};
-use crate::structs::Type::{Block_, Bool_, Float_, Int_, String_};
+use crate::structs::Type::{Bool_, Float_, Int_, String_};
 
-pub(crate) const QUOTATION_OPS: [&str; 4] = [
+pub(crate) const QUOTATION_OPS: [&str; 6] = [
     "exec",
-    "each",
+    "times",
     "map",
     "foldl",
+    "each",
+    "if",
 ];
 
 
@@ -40,7 +42,7 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
         else {
             print_error(ExpectedQuotation);
             og.pop();
-            og.clone()
+            og.to_owned()
         }
 
     }
@@ -58,21 +60,44 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
 
 pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type) -> Stack<Type> {
 
-    if c == "length" {stack.push(Int_(block.type_to_string().len() as i128)); return stack.to_owned() }
 
     let code = match c {
+
+        // Counts the amount of variables in the code block
+        "length" => {
+
+            let mut copy = block.clone();
+            let mut count = 0;
+
+            loop {
+                match pop_front(copy.to_owned()) {
+                    (Some(_), rem) => {
+                        count = count + 1;
+                        copy = rem;
+                    }
+                    _ => {break}
+                }
+            }
+            stack.push(Int_(count)); return stack.to_owned()
+        }
 
         // Executes the stack
         "exec" => { exec(block) },
 
         // Checks whether at least one of the predicates are True or not
-        "each" => { stack.to_owned() },
+        "times" => { stack.to_owned() },
 
         // Inverts the predicate
         "map" => { stack.to_owned() },
 
         // Inverts the predicate
         "foldl" => { stack.to_owned() },
+
+        // Checks whether at least one of the predicates are True or not
+        "each" => { stack.to_owned() },
+
+        // Checks whether at least one of the predicates are True or not
+        "if" => { stack.to_owned() },
 
         _ => panic!("An error occurred in quotation_ops!"),
     };

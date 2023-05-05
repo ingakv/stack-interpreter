@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AnalysisUIOptions">
+    <option name="SPLITTER_PROPORTION" value="0.29945055" />
     <option name="ANALYZE_INJECTED_CODE" value="false" />
   </component>
   <component name="AutoImportSettings">
@@ -8,17 +9,16 @@
   </component>
   <component name="CargoProjects">
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
-    <cargoProject FILE="$PROJECT_DIR$/Assignment2_prog1/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feat: Implemented code blocks">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Fix: Fixed exec">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/quotation_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/quotation_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/string_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/structs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -103,34 +103,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/ingak/Desktop/Programmering/prog shit/Assignment2_prog/Cargo.lock",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15722656",
-    "project.structure.side.proportion": "0.2",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/ingak/Desktop/Programmering/prog shit/Assignment2_prog/Cargo.lock&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15722656&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog\src" />
@@ -142,7 +142,7 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Run REPL">
+  <component name="RunManager" selected="Cargo.Test tests">
     <configuration name="Run NORMAL" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="run" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/src" />
@@ -248,7 +248,9 @@
       <workItem from="1683144483092" duration="13305000" />
       <workItem from="1683211871561" duration="1592000" />
       <workItem from="1683213494126" duration="635000" />
-      <workItem from="1683226006413" duration="16439000" />
+      <workItem from="1683226006413" duration="17208000" />
+      <workItem from="1683243442558" duration="107000" />
+      <workItem from="1683243615015" duration="1155000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -456,7 +458,13 @@
       <option name="presentableId" value="LOCAL−00034" />
       <updated>1683236621180</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL−00035" summary="Fix: Fixed exec">
+      <created>1683242675084</created>
+      <option name="number" value="LOCAL−00035" />
+      <option name="presentableId" value="LOCAL−00035" />
+      <updated>1683242675084</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -486,7 +494,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Change structure" />
     <MESSAGE value="Fix: Stacks are now updated correctly after an operation" />
     <MESSAGE value="Fix: In the case of duplicate variables, the ones in the back are removed when used in an arithmetic operation" />
     <MESSAGE value="Fix: Operators are ignored if less than 2 variables are given" />
@@ -511,7 +518,8 @@
     <MESSAGE value="Fix: Adapted to the new datatype" />
     <MESSAGE value="Fix: All of the implemented features now passes the tests" />
     <MESSAGE value="Feat: Implemented code blocks" />
-    <option name="LAST_COMMIT_MESSAGE" value="Feat: Implemented code blocks" />
+    <MESSAGE value="Fix: Fixed exec" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix: Fixed exec" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
@@ -527,12 +535,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>473</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>496</line>
+          <line>497</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -557,7 +560,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>101</line>
+          <line>123</line>
           <option name="timeStamp" value="69" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -567,7 +570,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>59</line>
+          <line>66</line>
           <option name="timeStamp" value="73" />
         </line-breakpoint>
       </breakpoints>

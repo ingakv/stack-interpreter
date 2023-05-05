@@ -46,30 +46,30 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
             match op {
                 "append" | "cons" => { do_list_op(og, &op, list, list2, x, y) }
-                _ => { do_list_op(og, &op, list.clone(), list.clone(), x, String_("".to_owned())) }
+                _ => { do_list_op(og, &op, list.to_owned(), list.to_owned(), x, String_("".to_owned())) }
             }
         }
 
         else if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
             match op {
                 "append" => { do_list_op(og, &op, list, str, x, y) }
-                _ => { do_list_op(og, &op, list.clone(), list.clone(), x, String_("".to_owned())) }
+                _ => { do_list_op(og, &op, list.to_owned(), list.to_owned(), x, String_("".to_owned())) }
             }
         }
 
-        else if let Some(List_(x)) = list.first() { do_list_op(og, &op, list.clone(), list.clone(), x, String_("".to_owned())) }
+        else if let Some(List_(x)) = list.first() { do_list_op(og, &op, list.to_owned(), list.to_owned(), x, String_("".to_owned())) }
 
         // Ensures that both the list and the string / list2 is not empty
-        else if op == "append" { print_error(ExpectedListOrString); og.pop(); og.clone() }
+        else if op == "append" { print_error(ExpectedListOrString); og.pop(); og.to_owned() }
 
         // Ensures that both lists are not empty
-        else if op == "cons" { print_error(ExpectedList); og.pop(); og.clone() }
+        else if op == "cons" { print_error(ExpectedList); og.pop(); og.to_owned() }
 
         // If there are no lists in the stack, the original stack gets sent back
         else {
             print_error(ExpectedList);
             og.pop();
-            og.clone()
+            og.to_owned()
         }
     }
 
@@ -96,7 +96,7 @@ fn do_list_op(stack: &mut Stack<Type>, c: &str, list: Stack<Type>, list2: Stack<
 pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type) -> Stack<Type> {
 
     let head =
-        if !li.is_empty() { li.first().unwrap().clone() }
+        if !li.is_empty() { li.first().unwrap().to_owned() }
         else { String_("".to_owned()) };
 
 

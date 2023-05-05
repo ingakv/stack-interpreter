@@ -36,7 +36,7 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> 
         else {
             print_error(ExpectedNumber);
             og.pop();
-            og.clone()
+            og.to_owned()
         }
 
     }
@@ -79,8 +79,8 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
         "/" => {
             if v2 == 0.0 {
                 print_error(DivisionByZero);
-                stack.push(x.clone());
-                stack.push(y.clone());
+                stack.push(x.to_owned());
+                stack.push(y.to_owned());
                 String_("".to_string())
             }
             else { Float_(v1 / v2) }
@@ -90,8 +90,8 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
         "div" => {
             if b == 0 {
                 print_error(DivisionByZero);
-                stack.push(x.clone());
-                stack.push(y.clone());
+                stack.push(x.to_owned());
+                stack.push(y.to_owned());
                 String_("".to_string())
             }
             else { Int_(a / b) }
@@ -108,8 +108,8 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
 
 
     // Remove the original numbers
-    stack.remove_last_match(x.clone());
-    stack.remove_last_match(y.clone());
+    stack.remove_last_match(x.to_owned());
+    stack.remove_last_match(y.to_owned());
 
 
     // Removes the operator and adds the new variable

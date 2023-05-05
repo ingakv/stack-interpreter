@@ -23,9 +23,9 @@ open terminal in project
 The program searches through the entire stack from the bottom up.
 
 If an operator has been added, it will loop through until it finds two (or one, depending on the operator) variables of the correct type, even if there are other variables in between.
-I.e. if the stack is `[1, "hello", 2, +]` the program will extract 1 and 2, and push the result to the back, resulting in the stack now being `["hello", 3]`
+I.e., if the stack is `[1, "hello", 2, +]` the program will extract 1 and 2, and push the result to the back, resulting in the stack now being `["hello", 3]`
 
-The print function does not remove the element being printed from the list. All other functions do, if I remember correctly.
+The print function does not remove the element being printed from the list. All other functions do if I remember correctly.
 
 ### Functional Requirements
 
@@ -83,7 +83,7 @@ The print function does not remove the element being printed from the list. All 
 - List operations
 - Parsing initial input
 - Error handling that explains what the user did wrong
-  - The program should never panic. I have rather implemented that the if an error occurs, i.e. the user tries to pop an empty stack, an appropriate error message will be printed out, but the program should not continue to run. In the case of any user-related error, the stack will not be changed.
+  - The program should never panic. I have rather implemented that if an error occurs, i.e., the user tries to pop an empty stack, an appropriate error message will be printed out, but the program should not continue to run. In the case of any user-related error, the stack will not be changed.
 
 
 
@@ -103,7 +103,7 @@ The print function does not remove the element being printed from the list. All 
 - Does it pass the tests?
 - Does normal mode and REPL mode work as specified?
 - Is the readme well written?
-- Are the files organized
+- Are the files organized?
 - Does the program print useful errors to the user?
 - Are the commit messages descriptive
 
@@ -115,13 +115,13 @@ The print function does not remove the element being printed from the list. All 
 
 
 
-I have implemented a lot of the features except for those related to code blocks. I also have not yet had time to implement error handling. For now, if no changes were made on the stack during one input line,  a basic error message will be printed. There is also an error message being printed when the stack contains more than one item at the end of normal mode. In that case, the top element will still be returned as the answer, but the rest of the stack will be printed out as well.
+I have implemented a lot of the features except for those related to code blocks. I also have not yet had time to implement error handling. For now, if no changes were made on the stack during one input line, a basic error message will be printed. There is also an error message being printed when the stack contains more than one item at the end of normal mode. In that case, the top element will still be returned as the answer, but the rest of the stack will be printed out as well.
 
-This iteration  of the program passes 58 of the 104 tests that were a part of the original repository. All of the tests that are failed contain code blocks, which I have not yet implemented. So all of the tests related to features I have implemented passed.
+This iteration of the program passes 58 of the 104 tests that were a part of the original repository. All the tests that are failed contain code blocks, which I have not yet implemented. So all the tests related to features I have implemented passed.
 
-REPL mode works as specified, with the stack being updated and printed for each time the user presses `enter`. Normal mode also works as specified, if I understood it correctly. I interpreted it as the user writes several input lines, but unlike REPL mode, the stack is not printed each time `enter` is pressed. Instead when the user writes `:q`, the stack is executed and returns the answer. The reason for not executing the stack when `ctrl + d` is pressed, is because it was easier to debug it using another input. I am also under the assumption that if there were more than one element left in the stack when `:q` is pressed, that the program was supposed to panic and display an error message. I rather made my program work the same way regardless of how many items are on the stack. With the exception of printing a message to the user that there are still items in the stack, as well as printing out said items, in the case of the stack having more than one item. TLDR: the answer is still printed, since it annoying for the user to type all of it again :cowboy_hat_face:
+REPL mode works as specified, with the stack being updated and printed for each time the user presses `enter`. Normal mode also works as specified, if I understood it correctly. I interpreted it as the user writes several input lines, but unlike REPL mode, the stack is not printed each time `enter` is pressed. Instead, when the user writes `:q`, the stack is executed and returns the answer. The reason for not executing the stack when `ctrl + d` is pressed, is because it was easier to debug it using another input. I am also under the assumption that if there were more than one element left in the stack when `:q` is pressed, that the program was supposed to panic and display an error message. I rather made my program work the same way regardless of how many items are on the stack. With the exception of printing a message to the user that there are still items in the stack, as well as printing out said items, in the case of the stack having more than one item. TLDR: the answer is still printed, since it's annoying for the user to type all of it again :cowboy_hat_face:
 
-In my opinion I think my readme is informative enough and up to standard.
+In my opinion, I think my readme is informative enough and up to standard.
 
 I also think my file structure is done well
 

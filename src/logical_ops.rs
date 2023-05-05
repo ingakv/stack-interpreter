@@ -46,7 +46,7 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
           || number.is_bool()) {
 
 
-            stack.remove_last_match(number.clone());
+            stack.remove_last_match(number.to_owned());
 
             let new_nr =
             if number.is_bool() { if number.type_to_bool() { Bool_(false) } else { Bool_(true) } }
@@ -56,7 +56,7 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
             // Removes the operator and adds the new variable
             stack.pop();
             stack.push(new_nr);
-            stack.clone()
+            stack.to_owned()
 
         }
 
@@ -65,7 +65,7 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
         else {
             print_error(ExpectedVariable);
             og.pop();
-            og.clone()
+            og.to_owned()
         }
 
     }
@@ -103,6 +103,6 @@ pub fn logical_op(stack: &mut Stack<Type>, c: &str, x: bool, y: bool) -> Stack<T
     stack.push(Bool_(new));
 
     // Return the stack
-    stack.clone()
+    stack.to_owned()
 }
 
