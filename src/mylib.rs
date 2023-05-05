@@ -5,7 +5,7 @@ use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::{Write};
-use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
+use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedQuotation, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
 use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
 use crate::structs::{CodeDone, Stack, Type};
@@ -365,9 +365,11 @@ pub(crate) fn check_operator(pos: i128, c: &str, stack: &mut Stack<Type>) -> (St
         done.code_done = true;
 
         op_stack.push(String_(c.to_string()));
-        find_block(stack, stack.clone());
 
-        do_quotation(pos, op_stack)
+        if let Some(Block_(x)) = find_block(stack, &mut stack.clone()).last() { op_stack.push(Block_(x.to_owned())); }
+
+
+        do_quotation(op_stack)
     }
 
     else {
@@ -452,6 +454,12 @@ pub(crate) fn is_float(el: &str) -> bool {
 // Checks whether or not the variable is a quotation
 pub(crate) fn is_block(el: Vec<Type>) -> bool {
     for i in el { if !i.is_block() {return false} }
+    true
+}
+
+// Checks whether or not the variable is a list
+pub(crate) fn is_list(el: Vec<Type>) -> bool {
+    for i in el { if !i.is_list() {return false} }
     true
 }
 

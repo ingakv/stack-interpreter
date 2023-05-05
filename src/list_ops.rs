@@ -130,16 +130,13 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
         // Inserts the string onto the front of the list
         "append" => {
 
-            let mut list: Vec<Type> = vec![];
-
-            list.push(el);
+            let mut list = vec![el];
 
             for i in li {
                 list.push(i);
             }
 
             stack.push(List_(list));
-
         }
 
 
@@ -147,7 +144,13 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
         "cons" => {
 
             // Return the other list if one of them is empty
-            if li.is_empty() { stack.push(List_(vec![el])); }
+            if li.is_empty() {
+
+                match el {
+                    List_(i) => { stack.push(List_(i)); }
+                    _ => { stack.push(List_(vec![el])); }
+                }
+            }
 
             else {
 

@@ -1,59 +1,37 @@
 
-use crate::error_handling::Error::{ExpectedQuotation};
-use crate::error_handling::{print_error};
-use crate::list_ops::find_list;
-use crate::mylib::{check_operator, is_block, pop_front, string_to_type};
+use crate::mylib::{check_operator, is_block, is_list, is_op, pop_front, string_to_type};
 use crate::structs::{Stack, Type};
-use crate::structs::Type::{ Int_, List_, String_};
+use crate::structs::Type::{Block_, Int_, List_, String_};
 
-pub(crate) const QUOTATION_OPS: [&str; 6] = [
+pub(crate) const QUOTATION_OPS: [&str; 2] = [
     "exec",
-    "times",
-    "map",
-    "foldl",
+//    "times",
+//    "map",
+//    "foldl",
     "each",
-    "if",
+//    "if",
 ];
 
 
-pub(crate) fn do_quotation(pos: i128, stack: Stack<Type>) -> Stack<Type> {
+pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
 
-    let mut old_stack = stack.clone();
-    old_stack.reverse();
+    // Loops through and finds the next code block and list
+    let mut block = Block_(vec![]);
+    let mut list = List_(vec![]);
+    let mut op = "".to_string();
 
-    let mut quotation_op = String_("".to_string());
-    let mut count = 0;
-    let mut new_stack = vec![];
+    let mut li_stack = stack.clone();
 
-    // Reorders the stack so that the operators are after the code block
-    loop {
-        match old_stack.pop() {
-            Some(el) => {
-
-                // Switch the position of the operator and the code block in the stack
-                if count == pos { quotation_op = el; }
-
-                else if count == pos+1 {
-                    new_stack.push(el);
-                    new_stack.push(quotation_op.to_owned());
-                }
-
-                else { new_stack.push(el); }
-
-                count = count + 1;
-
-            }
-            None => {break}
+    loop{
+        if let Some(li) = li_stack.pop() {
+            if is_block(vec![li.to_owned()]) { block = li}
+            else if is_list(vec![li.to_owned()]) { list = li}
+            else if is_op(li.type_to_string().as_str()) { op = li.type_to_string()}
         }
+        else { break }
     }
 
-
-    let mut new = Stack{ elements: (new_stack)};
-
-    let mut new2 = new.clone();
-
-    find_block(&mut new, &mut new2)
-
+    quotation(&mut stack.to_owned(), op.as_str(), block, list)
 }
 
 
@@ -62,45 +40,9 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
     // Remove top element and store it
     let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
 
-    let st = c.type_to_string();
-    let op = st.trim_start_matches("\"").trim_end_matches("\"");
-
     // Skips if the stack is empty
     if c == String_("".to_string()) {
         Stack{ elements: vec![] }
-    }
-
-    // Checks if it is an operator
-    else if QUOTATION_OPS.contains(&op) {
-
-        // Loops through and finds the next code block and list
-        let block = find_block(stack, og);
-        let mut list = List_(vec![]);
-
-        let mut li_stack = og.clone();
-
-        loop{
-            if let Some(li) = li_stack.pop() {
-                match li {
-                    List_(_) => { list = li; break}
-                    _ => {}
-                }
-            }
-            else { break }
-        }
-
-        if let Some(x) = block.first() {
-            quotation(stack, op, x, list)
-        }
-
-        // If there are no code blocks in the stack, the original stack gets sent back
-        // (without the operator)
-        else {
-            print_error(ExpectedQuotation);
-            og.pop();
-            og.to_owned()
-        }
-
     }
 
     else if is_block(vec![c.to_owned()]) {
@@ -152,7 +94,7 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
         // Checks whether at least one of the predicates are True or not
         "each" => {
 
-            let mut new_stack = stack.clone();
+            let mut new_stack = Stack::new();
 
             if let List_(elems) = list.to_owned() {
 
@@ -167,7 +109,6 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
 
                 }
             }
-            new_stack.remove_last_match(list.to_owned());
             new_stack.to_owned()
         },
 
