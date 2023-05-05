@@ -8,7 +8,7 @@ use std::io::{Write};
 use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
 use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
-use crate::structs::{Stack, Type};
+use crate::structs::{CodeDone, Stack, Type};
 use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 
 
@@ -26,21 +26,15 @@ pub fn normal() {
 
         if input == ":q" {
 
-            let mut new = stack.clone();
-
-            new.pop();
-            let new2 = stack.stack_to_string();
-
-            stack = program_loop(new2, Stack{ elements: vec![] }, true);
-
-
             // Prints the result of the operations
             if stack.is_empty() { print_error(StackEmpty); }
             else {
 
+                stack = exec_stack(stack.to_owned());
+
                 if stack.len() > 1 {print_error(ProgramFinishedWithMultipleValues)}
-                let result = stack.pop().unwrap_or_else(|| String_("".to_string()));
-                result.print();
+                if let Some(result) = stack.pop() { result.print(); }
+
 
                 println!();
                 stack.print_stack();
@@ -52,7 +46,7 @@ pub fn normal() {
         // Prints the stack
         else if input == ":s" { stack.print_stack(); }
 
-        else { stack = program_loop(input, stack.clone(), false); }
+        else { stack = read_stack(input, stack.clone()); }
 
     }
 }
@@ -71,7 +65,9 @@ pub fn repl() {
         // Reads user input
         let input = get_line();
 
-        stack = program_loop(input, stack.clone(), true);
+        let new = read_stack(input, stack.clone());
+
+        stack = exec_stack(new);
 
         // Prints the stack
         stack.print_stack();
@@ -80,7 +76,65 @@ pub fn repl() {
 }
 
 
-pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<Type> {
+
+pub fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
+
+
+    while stack.len() > 1 {
+
+        let og = stack.clone();
+        let mut pos = 0;
+        let mut code_done = CodeDone { code_done: false, op_done: false };
+
+        for i in og.elements {
+            if !stack.is_empty() {
+                let mut old_stack = stack.clone();
+
+                let ans = check_operator(pos as i128, i.type_to_string().trim_matches('\"'), &mut stack);
+
+                stack = ans.0;
+                code_done = ans.1;
+
+
+                if !code_done.code_done && !code_done.op_done {
+                    pos = pos + 1;
+                }
+
+                // Reset if any operation has been done
+                else {
+
+                    let mut count = 0;
+
+                    old_stack.reverse();
+
+
+                    // Combines the old and new stack
+                    if let Stack{elements: mut vec } = old_stack.to_owned() {
+                        loop {
+                            if let Some(elem) = vec.pop() {
+
+                                // Remove the first "pos" amount of elements in the old stack
+                                if count > pos { stack.push(elem); }
+
+                                count = count + 1;
+
+                            }
+                            else { break }
+                        }
+                    }
+
+                    break;
+
+                }
+
+            }
+        }
+
+    }
+    stack.to_owned()
+}
+
+pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
     // Splits up the different input variables
     let new_el: Vec<&str> = { input.split_whitespace().collect() };
@@ -118,11 +172,7 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
                 }
 
                 // Join the vector together to form a sentence / string, and send it to the stack
-                else {
-                    if repl { stack = check_operator(false, str_buf.concat().as_str(), &mut stack); }
-
-                    else { stack.push(String_(str_buf.concat().to_string())) }
-                }
+                else { stack.push(String_(str_buf.concat().to_string())) }
 
                 // Reset the buffer so that a potential new string can be read
                 str_buf.clear();
@@ -211,7 +261,6 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
 
 
-
         //////////////// Push to buffer /////////////////
 
 
@@ -230,31 +279,33 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
 
         else {
-            if repl { stack = check_operator(false, i, &mut stack); }
-            else {
-                match string_to_type(i) {
-                    Int_(i) => stack.push(Int_(i.to_owned())),
-                    Float_(i) => stack.push(Float_(i.to_owned())),
-                    Bool_(i) => stack.push(Bool_(i.to_owned())),
-                    String_(i) => stack.push(String_(i.to_owned())),
-                    _ => {}
-                };
-            }
-
+            match string_to_type(i) {
+                Int_(i) => stack.push(Int_(i.to_owned())),
+                Float_(i) => stack.push(Float_(i.to_owned())),
+                Bool_(i) => stack.push(Bool_(i.to_owned())),
+                String_(i) => stack.push(String_(i.to_owned())),
+                _ => {}
+            };
         }
     }
 
-
-
-    do_quotation(stack)
-
+    stack.to_owned()
 
 }
 
 
 
 
-pub(crate) fn check_operator(is_quotation: bool, c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn check_operator(pos: i128, c: &str, stack: &mut Stack<Type>) -> (Stack<Type>, CodeDone) {
+
+    let mut op_stack = stack.clone();
+
+    // Limit the part of the stack where the operations are done
+    while op_stack.len() as i128 > pos { op_stack.pop(); }
+
+    let mut done: CodeDone = CodeDone { code_done: false, op_done: true };
+
+    let new_stack =
 
     // Ignores ""
     if c == "" { stack.clone() }
@@ -262,7 +313,7 @@ pub(crate) fn check_operator(is_quotation: bool, c: &str, stack: &mut Stack<Type
     else if c == "==" {
 
         if stack.len() > 1 {
-            compare(stack)
+            compare(&mut op_stack)
         }
 
         else { print_error(ExpectedNumber); stack.to_owned() }
@@ -273,7 +324,7 @@ pub(crate) fn check_operator(is_quotation: bool, c: &str, stack: &mut Stack<Type
     else if c == "length" {
 
         if !stack.is_empty() {
-            length(stack)
+            length(&mut op_stack)
         }
 
         else { print_error(ExpectedListOrString); stack.to_owned() }
@@ -281,9 +332,8 @@ pub(crate) fn check_operator(is_quotation: bool, c: &str, stack: &mut Stack<Type
     }
 
     else if ARITHMETIC_OPS.contains(&c) {
-        // Adds the operator onto the stack
-        let mut new = stack.clone();
-        new.push(String_(c.to_string()));
+        op_stack.push(String_(c.to_string()));
+        let mut new = &mut op_stack.clone();
 
         let mut new2 = new.clone();
 
@@ -291,23 +341,19 @@ pub(crate) fn check_operator(is_quotation: bool, c: &str, stack: &mut Stack<Type
     }
 
     else if LOGICAL_OPS.contains(&c) {
-        // Adds the operator onto the stack
-        let mut new = stack.clone();
-        new.push(String_(c.to_string()));
+        op_stack.push(String_(c.to_string()));
+        let mut new = &mut op_stack.clone();
 
         let mut new2 = new.clone();
 
         find_logical(&mut new, &mut new2)
     }
 
-    else if STRING_OPS.contains(&c) {
-        parse_string(c, stack)
-    }
+    else if STRING_OPS.contains(&c) { parse_string(c, &mut op_stack) }
 
     else if LIST_OPS.contains(&c) {
-        // Adds the operator onto the stack
-        let mut new = stack.clone();
-        new.push(String_(c.to_string()));
+        op_stack.push(String_(c.to_string()));
+        let mut new = &mut op_stack.clone();
 
         let mut new2 = new.clone();
 
@@ -315,34 +361,22 @@ pub(crate) fn check_operator(is_quotation: bool, c: &str, stack: &mut Stack<Type
     }
 
 
-    else if STACK_OPS.contains(&c) { stack_op(c, stack) }
+    else if STACK_OPS.contains(&c) { stack_op(c, &mut op_stack) }
 
-    else if IO_OPS.contains(&c) { simple_io(c, stack) }
+    else if IO_OPS.contains(&c) { simple_io(c, &mut op_stack) }
 
-    else if is_quotation && QUOTATION_OPS.contains(&c) {
-        // Adds the operator onto the stack
-        let mut new = stack.clone();
-        new.push(String_(c.to_string()));
-
-        let mut new2 = new.clone();
-
-        find_block(&mut new, &mut new2)
+    else if QUOTATION_OPS.contains(&c) {
+        done.code_done = true;
+        do_quotation(pos, stack.to_owned())
     }
 
     else {
-
-        // Forces bools to have a capitalized first letter
-        let new = match c.to_lowercase().as_str() {
-            "true" => "True",
-            "false" => "False",
-            _ => c,
-        };
-
-        // If a stack operation was not typed in, push the value to the stack
-        stack.push(string_to_type(new));
-
+        done.op_done = false;
         stack.to_owned()
-    }
+    };
+
+    (new_stack, done)
+
 }
 
 

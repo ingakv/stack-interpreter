@@ -1,10 +1,10 @@
-use std::ffi::c_void;
+
 use crate::error_handling::Error::{ExpectedQuotation};
 use crate::error_handling::{print_error};
 use crate::list_ops::find_list;
-use crate::mylib::{check_operator, is_block, pop_front};
+use crate::mylib::{check_operator, is_block, pop_front, string_to_type};
 use crate::structs::{Stack, Type};
-use crate::structs::Type::{Block_, Int_, List_, String_};
+use crate::structs::Type::{ Int_, List_, String_};
 
 pub(crate) const QUOTATION_OPS: [&str; 6] = [
     "exec",
@@ -16,31 +16,39 @@ pub(crate) const QUOTATION_OPS: [&str; 6] = [
 ];
 
 
-pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
+pub(crate) fn do_quotation(pos: i128, stack: Stack<Type>) -> Stack<Type> {
 
     let mut old_stack = stack.clone();
-    let mut sorted_stack = vec![];
-    let mut quotation_ops = vec![];
+    old_stack.reverse();
 
-    // Reorders the stack so that the operators are at the end
+    let mut quotation_op = String_("".to_string());
+    let mut count = 0;
+    let mut new_stack = vec![];
+
+    // Reorders the stack so that the operators are after the code block
     loop {
         match old_stack.pop() {
             Some(el) => {
-                if QUOTATION_OPS.contains(&el.type_to_string().as_str()) { quotation_ops.push(el) }
-                else { sorted_stack.push(el) }
+
+                // Switch the position of the operator and the code block in the stack
+                if count == pos { quotation_op = el; }
+
+                else if count == pos+1 {
+                    new_stack.push(el);
+                    new_stack.push(quotation_op.to_owned());
+                }
+
+                else { new_stack.push(el); }
+
+                count = count + 1;
+
             }
             None => {break}
         }
     }
 
-    // Since it gets reversed in the loop above, it needs to be reversed back
-    sorted_stack.reverse();
 
-    for i in quotation_ops {
-        sorted_stack.push(i);
-    }
-
-    let mut new = Stack{ elements: (sorted_stack)};
+    let mut new = Stack{ elements: (new_stack)};
 
     let mut new2 = new.clone();
 
@@ -135,31 +143,26 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
         // Checks whether at least one of the predicates are True or not
         "each" => {
 
+            let mut new_stack = stack.clone();
+
             if let List_(elems) = list.to_owned() {
 
                 let mut list_copy = elems.clone();
 
-                loop {
+                for i in &list_copy {
+                    // Execute the code block
 
-                    // If there are more items left in the list
-                    if let Some(elem) = list_copy.pop() {
+                    if let Stack{elements: mut vec } = exec(Stack{elements: vec![i.to_owned()]}, block.to_owned()) {
 
-                        // Push the element to the front of the code block
-                        let mut new_block = vec![elem];
-
-                        if let Block_(mut block_elems) = block.to_owned() {
-                            if let Some(elem) = block_elems.pop() {
-                                new_block.push(elem)
-                            }
+                        if let Some(item) = vec.pop() {
+                            new_stack.push(item);
                         }
-
-                        // Execute the code block
-                        exec(stack.to_owned(), Block_(new_block));
                     }
-                    else { break }
+
                 }
             }
-            stack.to_owned()
+            new_stack.remove_last_match(list.to_owned());
+            new_stack.to_owned()
         },
 
         // Checks whether at least one of the predicates are True or not
@@ -167,7 +170,6 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
 
         _ => panic!("An error occurred in quotation_ops!"),
     };
-
 
     new_stack.to_owned()
 
@@ -188,7 +190,9 @@ pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
 
                 let st = x.type_to_string();
                 let op = st.trim_start_matches("\"").trim_end_matches("\"");
-                stack = check_operator(true, op, &mut stack.to_owned());
+                stack.push(string_to_type(op));
+
+                stack = check_operator((stack.len() - 1) as i128, op, &mut stack.to_owned()).0;
             }
 
             _ => {break}

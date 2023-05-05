@@ -1,10 +1,16 @@
 
 use crate::error_handling::Error::{ExpectedNumber, StackEmpty};
 use crate::error_handling::print_error;
-use crate::mylib::is_op;
+use crate::mylib::{is_op, string_to_type};
 use crate::structs::Type::*;
 
 
+
+
+pub struct CodeDone {
+    pub code_done: bool,
+    pub op_done: bool,
+}
 
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
@@ -83,6 +89,10 @@ impl Type{
         match self {
             Int_(val) => {*val as i128}
             Float_(val) => {*val as i128}
+            String_(val) => {
+                if let Int_(x) = string_to_type(val) {x}
+                else { {print_error(ExpectedNumber); 0} }
+            }
             _ => {print_error(ExpectedNumber); 0}
         }
     }
@@ -92,6 +102,10 @@ impl Type{
         match self {
             Int_(val) => {*val as f64}
             Float_(val) => {*val as f64}
+            String_(val) => {
+                if let Float_(x) = string_to_type(val) {x}
+                else { {print_error(ExpectedNumber); 0.0} }
+            }
             _ => {print_error(ExpectedNumber); 0.0}
         }
     }
@@ -215,7 +229,6 @@ impl Stack<Type>{
             println!("Stack: ");
             for i in self.elements.iter().rev() { i.print(); }
         }
-        else { print_error(StackEmpty); }
     }
 
 
@@ -229,18 +242,19 @@ impl Stack<Type>{
             for i in self.elements.iter() {
 
                 match i {
-                    List_(_) | String_(_) => {
+                    List_(_) | String_(_) | Block_(_) => {
 
                         let mut new_li = i.type_to_string();
-                        new_li = new_li.replace("[", "[ ");
-                        new_li = new_li.replace("]", " ]");
+                        new_li = new_li.replace("[", " [ ");
+                        new_li = new_li.replace("{", " { ");
+                        new_li = new_li.replace("}", " } ");
+                        new_li = new_li.replace("]", " ] ");
                         new_li = new_li.replace(",", " ");
                         new_li = new_li.replace("\"", " \" ");
 
                         buf.push(new_li)
 
                     }
-//                            Block_(_) => {}
                     _ => {
                         buf.push(i.type_to_string());
                         buf.push(" ".to_string());

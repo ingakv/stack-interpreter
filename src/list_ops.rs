@@ -47,7 +47,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
             match op {
                 "append" | "cons" => { do_list_op(og, &op, list, list2, x, y) }
-                _ => { do_list_op(og, &op, list.to_owned(), list.to_owned(), x, String_("".to_owned())) }
+                _ => { do_list_op(og, &op, list.to_owned(), list2.to_owned(), x, String_("".to_owned())) }
             }
         }
 
@@ -55,7 +55,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         else if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
             match op {
                 "append" => { do_list_op(og, &op, list, str, x, y) }
-                _ => { do_list_op(og, &op, list.to_owned(), list.to_owned(), x, String_("".to_owned())) }
+                _ => { do_list_op(og, &op, list.to_owned(), str.to_owned(), x, String_("".to_owned())) }
             }
         }
 

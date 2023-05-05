@@ -8,7 +8,7 @@ mod error_handling;
 mod structs;
 mod quotation_ops;
 
-use crate::mylib::{program_loop};
+use crate::mylib::{exec_stack, read_stack};
 use crate::structs::{Stack, Type};
 
 
@@ -22,7 +22,9 @@ pub fn t(input: &str) -> String {
     // 2. invoke interpreter with tokens from parser as input
     // 3. transform the result to a string (tip: implement Display traits)
 
-    let ans: Stack<Type> = program_loop(input.to_string(), Stack{ elements: vec![] }, true);
+    let mut ans: Stack<Type> = read_stack(input.to_string(), Stack{ elements: vec![] });
+
+    ans = exec_stack(ans);
 
     print_stack_lib(ans)
 
