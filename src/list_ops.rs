@@ -17,12 +17,7 @@ pub(crate) const LIST_OPS: [&str; 5] = [
 
 pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
 
-    let c = if stack.is_empty() { String_("".to_string()) }
-
-    else {
-        // Remove top element and store it
-        stack.elements.pop().unwrap_or_else(|| String_("".to_string()))
-    };
+    let c = stack.elements.pop().unwrap_or_else(|| String_("".to_string()));
 
     let st = c.type_to_string();
     let op = st.trim_start_matches("\"").trim_end_matches("\"");
@@ -55,7 +50,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         else if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
             match op {
                 "append" => { do_list_op(og, &op, list, str, x, y) }
-                _ => { do_list_op(og, &op, list.to_owned(), str.to_owned(), x, String_("".to_owned())) }
+                _ => { do_list_op(og, &op, list.to_owned(), str.to_owned(), x, y) }
             }
         }
 
@@ -104,13 +99,13 @@ fn do_list_op(stack: &mut Stack<Type>, c: &str, list: Stack<Type>, list2: Stack<
 
 pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type) -> Stack<Type> {
 
+    // Removes the operator
+    stack.pop();
+
     let head =
         if !li.is_empty() { li.first().unwrap().to_owned() }
         else { String_("".to_owned()) };
 
-
-    // Removes the operator and adds the new variable
-    stack.pop();
 
     match c {
         // Returns the first item of the list
@@ -152,7 +147,7 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
         "cons" => {
 
             // Return the other list if one of them is empty
-            if li.is_empty() { stack.push(el); }
+            if li.is_empty() { stack.push(List_(vec![el])); }
 
             else {
 

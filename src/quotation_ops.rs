@@ -72,16 +72,25 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
 
     // Checks if it is an operator
     else if QUOTATION_OPS.contains(&op) {
-        // Loops through and finds the next two numbers
-        let block = find_block(stack, og);
-        let list = find_list(og, &mut og.clone());
 
-        if let (Some(x), Some(y)) = (block.first(), list.first()) {
-            quotation(stack, op, x, y)
+        // Loops through and finds the next code block and list
+        let block = find_block(stack, og);
+        let mut list = List_(vec![]);
+
+        let mut li_stack = og.clone();
+
+        loop{
+            if let Some(li) = li_stack.pop() {
+                match li {
+                    List_(_) => { list = li; break}
+                    _ => {}
+                }
+            }
+            else { break }
         }
 
-        else if let Some(x) = block.first() {
-            quotation(stack, op, x, List_(vec![]))
+        if let Some(x) = block.first() {
+            quotation(stack, op, x, list)
         }
 
         // If there are no code blocks in the stack, the original stack gets sent back

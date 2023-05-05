@@ -7,7 +7,7 @@ use std::io;
 use std::io::{Write};
 use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
-use crate::quotation_ops::{do_quotation, quotation, QUOTATION_OPS};
+use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
 use crate::structs::{CodeDone, Stack, Type};
 use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 
@@ -122,7 +122,7 @@ pub fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
             }
 
             // Execute the new stack
-            { return exec_stack(stack.to_owned()) }
+            return exec_stack(stack.to_owned())
 
         }
     }
@@ -363,7 +363,11 @@ pub(crate) fn check_operator(pos: i128, c: &str, stack: &mut Stack<Type>) -> (St
 
     else if QUOTATION_OPS.contains(&c) {
         done.code_done = true;
-        do_quotation(pos, stack.to_owned())
+
+        op_stack.push(String_(c.to_string()));
+        find_block(stack, stack.clone());
+
+        do_quotation(pos, op_stack)
     }
 
     else {
