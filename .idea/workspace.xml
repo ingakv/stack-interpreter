@@ -11,15 +11,11 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Fix: Fixed exec">
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Feat: Implemented quotation length">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/quotation_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/quotation_ops.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/structs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +138,7 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Test tests">
+  <component name="RunManager" selected="Cargo.Run REPL">
     <configuration name="Run NORMAL" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="run" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/src" />
@@ -162,6 +158,23 @@
     </configuration>
     <configuration name="Run REPL" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="run -- REPL " />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test test_list_quotations::test_map_multiply" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package bprog --test tests test_list_quotations::test_map_multiply -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="emulateTerminal" value="false" />
       <option name="channel" value="DEFAULT" />
@@ -198,7 +211,13 @@
       <item itemvalue="Cargo.Run REPL" />
       <item itemvalue="Cargo.Run NORMAL" />
       <item itemvalue="Cargo.Test tests" />
+      <item itemvalue="Cargo.Test test_list_quotations::test_map_multiply" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.Test test_list_quotations::test_map_multiply" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -250,7 +269,7 @@
       <workItem from="1683213494126" duration="635000" />
       <workItem from="1683226006413" duration="17208000" />
       <workItem from="1683243442558" duration="107000" />
-      <workItem from="1683243615015" duration="1155000" />
+      <workItem from="1683243615015" duration="8321000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -464,7 +483,13 @@
       <option name="presentableId" value="LOCAL−00035" />
       <updated>1683242675084</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL−00036" summary="Feat: Implemented quotation length">
+      <created>1683244931569</created>
+      <option name="number" value="LOCAL−00036" />
+      <option name="presentableId" value="LOCAL−00036" />
+      <updated>1683244931569</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -494,7 +519,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fix: Stacks are now updated correctly after an operation" />
     <MESSAGE value="Fix: In the case of duplicate variables, the ones in the back are removed when used in an arithmetic operation" />
     <MESSAGE value="Fix: Operators are ignored if less than 2 variables are given" />
     <MESSAGE value="Feature: Prints an error message if the user doesn't follow the syntax" />
@@ -519,7 +543,8 @@
     <MESSAGE value="Fix: All of the implemented features now passes the tests" />
     <MESSAGE value="Feat: Implemented code blocks" />
     <MESSAGE value="Fix: Fixed exec" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix: Fixed exec" />
+    <MESSAGE value="Feat: Implemented quotation length" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feat: Implemented quotation length" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
@@ -530,12 +555,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>143</line>
+          <line>152</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>497</line>
+          <line>499</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -549,18 +574,13 @@
           <option name="timeStamp" value="62" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>254</line>
-          <option name="timeStamp" value="63" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>96</line>
+          <line>105</line>
           <option name="timeStamp" value="65" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>123</line>
+          <line>183</line>
           <option name="timeStamp" value="69" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -570,8 +590,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>66</line>
-          <option name="timeStamp" value="73" />
+          <line>138</line>
+          <option name="timeStamp" value="81" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

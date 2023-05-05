@@ -1,9 +1,10 @@
-
-use crate::error_handling::Error::{ExpectedQuotation, ExpectedVariable};
+use std::ffi::c_void;
+use crate::error_handling::Error::{ExpectedQuotation};
 use crate::error_handling::{print_error};
+use crate::list_ops::find_list;
 use crate::mylib::{check_operator, is_block, pop_front};
 use crate::structs::{Stack, Type};
-use crate::structs::Type::{Bool_, Float_, Int_, String_};
+use crate::structs::Type::{Block_, Int_, List_, String_};
 
 pub(crate) const QUOTATION_OPS: [&str; 6] = [
     "exec",
@@ -13,6 +14,39 @@ pub(crate) const QUOTATION_OPS: [&str; 6] = [
     "each",
     "if",
 ];
+
+
+pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
+
+    let mut old_stack = stack.clone();
+    let mut sorted_stack = vec![];
+    let mut quotation_ops = vec![];
+
+    // Reorders the stack so that the operators are at the end
+    loop {
+        match old_stack.pop() {
+            Some(el) => {
+                if QUOTATION_OPS.contains(&el.type_to_string().as_str()) { quotation_ops.push(el) }
+                else { sorted_stack.push(el) }
+            }
+            None => {break}
+        }
+    }
+
+    // Since it gets reversed in the loop above, it needs to be reversed back
+    sorted_stack.reverse();
+
+    for i in quotation_ops {
+        sorted_stack.push(i);
+    }
+
+    let mut new = Stack{ elements: (sorted_stack)};
+
+    let mut new2 = new.clone();
+
+    find_block(&mut new, &mut new2)
+
+}
 
 
 pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
@@ -32,9 +66,14 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
     else if QUOTATION_OPS.contains(&op) {
         // Loops through and finds the next two numbers
         let block = find_block(stack, og);
+        let list = find_list(og, &mut og.clone());
 
-        if let Some(x) = block.first() {
-            quotation(stack, op, x)
+        if let (Some(x), Some(y)) = (block.first(), list.first()) {
+            quotation(stack, op, x, y)
+        }
+
+        else if let Some(x) = block.first() {
+            quotation(stack, op, x, List_(vec![]))
         }
 
         // If there are no code blocks in the stack, the original stack gets sent back
@@ -58,10 +97,9 @@ pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack
 
 
 
-pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type) -> Stack<Type> {
+pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Type) -> Stack<Type> {
 
-
-    let code = match c {
+    let new_stack = match c {
 
         // Counts the amount of variables in the code block
         "length" => {
@@ -78,11 +116,12 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type) -> Stack<
                     _ => {break}
                 }
             }
-            stack.push(Int_(count)); return stack.to_owned()
+            stack.push(Int_(count));
+            stack.to_owned()
         }
 
         // Executes the stack
-        "exec" => { exec(block) },
+        "exec" => { exec(stack.to_owned(), block) },
 
         // Checks whether at least one of the predicates are True or not
         "times" => { stack.to_owned() },
@@ -94,7 +133,34 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type) -> Stack<
         "foldl" => { stack.to_owned() },
 
         // Checks whether at least one of the predicates are True or not
-        "each" => { stack.to_owned() },
+        "each" => {
+
+            if let List_(elems) = list.to_owned() {
+
+                let mut list_copy = elems.clone();
+
+                loop {
+
+                    // If there are more items left in the list
+                    if let Some(elem) = list_copy.pop() {
+
+                        // Push the element to the front of the code block
+                        let mut new_block = vec![elem];
+
+                        if let Block_(mut block_elems) = block.to_owned() {
+                            if let Some(elem) = block_elems.pop() {
+                                new_block.push(elem)
+                            }
+                        }
+
+                        // Execute the code block
+                        exec(stack.to_owned(), Block_(new_block));
+                    }
+                    else { break }
+                }
+            }
+            stack.to_owned()
+        },
 
         // Checks whether at least one of the predicates are True or not
         "if" => { stack.to_owned() },
@@ -103,32 +169,16 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type) -> Stack<
     };
 
 
-    for i in code.elements {
-        match i {
-            Int_(i) => stack.push(Int_(i.to_owned())),
-            Float_(i) => stack.push(Float_(i.to_owned())),
-            Bool_(i) => stack.push(Bool_(i.to_owned())),
-            String_(i) => stack.push(String_(i.to_owned())),
-//            List_(_) => {}
-//            Block_(_) => {}
-            _ => { print_error(ExpectedVariable) }
-
-        };
-    }
-
-    stack.to_owned()
+    new_stack.to_owned()
 
 }
 
 
 
 
-pub(crate) fn exec(block: Type) -> Stack<Type> {
-
-    let mut code = Stack::new();
+pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
 
     let mut old_block = block.clone();
-
 
     loop {
         match pop_front(old_block.to_owned()) {
@@ -138,14 +188,13 @@ pub(crate) fn exec(block: Type) -> Stack<Type> {
 
                 let st = x.type_to_string();
                 let op = st.trim_start_matches("\"").trim_end_matches("\"");
-                code = check_operator(op, &mut code.to_owned());
+                stack = check_operator(true, op, &mut stack.to_owned());
             }
 
             _ => {break}
         }
     }
 
-
-    code
+    stack
 
 }

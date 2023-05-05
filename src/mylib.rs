@@ -7,7 +7,7 @@ use std::io;
 use std::io::{Write};
 use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
-use crate::quotation_ops::{find_block, quotation, QUOTATION_OPS};
+use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 
@@ -119,7 +119,7 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
                 // Join the vector together to form a sentence / string, and send it to the stack
                 else {
-                    if repl { stack = check_operator(str_buf.concat().as_str(), &mut stack); }
+                    if repl { stack = check_operator(false, str_buf.concat().as_str(), &mut stack); }
 
                     else { stack.push(String_(str_buf.concat().to_string())) }
                 }
@@ -230,7 +230,7 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
 
 
         else {
-            if repl { stack = check_operator(i, &mut stack); }
+            if repl { stack = check_operator(false, i, &mut stack); }
             else {
                 match string_to_type(i) {
                     Int_(i) => stack.push(Int_(i.to_owned())),
@@ -244,14 +244,17 @@ pub fn program_loop(input: String, mut stack: Stack<Type>, repl: bool) -> Stack<
         }
     }
 
-    stack
+
+
+    do_quotation(stack)
+
 
 }
 
 
 
 
-pub(crate) fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn check_operator(is_quotation: bool, c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
     // Ignores ""
     if c == "" { stack.clone() }
@@ -316,7 +319,7 @@ pub(crate) fn check_operator(c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
     else if IO_OPS.contains(&c) { simple_io(c, stack) }
 
-    else if QUOTATION_OPS.contains(&c) {
+    else if is_quotation && QUOTATION_OPS.contains(&c) {
         // Adds the operator onto the stack
         let mut new = stack.clone();
         new.push(String_(c.to_string()));
@@ -488,10 +491,9 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
     // If it is a code block
-
     else if is_block(vec![elem.to_owned()]) {
         og.remove_last_match(elem.to_owned());
-        quotation(&mut og.to_owned(), "length", elem)
+        quotation(&mut og.to_owned(), "length", elem, List_(vec![]))
     }
 
 

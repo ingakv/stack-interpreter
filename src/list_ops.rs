@@ -43,6 +43,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         new_li.elements.pop();
         let str = find_string(&mut new_li);
 
+        // Functions with two lists
         if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
             match op {
                 "append" | "cons" => { do_list_op(og, &op, list, list2, x, y) }
@@ -50,6 +51,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
             }
         }
 
+        // Functions with a list and a string
         else if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
             match op {
                 "append" => { do_list_op(og, &op, list, str, x, y) }
@@ -57,7 +59,14 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
             }
         }
 
-        else if let Some(List_(x)) = list.first() { do_list_op(og, &op, list.to_owned(), list.to_owned(), x, String_("".to_owned())) }
+        // Functions that require only one list
+        else if let Some(List_(x)) = list.first() {
+            match op {
+                // This is to return the value back to quotation_ops
+                "each" => { Stack{elements: x.to_owned()} }
+                _ => { do_list_op(og, &op, list.to_owned(), list.to_owned(), x.to_owned(), String_("".to_owned())) }
+            }
+        }
 
         // Ensures that both the list and the string / list2 is not empty
         else if op == "append" { print_error(ExpectedListOrString); og.pop(); og.to_owned() }
@@ -73,7 +82,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
         }
     }
 
-    else if c. is_list(){
+    else if c.is_list(){
         Stack{ elements: vec![c] }
     }
 
