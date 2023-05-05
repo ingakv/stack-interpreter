@@ -147,16 +147,13 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
 
             if let List_(elems) = list.to_owned() {
 
-                let mut list_copy = elems.clone();
+                let list_copy = elems.clone();
 
                 for i in &list_copy {
+
                     // Execute the code block
-
-                    if let Stack{elements: mut vec } = exec(Stack{elements: vec![i.to_owned()]}, block.to_owned()) {
-
-                        if let Some(item) = vec.pop() {
-                            new_stack.push(item);
-                        }
+                    if let Some(item) = exec(Stack{elements: vec![i.to_owned()]}, block.to_owned()).pop() {
+                        new_stack.push(item);
                     }
 
                 }

@@ -7,7 +7,7 @@ use std::io;
 use std::io::{Write};
 use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::error_handling::{print_error};
-use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
+use crate::quotation_ops::{do_quotation, quotation, QUOTATION_OPS};
 use crate::structs::{CodeDone, Stack, Type};
 use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 
@@ -79,58 +79,54 @@ pub fn repl() {
 
 pub fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
 
+    let og = stack.clone();
+    let mut pos = 0;
 
-    while stack.len() > 1 {
+    // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since i am unable to can anymore)
+    for i in og.elements {
 
-        let og = stack.clone();
-        let mut pos = 0;
-        let mut code_done = CodeDone { code_done: false, op_done: false };
+        let mut old_stack = stack.clone();
 
-        for i in og.elements {
-            if !stack.is_empty() {
-                let mut old_stack = stack.clone();
+        // Here the execution of the operation happens
+        let ans = check_operator(pos as i128, i.type_to_string().trim_matches('\"'), &mut stack);
 
-                let ans = check_operator(pos as i128, i.type_to_string().trim_matches('\"'), &mut stack);
-
-                stack = ans.0;
-                code_done = ans.1;
-
-
-                if !code_done.code_done && !code_done.op_done {
-                    pos = pos + 1;
-                }
-
-                // Reset if any operation has been done
-                else {
-
-                    let mut count = 0;
-
-                    old_stack.reverse();
+        stack = ans.0;
+        // This return code tells us if there was an operation done
+        let code_done = ans.1;
 
 
-                    // Combines the old and new stack
-                    if let Stack{elements: mut vec } = old_stack.to_owned() {
-                        loop {
-                            if let Some(elem) = vec.pop() {
-
-                                // Remove the first "pos" amount of elements in the old stack
-                                if count > pos { stack.push(elem); }
-
-                                count = count + 1;
-
-                            }
-                            else { break }
-                        }
-                    }
-
-                    break;
-
-                }
-
-            }
+        if !code_done.code_done && !code_done.op_done {
+            pos = pos + 1;
         }
 
+        // Go through the entire stack again if an operation was done, since a lot of the stack has now changed
+        else {
+
+            // Code block execution involves the quotation that follows the main operator, which needs to be removed
+            // i.e. '[1,2,3] each {print}': here 'each' is now the one being executed, but '{print}' also needs to be removed
+            let mut count = if code_done.code_done { -1 } else { 0 };
+
+            old_stack.reverse();
+
+            // Combines the old and new stack
+            loop {
+                if let Some(elem) = old_stack.pop() {
+
+                    // Remove the first "pos" amount of elements in the old stack
+                    if count > pos { stack.push(elem); }
+
+                    count = count + 1;
+
+                }
+                else { break }
+            }
+
+            // Execute the new stack
+            { return exec_stack(stack.to_owned()) }
+
+        }
     }
+
     stack.to_owned()
 }
 
