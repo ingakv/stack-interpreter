@@ -1,3 +1,5 @@
+use crate::mylib::{exec_stack, read_stack};
+use crate::structs::{Stack, Type};
 
 mod arithmetic_ops;
 mod list_ops;
@@ -7,10 +9,6 @@ mod string_ops;
 mod error_handling;
 mod structs;
 mod quotation_ops;
-
-use crate::mylib::{exec_stack, read_stack};
-use crate::structs::{Stack, Type};
-
 
 pub fn t(input: &str) -> String {
     // Warning: don't move this function to another module, as integration tests in
@@ -23,6 +21,8 @@ pub fn t(input: &str) -> String {
     // 3. transform the result to a string (tip: implement Display traits)
 
     let mut ans: Stack<Type> = read_stack(input.to_string(), Stack{ elements: vec![] });
+
+    ans.reverse();
 
     ans = exec_stack(ans);
 

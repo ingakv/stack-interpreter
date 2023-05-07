@@ -1,16 +1,15 @@
+use std::io;
+use std::io::Write;
 
-use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS};
+use crate::arithmetic_ops::{ARITHMETIC_OPS, find_arithmetic};
+use crate::error_handling::print_error;
+use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::list_ops::{find_list, list_op, LIST_OPS};
 use crate::logical_ops::{find_logical, LOGICAL_OPS};
-use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
-use std::io;
-use std::io::{Write};
-use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedQuotation, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
-use crate::error_handling::{print_error};
 use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
-use crate::structs::{CodeDone, Stack, Type};
+use crate::string_ops::{IO_OPS, parse_string, simple_io, stack_op, STACK_OPS, STRING_OPS};
+use crate::structs::{Stack, Type};
 use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
-
 
 pub fn normal() {
     let mut stack: Stack<Type> = Stack::new();
@@ -30,6 +29,7 @@ pub fn normal() {
             if stack.is_empty() { print_error(StackEmpty); }
             else {
 
+                // Execute the stack and print it out
                 stack = exec_stack(stack.to_owned());
 
                 if stack.len() > 1 {print_error(ProgramFinishedWithMultipleValues)}
@@ -79,52 +79,17 @@ pub fn repl() {
 
 pub fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
 
-    let og = stack.clone();
-    let mut pos = 0;
-
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since i am unable to can anymore)
-    for i in og.elements {
+    loop {
 
-        let mut old_stack = stack.clone();
+        let old_stack = stack.clone();
 
-        // Here the execution of the operation happens
-        let ans = check_operator(pos as i128, i.type_to_string().trim_matches('\"'), &mut stack);
-
-        stack = ans.0;
-        // This return code tells us if there was an operation done
-        let code_done = ans.1;
-
-
-        if !code_done.code_done && !code_done.op_done {
-            pos = pos + 1;
+        if let Some(last_el) = stack.last() {
+            // If there is a code block in the stack, execute it first
+            stack = check_operator(stack.has_code(), last_el.type_to_string().trim_matches('\"'), &mut stack);
         }
 
-        // Go through the entire stack again if an operation was done, since a lot of the stack has now changed
-        else {
-
-            // Code block execution involves the quotation that follows the main operator, which needs to be removed
-            // i.e. '[1,2,3] each {print}': here 'each' is now the one being executed, but '{print}' also needs to be removed
-            let mut count = if code_done.code_done { -1 } else { 0 };
-
-            old_stack.reverse();
-
-            // Combines the old and new stack
-            loop {
-                if let Some(elem) = old_stack.pop() {
-
-                    // Remove the first "pos" amount of elements in the old stack
-                    if count > pos { stack.push(elem); }
-
-                    count = count + 1;
-
-                }
-                else { break }
-            }
-
-            // Execute the new stack
-            return exec_stack(stack.to_owned())
-
-        }
+        if old_stack == stack { break }
     }
 
     stack.to_owned()
@@ -256,9 +221,7 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
 
 
-
         //////////////// Push to buffer /////////////////
-
 
         // If a block is currently being read, push it to the buffer
         else if is_block { bl_buf = push_to_vec(i, bl_buf.to_owned()); }
@@ -272,7 +235,6 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
 
         //////////////// Push to stack /////////////////
-
 
         else {
             match string_to_type(i) {
@@ -292,92 +254,104 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
 
 
-pub(crate) fn check_operator(pos: i128, c: &str, stack: &mut Stack<Type>) -> (Stack<Type>, CodeDone) {
+pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
-    let mut op_stack = stack.clone();
+    // If there is code, execute it first
+    return if has_code {
 
-    // Limit the part of the stack where the operations are done
-    while op_stack.len() as i128 > pos { op_stack.pop(); }
+        // Find and extract the code, list, and quotation operator into a separate stack
+        let block_stack = find_block(&mut stack.clone());
 
-    let mut done: CodeDone = CodeDone { code_done: false, op_done: true };
+        // Push the result of the code block to front of the regular stack
+        stack.reverse();
 
-    let new_stack =
-
-    // Ignores ""
-    if c == "" { stack.clone() }
-
-    else if c == "==" {
-
-        if stack.len() > 1 {
-            compare(&mut op_stack)
+        for el in do_quotation(block_stack.to_owned()).elements {
+            stack.push(el);
         }
 
-        else { print_error(ExpectedNumber); stack.to_owned() }
+        stack.reverse();
+
+        stack.replace_last_match(block_stack.elements, String_("".to_string()));
+
+        stack.to_owned()
 
     }
 
-
-    else if c == "length" {
-
-        if !stack.is_empty() {
-            length(&mut op_stack)
-        }
-
-        else { print_error(ExpectedListOrString); stack.to_owned() }
-
-    }
-
-    else if ARITHMETIC_OPS.contains(&c) {
-        op_stack.push(String_(c.to_string()));
-        let mut new = &mut op_stack.clone();
-
-        let mut new2 = new.clone();
-
-        find_arithmetic(&mut new, &mut new2)
-    }
-
-    else if LOGICAL_OPS.contains(&c) {
-        op_stack.push(String_(c.to_string()));
-        let mut new = &mut op_stack.clone();
-
-        let mut new2 = new.clone();
-
-        find_logical(&mut new, &mut new2)
-    }
-
-    else if STRING_OPS.contains(&c) { parse_string(c, &mut op_stack) }
-
-    else if LIST_OPS.contains(&c) {
-        op_stack.push(String_(c.to_string()));
-        let mut new = &mut op_stack.clone();
-
-        let mut new2 = new.clone();
-
-        find_list(&mut new, &mut new2)
-    }
-
-
-    else if STACK_OPS.contains(&c) { stack_op(c, &mut op_stack) }
-
-    else if IO_OPS.contains(&c) { simple_io(c, &mut op_stack) }
-
-    else if QUOTATION_OPS.contains(&c) {
-        done.code_done = true;
-
-        op_stack.push(String_(c.to_string()));
-
-        if let Some(Block_(x)) = find_block(stack, &mut stack.clone()).last() { op_stack.push(Block_(x.to_owned())); }
-
-
-        do_quotation(op_stack)
-    }
 
     else {
-        done.op_done = false;
-        stack.to_owned()
-    };
 
-    (new_stack, done)
+        // Remove the operator
+        stack.replace_last_match(vec![string_to_type(c)], String_("".to_string()));
+
+        let new_stack =
+
+            // Ignores ""
+            if c == "" { stack.clone() }
+
+            else if c == "==" {
+
+                if stack.len() > 1 {
+                    compare(stack)
+                }
+
+                else {
+                    print_error(ExpectedNumber);
+                    stack.to_owned()
+                }
+            }
+
+            else if c == "length" {
+                if !stack.is_empty() {
+                    length(stack)
+                }
+
+                else {
+                    print_error(ExpectedListOrString);
+                    stack.to_owned()
+                }
+            }
+
+            else if ARITHMETIC_OPS.contains(&c) {
+                stack.push(String_(c.to_string()));
+                let mut new = &mut stack.clone();
+
+                let mut new2 = new.clone();
+
+                find_arithmetic(&mut new, &mut new2, false)
+            }
+
+            else if LOGICAL_OPS.contains(&c) {
+                stack.push(String_(c.to_string()));
+                let mut new = &mut stack.clone();
+
+                let mut new2 = new.clone();
+
+                find_logical(&mut new, &mut new2, false)
+            }
+
+            else if STRING_OPS.contains(&c) { parse_string(c, stack) }
+
+            else if LIST_OPS.contains(&c) {
+                stack.push(String_(c.to_string()));
+                let mut new = &mut stack.clone();
+
+                let mut new2 = new.clone();
+
+                find_list(&mut new, &mut new2, false)
+            }
+
+            else if STACK_OPS.contains(&c) { stack_op(c, stack) }
+
+            else if IO_OPS.contains(&c) { simple_io(c, stack) }
+
+            else {
+                stack.push(string_to_type(c));
+                stack.to_owned()
+
+            };
+
+        new_stack
+    }
 
 }
 
@@ -525,8 +499,6 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
     // If it is a list
     if let List_(x) = elem.to_owned() {
 
-        og.remove_last_match(elem.to_owned());
-
         list_op(&mut og.to_owned(), "length", x, String_("".to_owned()))
 
     }
@@ -534,7 +506,7 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
     // If it is a code block
     else if is_block(vec![elem.to_owned()]) {
-        og.remove_last_match(elem.to_owned());
+        og.replace_last_match(vec![elem.to_owned()], String_("".to_string()));
         quotation(&mut og.to_owned(), "length", elem, List_(vec![]))
     }
 
@@ -547,8 +519,23 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 // By making this a separate function, several datatypes can be compared
 pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
-    let num1 = stack.pop().unwrap_or_else(|| String_("".to_string()));
-    let num2 = stack.pop().unwrap_or_else(|| String_("".to_string()));
+
+    let mut num1 = String_("".to_string());
+    let mut num2 = String_("".to_string());
+
+    let mut og = stack.clone();
+
+    // Set num1 and num2 to be the next 2 numbers in the stack
+    loop {
+        if let Some(Int_(x)) = og.pop() {
+
+            if let Int_(_) = num1.to_owned() { num2 = Int_(x); break }
+            else { num1 = Int_(x) }
+
+        }
+        else { break }
+    }
+
 
     let ans = if is_number(num1.type_to_string().as_str()) && is_number(num2.type_to_string().as_str()) {
 

@@ -225,6 +225,7 @@ mod test_stack_operations {
 
 mod test_length {
     use bprog::t;
+
     #[test]
     fn test_hello_length() {
         assert_eq!(t("\" hello \" length"), "5");
@@ -385,6 +386,7 @@ mod test_list_quotations {
 
 mod test_assignments {
     use bprog::t;
+
     #[test]
     fn test_variable_name() {
         assert_eq!(t("age"), "age");

@@ -5,13 +5,6 @@ use crate::mylib::{is_op, string_to_type};
 use crate::structs::Type::*;
 
 
-
-
-pub struct CodeDone {
-    pub code_done: bool,
-    pub op_done: bool,
-}
-
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
 
@@ -204,21 +197,34 @@ impl Stack<Type>{
 
 
     // Removes the last element of the stack that matches the one given
-    pub fn remove_last_match(&mut self, el: Type) -> Self {
+    pub fn replace_last_match(&mut self, mut remove: Vec<Type>, new: Type) -> Self {
 
-        // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
+        // Only pushes the new value if it isn't empty
+        let mut swap =
+            if new != String_("".to_string()) { self.reverse(); self.push(new.to_owned()); self.reverse(); true }
+            else { false };
 
-        self.reverse();
+        while !remove.is_empty() {
 
-        if let Some(str_ref) = self.elements.iter().position(|r| r == &el) {
-            self.elements.remove(str_ref);
+            // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
+            self.reverse();
+
+
+            if let Some(rem) = remove.pop() {
+                if let Some(str_ref) = self.elements.iter().position(|r| r == &rem) {
+
+                    // Swaps the first element in 'remove' with the new element
+                    if swap { self.elements.swap_remove(str_ref); swap = false; }
+                    else { self.elements.remove(str_ref); }
+
+                }
+            };
+
+            // Reverse it back
+            self.reverse();
         }
 
-        // Reverse it back
-        self.reverse();
-
         self.to_owned()
-
     }
 
 
@@ -232,6 +238,14 @@ impl Stack<Type>{
     }
 
 
+    pub fn has_code(&self) -> bool {
+        let mut ans = false;
+
+        for i in &self.elements {
+            if i.is_block() { ans = true }
+        }
+        ans
+    }
 
 
     pub fn stack_to_string(&self) -> String {

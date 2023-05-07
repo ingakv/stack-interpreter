@@ -1,5 +1,6 @@
-
-use crate::mylib::{check_operator, is_block, is_list, is_op, pop_front, string_to_type};
+use crate::error_handling::Error::ExpectedQuotation;
+use crate::error_handling::print_error;
+use crate::mylib::{check_operator, is_block, is_list, is_op, pop_front};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Block_, Int_, List_, String_};
 
@@ -22,7 +23,7 @@ pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
 
     let mut li_stack = stack.clone();
 
-    loop{
+    loop {
         if let Some(li) = li_stack.pop() {
             if is_block(vec![li.to_owned()]) { block = li}
             else if is_list(vec![li.to_owned()]) { list = li}
@@ -35,22 +36,24 @@ pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
 }
 
 
-pub(crate) fn find_block(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn find_block(stack: &mut Stack<Type>) -> Stack<Type> {
 
     // Remove top element and store it
-    let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
+    let c = stack.last().unwrap_or_else(|| String_("".to_string()));
 
     // Skips if the stack is empty
     if c == String_("".to_string()) {
+        print_error(ExpectedQuotation);
         Stack{ elements: vec![] }
     }
 
     else if is_block(vec![c.to_owned()]) {
-        Stack{ elements: vec![c] }
+        stack.to_owned()
     }
 
     else {
-        find_block(stack, og)
+        stack.pop();
+        find_block(stack)
     }
 }
 
@@ -115,7 +118,7 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
         // Checks whether at least one of the predicates are True or not
         "if" => { stack.to_owned() },
 
-        _ => panic!("An error occurred in quotation_ops!"),
+        _ => stack.to_owned(),
     };
 
     new_stack.to_owned()
@@ -125,11 +128,13 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
 
 
 
+// Execute a code block
 pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
 
     let mut old_block = block.clone();
 
     loop {
+        // Execute the code from the first element
         match pop_front(old_block.to_owned()) {
 
             (Some(x), rem) => {
@@ -137,11 +142,11 @@ pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
 
                 let st = x.type_to_string();
                 let op = st.trim_start_matches("\"").trim_end_matches("\"");
-                stack.push(string_to_type(op));
 
-                stack = check_operator((stack.len() - 1) as i128, op, &mut stack.to_owned()).0;
+                stack = check_operator(false, op, &mut stack.to_owned());
             }
 
+            // Loop through until the list is empty
             _ => {break}
         }
     }

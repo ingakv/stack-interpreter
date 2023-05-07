@@ -1,14 +1,12 @@
-
-use crate::error_handling::Error::{ExpectedVariable};
+use crate::error_handling::Error::ExpectedVariable;
 use crate::error_handling::print_error;
 use crate::mylib::{invert_number, is_number};
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, String_};
 
-
 pub(crate) const LOGICAL_OPS: [&str; 3] = ["&&", "||", "not"];
 
-pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>, skip: bool) -> Stack<Type> {
 
     // Remove top element and store it
     let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
@@ -24,19 +22,14 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
     }
 
     // Checks if it is an operator
-    else if LOGICAL_OPS.contains(&op) {
+    else if LOGICAL_OPS.contains(&op) && !skip {
         // Loops through and finds the next two literals
-        let num2 = find_logical(stack, og);
-        let num1 = find_logical(stack, og);
+        let num2 = find_logical(stack, og, true);
+        let num1 = find_logical(stack, og, true);
 
         let number = num2.first().unwrap();
 
         if let (Some(Bool_(x)), Some(Bool_(y))) = (num1.first(), num2.first()) {
-
-            // Ensures that if there are duplicates of the predicates, the ones removed are the ones in the back
-            og.remove_last_match(num1.first().unwrap());
-            og.remove_last_match(number);
-
             logical_op(og, &op, x, y)
         }
 
@@ -45,9 +38,6 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
             (is_number(number.type_to_string().as_str())
           || number.is_bool()) {
 
-
-            stack.remove_last_match(number.to_owned());
-
             let new_nr =
             if number.is_bool() { if number.type_to_bool() { Bool_(false) } else { Bool_(true) } }
             else { invert_number(number.type_to_string().as_str()) };
@@ -55,7 +45,7 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
 
             // Removes the operator and adds the new variable
             stack.pop();
-            stack.push(new_nr);
+            stack.replace_last_match(vec![number.to_owned()], new_nr);
             stack.to_owned()
 
         }
@@ -75,7 +65,7 @@ pub(crate) fn find_logical(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Sta
     }
 
     else {
-        find_logical(stack, og)
+        find_logical(stack, og, true)
     }
 }
 
@@ -97,10 +87,10 @@ pub fn logical_op(stack: &mut Stack<Type>, c: &str, x: bool, y: bool) -> Stack<T
     };
 
 
-
     // Removes the operator and adds the new variable
     stack.pop();
-    stack.push(Bool_(new));
+
+    stack.replace_last_match(vec![Bool_(x), Bool_(y)], Bool_(new));
 
     // Return the stack
     stack.to_owned()

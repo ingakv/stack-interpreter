@@ -1,5 +1,4 @@
-
-use crate::error_handling::{print_error};
+use crate::error_handling::print_error;
 use crate::error_handling::Error::{DivisionByZero, ExpectedNumber};
 use crate::mylib::{is_float, is_number};
 use crate::structs::{Stack, Type};
@@ -8,7 +7,7 @@ use crate::structs::Type::{Bool_, Float_, Int_, String_};
 pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">"];
 
 
-pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>, skip: bool) -> Stack<Type> {
 
     // Remove top element and store it
     let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
@@ -22,10 +21,10 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> 
     }
 
     // Checks if it is an operator
-    else if ARITHMETIC_OPS.contains(&op) {
+    else if ARITHMETIC_OPS.contains(&op) && !skip {
         // Loops through and finds the next two numbers
-        let num2 = find_arithmetic(stack, og);
-        let num1 = find_arithmetic(stack, og);
+        let num2 = find_arithmetic(stack, og, true);
+        let num1 = find_arithmetic(stack, og, true);
 
         if let (Some(x), Some(y)) = (num1.first(), num2.first()) {
             arithmetic(og, &op, x, y)
@@ -47,7 +46,7 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> 
     }
 
     else {
-        find_arithmetic(stack, og)
+        find_arithmetic(stack, og, true)
     }
 }
 
@@ -107,14 +106,11 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
     };
 
 
-    // Remove the original numbers
-    stack.remove_last_match(x.to_owned());
-    stack.remove_last_match(y.to_owned());
-
-
     // Removes the operator and adds the new variable
     stack.pop();
-    if new_el != String_("".to_string()) { stack.push(new_el); }
+
+    // Remove the original numbers or replaces them with the new element
+    stack.replace_last_match(vec![x.to_owned(),y.to_owned()], new_el);
 
     stack.to_owned()
 }

@@ -1,6 +1,6 @@
+use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
-use crate::error_handling::{print_error};
-use crate::string_ops::{find_string};
+use crate::string_ops::find_string;
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, Int_, List_, String_};
 
@@ -15,7 +15,7 @@ pub(crate) const LIST_OPS: [&str; 5] = [
 
 
 
-pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>, skip: bool) -> Stack<Type> {
 
     let c = stack.elements.pop().unwrap_or_else(|| String_("".to_string()));
 
@@ -28,38 +28,42 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
     }
 
     // Checks if it is a list
-    else if LIST_OPS.contains(&op) {
+    else if LIST_OPS.contains(&op) && !skip {
         // Loops through and finds the next lists
-        let list = find_list(stack, og);
-        let list2 = find_list(stack, og);
+        let list = find_list(stack, og, true);
+        let list2 = find_list(stack, og, true);
 
         // Loops through and finds the next non-list (AKA string)
         let mut new_li = og.clone();
         new_li.elements.pop();
         let str = find_string(&mut new_li);
 
-        // Functions with two lists
-        if let (Some(List_(x)), Some(y)) = (list.first(), list2.first()) {
-            match op {
-                "append" | "cons" => { do_list_op(og, &op, list, list2, x, y) }
-                _ => { do_list_op(og, &op, list.to_owned(), list2.to_owned(), x, String_("".to_owned())) }
-            }
-        }
 
-        // Functions with a list and a string
-        else if let (Some(List_(x)), Some(y)) = (list.first(), str.first()) {
-            match op {
-                "append" => { do_list_op(og, &op, list, str, x, y) }
-                _ => { do_list_op(og, &op, list.to_owned(), str.to_owned(), x, y) }
-            }
-        }
+        if let Some(List_(x)) = list.first() {
 
-        // Functions that require only one list
-        else if let Some(List_(x)) = list.first() {
-            match op {
-                // This is to return the value back to quotation_ops
-                "each" => { Stack{elements: x.to_owned()} }
-                _ => { do_list_op(og, &op, list.to_owned(), list.to_owned(), x.to_owned(), String_("".to_owned())) }
+            // Functions with two lists
+            if let Some(y) = list2.first() {
+                match op {
+                    "append" | "cons" => { list_op(og, &op, x, y) }
+                    _ => { list_op(og, &op, x, String_("".to_owned())) }
+                }
+            }
+
+            // Functions with a list and a string
+            else if let Some(y) = str.first() {
+                match op {
+                    "append" => { list_op(og, &op, x, y) }
+                    _ => { list_op(og, &op, x, y) }
+                }
+            }
+
+            // Functions that require only one list
+            else {
+                match op {
+                    // This is to return the value back to quotation_ops
+                    "each" => { Stack { elements: x.to_owned() } }
+                    _ => { list_op(og, &op, x.to_owned(), String_("".to_owned())) }
+                }
             }
         }
 
@@ -82,18 +86,8 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>) -> Stack<
     }
 
     else {
-        find_list(stack, og)
+        find_list(stack, og, true)
     }
-}
-
-fn do_list_op(stack: &mut Stack<Type>, c: &str, list: Stack<Type>, list2: Stack<Type>, li: Vec<Type>, el: Type) -> Stack<Type> {
-
-    let mut len = list_op(stack, c, li, el);
-
-    len.remove_last_match(list.first().unwrap().to_owned());
-    len.remove_last_match(list2.first().unwrap().to_owned());
-
-    len
 }
 
 
@@ -107,36 +101,38 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
         else { String_("".to_owned()) };
 
 
-    match c {
+
+    let new_el = match c {
+
         // Returns the first item of the list
-        "head" => { stack.push(head) },
+        "head" => { head },
 
         // Returns the last item of the list
         "tail" => {
             let mut new_li = vec![];
-            for i in li {
+            for i in li.to_owned() {
                 if i != head {new_li.push(i)}
             }
-            stack.push(List_(new_li));
+            List_(new_li)
         },
 
         // Returns whether or not the list is empty
-        "empty" => stack.push(Bool_(li.is_empty())),
+        "empty" => Bool_(li.is_empty()),
 
         // Returns the length of the list
-        "length" => stack.push(Int_(li.len() as i128)),
+        "length" => Int_(li.len() as i128),
 
 
         // Inserts the string onto the front of the list
         "append" => {
 
-            let mut list = vec![el];
+            let mut list = vec![el.to_owned()];
 
-            for i in li {
+            for i in li.to_owned() {
                 list.push(i);
             }
 
-            stack.push(List_(list));
+            List_(list)
         }
 
 
@@ -146,9 +142,9 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
             // Return the other list if one of them is empty
             if li.is_empty() {
 
-                match el {
-                    List_(i) => { stack.push(List_(i)); }
-                    _ => { stack.push(List_(vec![el])); }
+                match el.to_owned() {
+                    List_(i) => { List_(i) }
+                    _ => { List_(vec![el.to_owned()]) }
                 }
             }
 
@@ -156,16 +152,16 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
 
                 let mut list = vec![];
 
-                match el {
+                match el.to_owned() {
                     List_(i) => { list = i }
                     _ => { print_error(ExpectedList) }
                 }
 
-                for i in li {
+                for i in li.to_owned(){
                     if !list.contains(&i) { list.push(i); }
                 }
 
-                stack.push(List_(list));
+                List_(list)
 
             }
         }
@@ -173,6 +169,11 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
         _ => panic!("An error occurred in list_ops!"),
     };
 
+    let mut rem = li.clone();
+    rem.push(el.to_owned());
+
+    // Remove the original numbers or replaces them with the new element
+    stack.replace_last_match(vec![List_(li), el], new_el);
 
     // Return the stack
     stack.to_owned()

@@ -11,11 +11,17 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Fix: Fixed bugs related to exec_stack and code blocks">
+    <list default="true" id="82a80218-a945-4f43-b9ef-8f309e84a50a" name="Changes" comment="Test: Code now passes all the relevant tests">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/arithmetic_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/arithmetic_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/list_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/list_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/logical_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/logical_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/mylib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/mylib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/quotation_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/quotation_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/string_ops.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/string_ops.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/structs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/structs.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tests.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -120,7 +126,7 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Facets&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15722656&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
     &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
@@ -139,7 +145,7 @@
       <recent name="C:\Users\ingak\Desktop\Programmering\prog shit\Assignment2_prog" />
     </key>
   </component>
-  <component name="RunManager" selected="Cargo.Test tests">
+  <component name="RunManager" selected="Cargo.Test test_comparison">
     <configuration name="Run NORMAL" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="run" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$/src" />
@@ -159,6 +165,74 @@
     </configuration>
     <configuration name="Run REPL" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="command" value="run -- REPL " />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test test_comparison" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package bprog --test tests test_comparison" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test test_lists" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package bprog --test tests test_lists" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test test_stack_operations" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package bprog --test tests test_stack_operations" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <option name="emulateTerminal" value="false" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <envs />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test test_stack_operations::test_dup_swap_pop" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="command" value="test --package bprog --test tests test_stack_operations::test_dup_swap_pop -- --exact" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <option name="emulateTerminal" value="false" />
       <option name="channel" value="DEFAULT" />
@@ -195,7 +269,19 @@
       <item itemvalue="Cargo.Run REPL" />
       <item itemvalue="Cargo.Run NORMAL" />
       <item itemvalue="Cargo.Test tests" />
+      <item itemvalue="Cargo.Test test_lists" />
+      <item itemvalue="Cargo.Test test_stack_operations" />
+      <item itemvalue="Cargo.Test test_stack_operations::test_dup_swap_pop" />
+      <item itemvalue="Cargo.Test test_comparison" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.Test test_stack_operations::test_dup_swap_pop" />
+        <item itemvalue="Cargo.Test test_comparison" />
+        <item itemvalue="Cargo.Test test_lists" />
+        <item itemvalue="Cargo.Test test_stack_operations" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -250,7 +336,11 @@
       <workItem from="1683243615015" duration="28555000" />
       <workItem from="1683315910321" duration="352000" />
       <workItem from="1683316275853" duration="381000" />
-      <workItem from="1683316664178" duration="11557000" />
+      <workItem from="1683316664178" duration="11674000" />
+      <workItem from="1683381489777" duration="4000" />
+      <workItem from="1683465986994" duration="954000" />
+      <workItem from="1683466956615" duration="23000" />
+      <workItem from="1683466987553" duration="20446000" />
     </task>
     <task id="LOCAL−00001" summary="Feat: Program can loop through the arithmetics several times">
       <created>1681152743726</created>
@@ -494,7 +584,13 @@
       <option name="presentableId" value="LOCAL−00040" />
       <updated>1683325269194</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL−00041" summary="Test: Code now passes all the relevant tests">
+      <created>1683328414838</created>
+      <option name="number" value="LOCAL−00041" />
+      <option name="presentableId" value="LOCAL−00041" />
+      <updated>1683328414838</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -524,7 +620,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Feature: Implemented all logical operations except for &quot;not&quot;" />
     <MESSAGE value="Feature: Strings that contains several words can now be recognised as sentences, and not individual words" />
     <MESSAGE value="Feature: Lists and sublists are now recognized" />
     <MESSAGE value="Feature: Literals are done" />
@@ -549,7 +644,8 @@
     <MESSAGE value="Feat: Implemented the each function (i could cry)" />
     <MESSAGE value="Fix: At least partially working" />
     <MESSAGE value="Fix: Fixed bugs related to exec_stack and code blocks" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix: Fixed bugs related to exec_stack and code blocks" />
+    <MESSAGE value="Test: Code now passes all the relevant tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="Test: Code now passes all the relevant tests" />
   </component>
   <component name="VgoProject">
     <integration-enabled>false</integration-enabled>
@@ -559,79 +655,54 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>26</line>
-          <option name="timeStamp" value="139" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/string_ops.rs</url>
           <line>59</line>
           <option name="timeStamp" value="152" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>518</line>
+          <line>492</line>
           <option name="timeStamp" value="157" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>123</line>
-          <option name="timeStamp" value="256" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>89</line>
-          <option name="timeStamp" value="265" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>59</line>
-          <option name="timeStamp" value="270" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>15</line>
-          <option name="timeStamp" value="271" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>370</line>
-          <option name="timeStamp" value="277" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>28</line>
-          <option name="timeStamp" value="278" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
-          <line>128</line>
-          <option name="timeStamp" value="281" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
-          <line>295</line>
-          <option name="timeStamp" value="282" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/string_ops.rs</url>
-          <line>13</line>
-          <option name="timeStamp" value="283" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>31</line>
-          <option name="timeStamp" value="285" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>131</line>
-          <option name="timeStamp" value="287" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
-          <line>100</line>
+          <line>94</line>
           <option name="timeStamp" value="289" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
+          <line>40</line>
+          <option name="timeStamp" value="308" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/list_ops.rs</url>
+          <line>18</line>
+          <option name="timeStamp" value="315" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/quotation_ops.rs</url>
+          <line>17</line>
+          <option name="timeStamp" value="332" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
+          <line>520</line>
+          <option name="timeStamp" value="333" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/arithmetic_ops.rs</url>
+          <line>57</line>
+          <option name="timeStamp" value="338" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/mylib.rs</url>
+          <line>315</line>
+          <option name="timeStamp" value="339" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/arithmetic_ops.rs</url>
+          <line>10</line>
+          <option name="timeStamp" value="340" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
