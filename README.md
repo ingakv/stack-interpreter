@@ -1,5 +1,14 @@
 # BPROG Assignment 2
 
+This is an interpreter that can do simple math, io, parsing, and simple code blocks. I wrote this in Rust.
+
+Currently I have Ints, Floats, Bools, Strings, Lists, and Code blocks as separate file types. It also has the ability to execute code for a list with the each function.
+
+However, this version does not pass the majority of the tests. This is due to an issue concerning the order of which the variables or operations are executed.
+
+The previous version with less functionality is commit 2d53a09e53b97eb99820a3f1148bf8b8e7d9efd9
+
+
 ## Usage
 
 **To run normal mode:**
