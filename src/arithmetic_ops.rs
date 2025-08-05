@@ -1,15 +1,17 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{DivisionByZero, ExpectedNumber};
 use crate::mylib::{is_float, is_number};
-use crate::structs::{Stack, Type};
 use crate::structs::Type::{Bool_, Float_, Int_, String_};
+use crate::structs::{Stack, Type};
 
 pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">"];
 
-
-pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>, skip: bool) -> Stack<Type> {
-
-    // Remove top element and store it
+pub(crate) fn find_arithmetic(
+    stack: &mut Stack<Type>,
+    og: &mut Stack<Type>,
+    skip: bool,
+) -> Stack<Type> {
+    // Remove the top element and store it
     let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
 
     let st = c.type_to_string();
@@ -17,9 +19,8 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>, ski
 
     // Skips if the stack is empty
     if c == String_("".to_string()) {
-        Stack{ elements: vec![] }
+        Stack { elements: vec![] }
     }
-
     // Checks if it is an operator
     else if ARITHMETIC_OPS.contains(&op) && !skip {
         // Loops through and finds the next two numbers
@@ -29,7 +30,6 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>, ski
         if let (Some(x), Some(y)) = (num1.first(), num2.first()) {
             arithmetic(og, &op, x, y)
         }
-
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
         else {
@@ -37,22 +37,14 @@ pub(crate) fn find_arithmetic(stack: &mut Stack<Type>, og: &mut Stack<Type>, ski
             og.pop();
             og.to_owned()
         }
-
-    }
-
-
-    else if is_number(op) {
-        Stack{ elements: vec![c] }
-    }
-
-    else {
+    } else if is_number(op) {
+        Stack { elements: vec![c] }
+    } else {
         find_arithmetic(stack, og, true)
     }
 }
 
-
 fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type> {
-
     // Float is set as the default value to do calculations
     let v1 = x.type_to_float();
     let v2 = y.type_to_float();
@@ -61,18 +53,34 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
 
     let is_float = is_float(x.type_to_string().as_str()) || is_float(y.type_to_string().as_str());
 
-
     // Calculates the answers to the arithmetic operations
     let new_el = match c {
-
         // Addition
-        "+" => if is_float {Float_(v1 + v2)} else { Int_((v1 as i128) + (v2 as i128)) },
+        "+" => {
+            if is_float {
+                Float_(v1 + v2)
+            } else {
+                Int_((v1 as i128) + (v2 as i128))
+            }
+        }
 
         // Subtraction
-        "-" => if is_float {Float_(v1 - v2)} else { Int_((v1 as i128) - (v2 as i128)) },
+        "-" => {
+            if is_float {
+                Float_(v1 - v2)
+            } else {
+                Int_((v1 as i128) - (v2 as i128))
+            }
+        }
 
         // Multiplication
-        "*" => if is_float {Float_(v1 * v2)} else { Int_((v1 as i128) * (v2 as i128)) },
+        "*" => {
+            if is_float {
+                Float_(v1 * v2)
+            } else {
+                Int_((v1 as i128) * (v2 as i128))
+            }
+        }
 
         // Floating point division
         "/" => {
@@ -81,9 +89,10 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
                 stack.push(x.to_owned());
                 stack.push(y.to_owned());
                 String_("".to_string())
+            } else {
+                Float_(v1 / v2)
             }
-            else { Float_(v1 / v2) }
-        },
+        }
 
         // Integer division
         "div" => {
@@ -92,25 +101,37 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
                 stack.push(x.to_owned());
                 stack.push(y.to_owned());
                 String_("".to_string())
+            } else {
+                Int_(a / b)
             }
-            else { Int_(a / b) }
-        },
+        }
 
         // Smaller than
-        "<" => if v1 < v2 { Bool_(true) } else { Bool_(false) },
+        "<" => {
+            if v1 < v2 {
+                Bool_(true)
+            } else {
+                Bool_(false)
+            }
+        }
 
         // Bigger than
-        ">" => if v1 > v2 { Bool_(true) } else { Bool_(false) },
+        ">" => {
+            if v1 > v2 {
+                Bool_(true)
+            } else {
+                Bool_(false)
+            }
+        }
 
         _ => panic!("An error occurred in arithmetic_ops!"),
     };
-
 
     // Removes the operator and adds the new variable
     stack.pop();
 
     // Remove the original numbers or replaces them with the new element
-    stack.replace_last_match(vec![x.to_owned(),y.to_owned()], new_el);
+    stack.replace_last_match(vec![x.to_owned(), y.to_owned()], new_el);
 
     stack.to_owned()
 }

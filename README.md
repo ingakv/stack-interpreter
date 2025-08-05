@@ -58,7 +58,7 @@ The print function does not remove the element being printed from the list. All 
 
   * List operations (head, tail, empty, length, cons, append, each quotation, map quotation, foldl quotation)
 
-  * Control flow ( if, then, else, loop, times, break, block)
+  * Control flow (if, then, else, loop, times, break, block)
   * Assigning variables
 
 * The program should handle errors and print them to help user understand what went wrong
@@ -106,20 +106,6 @@ The print function does not remove the element being printed from the list. All 
 
 
 
-## Assessment Specification
-
-- How much of the assignment specification is implemented
-- Does it pass the tests?
-- Does normal mode and REPL mode work as specified?
-- Is the readme well written?
-- Are the files organized?
-- Does the program print useful errors to the user?
-- Are the commit messages descriptive
-
-
-
-
-
 ## Self Assessment
 
 
@@ -129,10 +115,3 @@ I have implemented a lot of the features except for those related to code blocks
 This iteration of the program passes 58 of the 104 tests that were a part of the original repository. All the tests that are failed contain code blocks, which I have not yet implemented. So all the tests related to features I have implemented passed.
 
 REPL mode works as specified, with the stack being updated and printed for each time the user presses `enter`. Normal mode also works as specified, if I understood it correctly. I interpreted it as the user writes several input lines, but unlike REPL mode, the stack is not printed each time `enter` is pressed. Instead, when the user writes `:q`, the stack is executed and returns the answer. The reason for not executing the stack when `ctrl + d` is pressed, is because it was easier to debug it using another input. I am also under the assumption that if there were more than one element left in the stack when `:q` is pressed, that the program was supposed to panic and display an error message. I rather made my program work the same way regardless of how many items are on the stack. With the exception of printing a message to the user that there are still items in the stack, as well as printing out said items, in the case of the stack having more than one item. TLDR: the answer is still printed, since it's annoying for the user to type all of it again :cowboy_hat_face:
-
-In my opinion, I think my readme is informative enough and up to standard.
-
-I also think my file structure is done well
-
-And I know the commit messages are proper. Less fun, but easier to navigate I guess :unamused:
-

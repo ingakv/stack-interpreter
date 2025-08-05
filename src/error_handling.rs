@@ -18,41 +18,38 @@ pub(crate) enum Error {
     IncompleteQuotation,
 }
 
-
 pub(crate) fn print_error(err: Error) {
+    let error_message = match err {
+        StackEmpty => "Stack is empty",
 
-    match err {
+        ExpectedBool => "Expected a bool",
 
-        StackEmpty => print!("\n\tError: Stack is empty!\n\n"),
+        ExpectedNumber => "Expected a number",
 
-        ExpectedBool => print!("\n\tError: Expected a bool!\n\n"),
+        ExpectedString => "Expected a string",
 
-        ExpectedNumber => print!("\n\tError: Expected a number!\n\n"),
+        ExpectedListOrString => "Expected a list or a string",
 
-        ExpectedString => print!("\n\tError: Expected a string!\n\n"),
+        ExpectedQuotation => "Expected a quotation",
 
-        ExpectedListOrString => print!("\n\tError: Expected a list or a string!\n\n"),
+        ExpectedList => "Expected a list",
 
-        ExpectedQuotation => print!("\n\tError: Expected a quotation!\n\n"),
+        ExpectedVariable => "Expected a variable",
 
-        ExpectedList => print!("\n\tError: Expected a list!\n\n"),
+        DivisionByZero => "Can't divide by 0",
 
-        ExpectedVariable => print!("\n\tError: Expected a variable!\n\n"),
+        ProgramFinishedWithMultipleValues => "Program finished with multiple values",
 
-        DivisionByZero => print!("\n\tError: Can't divide by 0!\n\n"),
+        NumberConversionError => "String couldnt be converted to a number",
 
-        ProgramFinishedWithMultipleValues => print!("\n\tError: Program finished with multiple values!\n\n"),
+        IncompleteString => {
+            "Incomplete string\n\t\t   Should be written in this format: \" stringtext \""
+        }
 
-        NumberConversionError => print!("\n\tError: String couldnt be converted to a number!\n\n"),
+        IncompleteList => "Incomplete list",
 
-        IncompleteString => print!("\n\tError: Incomplete string!\n\n"),
-
-        IncompleteList => print!("\n\tError: Incomplete list!\n\n"),
-
-        IncompleteQuotation => print!("\n\tError: Incomplete quotation!\n\n"),
-
-//        _ => print!("\n\tError: Syntax error, try again!\n\n"),
-    }
+        IncompleteQuotation => "Incomplete quotation",
+        //        _ => "Syntax error, try again",
+    };
+    print!("\n\tError: {error_message}!\n\n");
 }
-
-

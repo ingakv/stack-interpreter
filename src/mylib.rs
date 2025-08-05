@@ -3,7 +3,7 @@ use std::io::Write;
 
 use crate::arithmetic_ops::{ARITHMETIC_OPS, find_arithmetic};
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty};
+use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty, IncompleteString, IncompleteList, IncompleteQuotation};
 use crate::list_ops::{find_list, list_op, LIST_OPS};
 use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
@@ -79,7 +79,7 @@ pub fn repl() {
 
 pub fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
 
-    // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since i am unable to can anymore)
+    // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
     loop {
 
         let old_stack = stack.clone();
@@ -119,38 +119,50 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
         //////////////// String /////////////////
 
-        // If it is the start or the end of a string
-        if i.contains('"') {
-            // If it is the end of the string
-            if is_str {
-                // Remove the last whitespace
+        // Remove quotes or whitespace
+        let elem =  i.trim().trim_matches(|c| c == ' ' || c == '"');
+        
+        // If it is the end of the string
+        if (i.trim().starts_with('"') || i.trim().ends_with('"')) && is_str {
+
+
+            // Remove the last whitespace
+            if str_buf.last().unwrap().trim().is_empty() {
                 str_buf.pop();
+            }
+            
+            if !elem.is_empty() { str_buf.push(elem); }
 
-
-                // If we are in a list, copy the new list over
-                if is_list {
-                    li_buf.push(String_(str_buf.concat()));
-                }
-
-                // Join the vector together to form a sentence / string, and send it to the stack
-                else { stack.push(String_(str_buf.concat().to_string())) }
-
-                // Reset the buffer so that a potential new string can be read
-                str_buf.clear();
-
+            // If we are in a list, copy the new list over
+            if is_list {
+                li_buf.push(String_(str_buf.concat()));
             }
 
-            // Flip the boolean
-            is_str = !is_str;
+            // Join the vector together to form a sentence / string and send it to the stack
+            else { stack.push(String_(str_buf.concat().to_string())) }
+
+            // Reset the buffer so that a potential new string can be read
+            str_buf.clear();
+            
+            is_str = false;
+
         }
-
-
 
         // If a string is currently being read, push it to the buffer, with a whitespace after
-        else if is_str {
-            str_buf.push(i);
-            str_buf.push(" ");
+        else if i.trim().starts_with('"') || is_str {
+            
+            // Push the element to the buffer
+            if !elem.is_empty() {
+                str_buf.push(elem);
+
+                // Add a whitespace between elements / words
+                str_buf.push(" ");
+            }
+
+            is_str = true;
+
         }
+            
 
 
         //////////////// List /////////////////
@@ -173,7 +185,7 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
             // If the list is a sublist, continue reading it
             if !is_sublist {
 
-                // Join the vector together to form a list, and send it to the stack
+                // Join the vector together to form a list and send it to the stack
                 stack.push(List_(li_buf.to_owned()));
 
                 is_list = false;
@@ -246,6 +258,17 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
             };
         }
     }
+    
+    
+    if is_str {
+        print_error(IncompleteString);
+    }
+    if is_block {
+        print_error(IncompleteQuotation);
+    }
+    if is_list || is_sublist {
+        print_error(IncompleteList);
+    }
 
     stack.to_owned()
 
@@ -257,12 +280,12 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
     // If there is code, execute it first
-    return if has_code {
+    if has_code {
 
         // Find and extract the code, list, and quotation operator into a separate stack
         let block_stack = find_block(&mut stack.clone());
 
-        // Push the result of the code block to front of the regular stack
+        // Push the result of the code block to the front of the regular stack
         stack.reverse();
 
         for el in do_quotation(block_stack.to_owned()).elements {
@@ -357,7 +380,7 @@ pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -
 
 
 
-// Pattern match the types to push to vector
+// Pattern matches the types to push to vector
 pub(crate) fn push_to_vec(i: &str, mut stack: Vec<Type>) -> Vec<Type> {
     match string_to_type(i) {
         Int_(i) => stack.push(Int_(i.to_owned())),
@@ -403,13 +426,15 @@ pub(crate) fn get_line() -> String {
 
 
 pub(crate) fn is_literal(el: &str) -> bool {
-    return el == "True" || el == "False"
+    el == "True" || el == "False"
 }
 
-// Checks whether or not the variable is a valid number
+// Checks whether the variable is a valid number
 // Returns true for both ints and floats
 pub(crate) fn is_number(el: &str) -> bool {
-    let mut is_num = true;
+    
+    // Prevents error when checking empty strings
+    let mut is_num = !el.is_empty();
 
     let st: String =  el.split_terminator('.').collect();
 
@@ -419,19 +444,19 @@ pub(crate) fn is_number(el: &str) -> bool {
     is_num
 }
 
-// Checks whether or not the variable is a float
+// Checks whether the variable is a float
 pub(crate) fn is_float(el: &str) -> bool {
     is_number(el) && el.contains('.')
 }
 
 
-// Checks whether or not the variable is a quotation
+// Checks whether the variable is a quotation
 pub(crate) fn is_block(el: Vec<Type>) -> bool {
     for i in el { if !i.is_block() {return false} }
     true
 }
 
-// Checks whether or not the variable is a list
+// Checks whether the variable is a list
 pub(crate) fn is_list(el: Vec<Type>) -> bool {
     for i in el { if !i.is_list() {return false} }
     true
@@ -539,7 +564,7 @@ pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
     let ans = if is_number(num1.type_to_string().as_str()) && is_number(num2.type_to_string().as_str()) {
 
-        // This ensures that ie 10.0 and 10 is considered as equal
+        // This ensures that i.e., 10.0 and 10 are considered as equal
         let v1: f64 = num1.type_to_float();
         let v2: f64 = num2.type_to_float();
 

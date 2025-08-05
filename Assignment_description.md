@@ -1,20 +1,6 @@
-# prog2006-assignment-2
-
-* Submission Deadline: **27.04.2023 - 23:59**
-* Peer-review Deadline: **01.05.2023 - 23:59**
-* Submission must be done through [the submission system](https://10.212.175.82)
-   - https://10.212.175.82
-   - Hash: `cg49jme8eh9dbc0db0sg`
-* Programming language: Rust or Haskell 
-
-
-
 # **bprog** :: simple concatenative, stack-based interpreter
 
-**Note** - the specification below might be unclear or may need amendments. Use Issue tracker to post questions, clarification requests, or modification suggestions.
-
 * [Assignment walkthrough video](https://youtu.be/Dw0dWN3yehM)
-* Check Lecture from February 27, 2023.
 * Check `haskell/rpn-calc` project for basics for parsing and using stack to represent your program state.
 * check `haskell/fib-state` project for basics of how to incorporate State monad into your program.
 

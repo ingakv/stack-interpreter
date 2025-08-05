@@ -1,8 +1,8 @@
-use crate::error_handling::Error::{ExpectedList, ExpectedString};
 use crate::error_handling::print_error;
+use crate::error_handling::Error::{ExpectedList, ExpectedString};
 use crate::mylib::{get_line, is_number, is_op, string_to_type};
-use crate::structs::{Stack, Type};
 use crate::structs::Type::{Float_, Int_, List_, String_};
+use crate::structs::{Stack, Type};
 
 pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
 
@@ -11,25 +11,28 @@ pub(crate) const IO_OPS: [&str; 2] = ["print", "read"];
 pub(crate) const STRING_OPS: [&str; 3] = ["parseInteger", "parseFloat", "words"];
 
 pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
-
     match elem {
         // Converts a string to an integer
         "parseInteger" => {
-            if let Some(str_ref) = stack.pop() { stack.push(Int_(str_ref.type_to_int()))}
-            else { print_error(ExpectedString) }
+            if let Some(str_ref) = stack.pop() {
+                stack.push(Int_(str_ref.type_to_int()))
+            } else {
+                print_error(ExpectedString)
+            }
         }
 
         // Converts a string to a float
         "parseFloat" => {
-            if let Some(str_ref) = stack.pop() { stack.push(Float_(str_ref.type_to_float()))}
-            else { print_error(ExpectedString) }
+            if let Some(str_ref) = stack.pop() {
+                stack.push(Float_(str_ref.type_to_float()))
+            } else {
+                print_error(ExpectedString)
+            }
         }
 
-        // Divides the string into words, and puts them in a list
+        // Divides the string into words and puts them in a list
         "words" => {
-
             if let Some(String_(str_ref)) = stack.pop() {
-
                 let str_val: Vec<&str> = str_ref.split_whitespace().collect();
 
                 let mut new_li = vec![];
@@ -39,8 +42,9 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
                 }
 
                 stack.push(List_(new_li));
+            } else {
+                print_error(ExpectedString)
             }
-            else { print_error(ExpectedString) }
         }
 
         // Returns the length of the string
@@ -60,26 +64,28 @@ pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
     match elem {
         // dup duplicates the top element
         "dup" => {
-            if let Some(str_ref) = stack.last() { stack.push(str_ref)}
-            else { print_error(ExpectedString) }
+            if let Some(str_ref) = stack.last() {
+                stack.push(str_ref)
+            } else {
+                print_error(ExpectedString)
+            }
         }
-
 
         // swap swaps the top two elements
         "swap" => {
-
             let len = stack.len();
 
             if len > 1 {
                 stack.swap((len - 2).try_into().unwrap(), (len - 1).try_into().unwrap());
+            } else {
+                print_error(ExpectedList)
             }
-            else { print_error(ExpectedList) }
-
-
         }
 
         // pop removes the top element
-        "pop" => { stack.pop(); }
+        "pop" => {
+            stack.pop();
+        }
 
         _ => {}
     }
@@ -89,18 +95,21 @@ pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 }
 
 pub(crate) fn simple_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
-
     match elem {
         // Prints the top element to standard output
         "print" => {
+            if let Some(str_ref) = stack.pop() {
+                str_ref.print()
+            } else {
+                print_error(ExpectedString)
+            }
+        }
 
-            if let Some(str_ref) = stack.pop() {str_ref.print()}
-            else { print_error(ExpectedString) }
-        },
-
-
-        // Reads an input, and adds it to the stack
-        "read" => { let input = get_line(); stack.push(string_to_type(input.as_str())); },
+        // Reads an input and adds it to the stack
+        "read" => {
+            let input = get_line();
+            stack.push(string_to_type(input.as_str()));
+        }
 
         _ => {}
     }
@@ -110,22 +119,22 @@ pub(crate) fn simple_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 }
 
 pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
-
-    let c = if stack.is_empty() { String_("".to_string()) }
-
-    // Remove top element and store it
-    else { stack.pop().unwrap_or_else(|| String_("".to_string())) };
+    let c = if stack.is_empty() {
+        String_("".to_string())
+    }
+    // Remove the top element and store it
+    else {
+        stack.pop().unwrap_or_else(|| String_("".to_string()))
+    };
 
     // Skips if the stack is empty
     if c == String_("".to_string()) {
-        Stack{ elements: vec![] }
-    }
-
-    else if !is_op(c.type_to_string().as_str()) && (c.is_string() || is_number(c.type_to_string().as_str())) {
-        Stack{ elements: vec![c] }
-    }
-
-    else {
+        Stack { elements: vec![] }
+    } else if !is_op(c.type_to_string().as_str())
+        && (c.is_string() || is_number(c.type_to_string().as_str()))
+    {
+        Stack { elements: vec![c] }
+    } else {
         find_string(stack)
     }
 }
