@@ -115,19 +115,26 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
     let mut sub_buf: Vec<Type> = vec![];
     let mut is_sublist = false;
 
-    for i in new_el {
+        for i in new_el {
 
         //////////////// String /////////////////
 
         // Remove quotes or whitespace
         let elem =  i.trim().trim_matches(|c| c == ' ' || c == '"');
         
-        // If it is the end of the string
-        if (i.trim().starts_with('"') || i.trim().ends_with('"')) && is_str {
+        // Does the element start or end with a quote?
+        let has_start_quote = i.trim().starts_with('"');
+        let has_end_quote = i.trim().ends_with('"');
+        
+        // If it is the end of the string, 
+        // or if the string contains a single word
+        if ((has_start_quote || has_end_quote) && is_str)
+            || (has_start_quote && has_end_quote) {
 
 
             // Remove the last whitespace
-            if str_buf.last().unwrap().trim().is_empty() {
+            if !str_buf.is_empty() &&
+                str_buf.last().unwrap().trim().is_empty() {
                 str_buf.pop();
             }
             
@@ -149,7 +156,7 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         }
 
         // If a string is currently being read, push it to the buffer, with a whitespace after
-        else if i.trim().starts_with('"') || is_str {
+        else if has_start_quote || is_str {
             
             // Push the element to the buffer
             if !elem.is_empty() {
@@ -438,9 +445,14 @@ pub(crate) fn is_number(el: &str) -> bool {
 
     let st: String =  el.split_terminator('.').collect();
 
+    // Loops until a non-digit is found
     for i in st.trim_start_matches('-').as_bytes() {
         if !i.is_ascii_digit() {is_num = false}
     }
+
+    // A minus sign is not a number
+    if el.trim().as_bytes() == b"-" { is_num = false; }
+    
     is_num
 }
 
