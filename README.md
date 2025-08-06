@@ -1,4 +1,4 @@
-# BPROG Assignment 2
+# BPROG - Stack Interpreter
 
 This is an interpreter that can do simple math, io, parsing, and simple code blocks. I wrote this in Rust.
 
