@@ -11,6 +11,8 @@ use crate::string_ops::{IO_OPS, parse_string, simple_io, stack_op, STACK_OPS, ST
 use crate::structs::{Stack, Type};
 use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 
+#[allow(dead_code)]
+
 pub fn normal() {
     let mut stack: Stack<Type> = Stack::new();
 
@@ -55,6 +57,7 @@ pub fn normal() {
 
 
 // REPL mode (looping through and executing the code for each user input)
+#[allow(dead_code)]
 pub fn repl() {
     let mut stack: Stack<Type> = Stack::new();
 
@@ -114,8 +117,8 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
     let mut sub_buf: Vec<Type> = vec![];
     let mut is_sublist = false;
-
-        for i in new_el {
+    
+    for i in new_el {
 
         //////////////// String /////////////////
 
@@ -301,7 +304,7 @@ pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -
 
         stack.reverse();
 
-        stack.replace_last_match(block_stack.elements, String_("".to_string()));
+        stack.replace_last_match(block_stack.elements, String_(String::new()));
 
         stack.to_owned()
 
@@ -311,24 +314,12 @@ pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -
     else {
 
         // Remove the operator
-        stack.replace_last_match(vec![string_to_type(c)], String_("".to_string()));
+        stack.replace_last_match(vec![string_to_type(c)], String_(String::new()));
 
         let new_stack =
 
             // Ignores ""
             if c == "" { stack.clone() }
-
-            else if c == "==" {
-
-                if stack.len() > 1 {
-                    compare(stack)
-                }
-
-                else {
-                    print_error(ExpectedNumber);
-                    stack.to_owned()
-                }
-            }
 
             else if c == "length" {
                 if !stack.is_empty() {
@@ -412,7 +403,7 @@ pub fn string_to_type(var: &str) -> Type {
     else if is_literal(var) {
         if var == "True" { return Bool_(true); }
         else if var == "False" { return Bool_(false); }
-        else { print_error(ExpectedBool); String_("".to_owned()) }
+        else { print_error(ExpectedBool); String_(String::new()) }
     }
 
     else {String_(var.to_owned())}
@@ -486,20 +477,6 @@ pub(crate) fn is_op(el: &str) -> bool {
 }
 
 
-// Turns a negative number positive, or the opposite
-pub(crate) fn invert_number(el: &str) -> Type {
-
-    let new_number =
-        if is_number(el) {
-            if el.contains('-') {el.trim_start_matches(|x| x != '-').parse().unwrap()}
-            else { let new = vec!["-", el]; new.concat().parse().unwrap() }
-        }
-        else { print_error(ExpectedNumber); 0 };
-
-    Int_(new_number)
-
-}
-
 
 
 
@@ -530,20 +507,20 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
     let mut og = stack.clone();
 
-    let elem = stack.pop().unwrap_or_else(|| String_("".to_string()));
+    let elem = stack.pop().unwrap_or_else(|| String_(String::new()));
 
 
     // If it is a list
     if let List_(x) = elem.to_owned() {
 
-        list_op(&mut og.to_owned(), "length", x, String_("".to_owned()))
+        list_op(&mut og.to_owned(), "length", x, String_(String::new()))
 
     }
 
 
     // If it is a code block
     else if is_block(vec![elem.to_owned()]) {
-        og.replace_last_match(vec![elem.to_owned()], String_("".to_string()));
+        og.replace_last_match(vec![elem.to_owned()], String_(String::new()));
         quotation(&mut og.to_owned(), "length", elem, List_(vec![]))
     }
 
@@ -554,39 +531,40 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
 // By making this a separate function, several datatypes can be compared
+#[allow(dead_code)]
 pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
-    let mut num1 = String_("".to_string());
-    let mut num2 = String_("".to_string());
+    let mut num1 = None;
+    let mut num2 = None;
 
     let mut og = stack.clone();
 
     // Set num1 and num2 to be the next 2 numbers in the stack
     loop {
-        if let Some(Int_(x)) = og.pop() {
 
-            if let Int_(_) = num1.to_owned() { num2 = Int_(x); break }
-            else { num1 = Int_(x) }
-
+        if let Some(elem) = og.pop() {
+            match elem {
+                Int_(_) | Float_(_) => {
+                    if let Some(Int_(_) | Float_(_)) = num1.to_owned() { num2 = Some(elem); break }
+                    else { num1 = Some(elem) }
+                }
+                _ => {}
+            }
         }
+            
         else { break }
     }
 
-
-    let ans = if is_number(num1.type_to_string().as_str()) && is_number(num2.type_to_string().as_str()) {
+    if num1.is_some() && num2.is_some() {
 
         // This ensures that i.e., 10.0 and 10 are considered as equal
-        let v1: f64 = num1.type_to_float();
-        let v2: f64 = num2.type_to_float();
+        let v1: f64 = num1.unwrap().type_to_float();
+        let v2: f64 = num2.unwrap().type_to_float();
 
-        v1 == v2
-    }
-
-    else { num1 == num2 };
-
-
-    stack.push(Bool_(ans));
+        stack.push(Bool_(v1 == v2));
+    } else { print_error(ExpectedNumber); };
+    
     stack.to_owned()
 
 }

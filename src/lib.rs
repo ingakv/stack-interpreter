@@ -1,4 +1,4 @@
-use crate::mylib::{exec_stack, read_stack};
+﻿use crate::mylib::{exec_stack, read_stack};
 use crate::structs::{Stack, Type};
 
 mod arithmetic_ops;
@@ -21,8 +21,6 @@ pub fn t(input: &str) -> String {
     // 3. transform the result to a string (tip: implement Display traits)
 
     let mut ans: Stack<Type> = read_stack(input.to_string(), Stack { elements: vec![] });
-
-    ans.reverse();
 
     ans = exec_stack(ans);
 

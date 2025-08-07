@@ -4,7 +4,7 @@ use crate::mylib::{is_float, is_number};
 use crate::structs::Type::{Bool_, Float_, Int_, String_};
 use crate::structs::{Stack, Type};
 
-pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">"];
+pub(crate) const ARITHMETIC_OPS: [&str; 8] = ["+", "-", "*", "/", "div", "<", ">", "=="];
 
 pub(crate) fn find_arithmetic(
     stack: &mut Stack<Type>,
@@ -12,13 +12,13 @@ pub(crate) fn find_arithmetic(
     skip: bool,
 ) -> Stack<Type> {
     // Remove the top element and store it
-    let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
+    let c = stack.pop().unwrap_or_else(|| String_(String::new()));
 
     let st = c.type_to_string();
     let op = st.trim_start_matches("\"").trim_end_matches("\"");
 
     // Skips if the stack is empty
-    if c == String_("".to_string()) {
+    if c.is_empty() {
         Stack { elements: vec![] }
     }
     // Checks if it is an operator
@@ -88,7 +88,7 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
                 print_error(DivisionByZero);
                 stack.push(x.to_owned());
                 stack.push(y.to_owned());
-                String_("".to_string())
+                String_(String::new())
             } else {
                 Float_(v1 / v2)
             }
@@ -100,7 +100,7 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
                 print_error(DivisionByZero);
                 stack.push(x.to_owned());
                 stack.push(y.to_owned());
-                String_("".to_string())
+                String_(String::new())
             } else {
                 Int_(a / b)
             }
@@ -108,20 +108,17 @@ fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type>
 
         // Smaller than
         "<" => {
-            if v1 < v2 {
-                Bool_(true)
-            } else {
-                Bool_(false)
-            }
+            Bool_(v1 < v2)
         }
 
         // Bigger than
         ">" => {
-            if v1 > v2 {
-                Bool_(true)
-            } else {
-                Bool_(false)
-            }
+            Bool_(v1 > v2)
+        }
+
+        // Is the same as
+        "==" => {
+            Bool_(v1 == v2)
         }
 
         _ => panic!("An error occurred in arithmetic_ops!"),

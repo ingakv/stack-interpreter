@@ -1,7 +1,7 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::ExpectedVariable;
-use crate::mylib::{invert_number, is_number};
-use crate::structs::Type::{Bool_, String_};
+use crate::error_handling::Error::{ExpectedNumber, ExpectedVariable};
+use crate::mylib::{is_number};
+use crate::structs::Type::{Bool_, Int_, String_};
 use crate::structs::{Stack, Type};
 
 pub(crate) const LOGICAL_OPS: [&str; 3] = ["&&", "||", "not"];
@@ -12,13 +12,13 @@ pub(crate) fn find_logical(
     skip: bool,
 ) -> Stack<Type> {
     // Remove the top element and store it
-    let c = stack.pop().unwrap_or_else(|| String_("".to_string()));
+    let c = stack.pop().unwrap_or_else(|| String_(String::new()));
 
     let st = c.type_to_string();
     let op = st.trim_start_matches("\"").trim_end_matches("\"");
 
     // Skips if the stack is empty
-    if c == String_("".to_string()) {
+    if c.is_empty() {
         Stack { elements: vec![] }
     }
     // Checks if it is an operator
@@ -86,4 +86,19 @@ pub fn logical_op(stack: &mut Stack<Type>, c: &str, x: bool, y: bool) -> Stack<T
 
     // Return the stack
     stack.to_owned()
+}
+
+
+// Turns a negative number positive, or the opposite
+pub(crate) fn invert_number(el: &str) -> Type {
+
+    let new_number =
+        if is_number(el) {
+            if el.contains('-') {el.trim_start_matches(|x| x != '-').parse().unwrap()}
+            else { let new = vec!["-", el]; new.concat().parse().unwrap() }
+        }
+        else { print_error(ExpectedNumber); 0 };
+
+    Int_(new_number)
+
 }

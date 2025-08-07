@@ -10,13 +10,13 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>, skip: boo
     let c = stack
         .elements
         .pop()
-        .unwrap_or_else(|| String_("".to_string()));
+        .unwrap_or_else(|| String_(String::new()));
 
     let st = c.type_to_string();
     let op = st.trim_start_matches("\"").trim_end_matches("\"");
 
     // Skips if the stack is empty
-    if c == String_("".to_string()) {
+    if c.is_empty() {
         Stack::new()
     }
     // Checks if it is a list
@@ -35,7 +35,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>, skip: boo
             if let Some(y) = list2.first() {
                 match op {
                     "append" | "cons" => list_op(og, &op, x, y),
-                    _ => list_op(og, &op, x, String_("".to_owned())),
+                    _ => list_op(og, &op, x, String_(String::new())),
                 }
             }
             // Functions with a list and a string
@@ -52,7 +52,7 @@ pub(crate) fn find_list(stack: &mut Stack<Type>, og: &mut Stack<Type>, skip: boo
                     "each" => Stack {
                         elements: x.to_owned(),
                     },
-                    _ => list_op(og, &op, x.to_owned(), String_("".to_owned())),
+                    _ => list_op(og, &op, x.to_owned(), String_(String::new())),
                 }
             }
         }
@@ -88,7 +88,7 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
     let head = if !li.is_empty() {
         li.first().unwrap().to_owned()
     } else {
-        String_("".to_owned())
+        String_(String::new())
     };
 
     let new_el = match c {

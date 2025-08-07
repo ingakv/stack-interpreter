@@ -16,7 +16,7 @@ pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
     // Loops through and finds the next code block and list
     let mut block = Block_(vec![]);
     let mut list = List_(vec![]);
-    let mut op = "".to_string();
+    let mut op = String::new();
 
     let mut li_stack = stack.clone();
 
@@ -39,10 +39,10 @@ pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
 
 pub(crate) fn find_block(stack: &mut Stack<Type>) -> Stack<Type> {
     // Remove the top element and store it
-    let c = stack.last().unwrap_or_else(|| String_("".to_string()));
+    let c = stack.last().unwrap_or_else(|| String_(String::new()));
 
     // Skips if the stack is empty
-    if c == String_("".to_string()) {
+    if c.is_empty() {
         print_error(ExpectedQuotation);
         Stack { elements: vec![] }
     } else if is_block(vec![c.to_owned()]) {

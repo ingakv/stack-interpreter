@@ -81,8 +81,15 @@ impl Type {
     // Returns the variable as an int
     pub fn type_to_int(&self) -> i128 {
         match self {
-            Int_(val) => *val as i128,
+            Int_(val) => *val,
             Float_(val) => *val as i128,
+            Bool_(val) => {
+                if *val {
+                    1i128
+                } else {
+                    0i128
+                }
+            }
             String_(val) => {
                 if let Int_(x) = string_to_type(val) {
                     x
@@ -104,7 +111,14 @@ impl Type {
     pub fn type_to_float(&self) -> f64 {
         match self {
             Int_(val) => *val as f64,
-            Float_(val) => *val as f64,
+            Float_(val) => *val,
+            Bool_(val) => {
+                if *val {
+                    1.0f64
+                } else {
+                    0.0f64
+                }
+            }
             String_(val) => {
                 if let Float_(x) = string_to_type(val) {
                     x
@@ -122,6 +136,7 @@ impl Type {
         }
     }
 
+
     // Returns the variable as a bool
     pub fn type_to_bool(&self) -> bool {
         match self {
@@ -130,6 +145,17 @@ impl Type {
                 print_error(ExpectedNumber);
                 panic!()
             }
+        }
+    }
+    
+
+    // Returns the variable as a bool
+    pub fn is_empty(&self) -> bool {
+        match self {
+            String_(val) => {
+                val.is_empty()
+            }
+            _ => false,
         }
     }
 
@@ -223,7 +249,7 @@ impl Stack<Type> {
     // Removes the last element of the stack that matches the one given
     pub fn replace_last_match(&mut self, mut remove: Vec<Type>, new: Type) -> Self {
         // Only pushes the new value if it isn't empty
-        let mut swap = if new != String_("".to_string()) {
+        let mut swap = if !new.is_empty() {
             self.reverse();
             self.push(new.to_owned());
             self.reverse();
@@ -302,7 +328,7 @@ impl Stack<Type> {
             buf.concat()
         } else {
             print_error(StackEmpty);
-            "".to_string()
+            String::new()
         }
     }
 }
