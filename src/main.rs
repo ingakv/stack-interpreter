@@ -22,7 +22,7 @@ fn main() {
     if args.len() > 1 {
         let arg: &String = &args[1];
 
-        if arg == "REPL" {
+        if arg.eq_ignore_ascii_case("REPL") {
             println!("Running whole file...");
             repl();
         } else {

@@ -284,7 +284,7 @@ impl Stack<Type> {
     pub fn print_stack(&self) {
         if !self.is_empty() {
             // Prints the stack
-            println!("Stack: ");
+            println!("\nStack: ");
             for i in self.elements.iter().rev() {
                 i.print();
             }

@@ -1,6 +1,5 @@
 use crate::error_handling::Error::*;
 
-#[allow(dead_code)]
 #[derive(PartialEq)]
 pub(crate) enum Error {
     StackEmpty,
@@ -19,8 +18,11 @@ pub(crate) enum Error {
     IncompleteQuotation,
 }
 
+
 pub(crate) fn print_error(err: Error) {
-    let error_message = match err {
+
+    let msg = match err {
+
         StackEmpty => "Stack is empty",
 
         ExpectedBool => "Expected a bool",
@@ -43,14 +45,11 @@ pub(crate) fn print_error(err: Error) {
 
         NumberConversionError => "String couldnt be converted to a number",
 
-        IncompleteString => {
-            "Incomplete string\n\t\t   Should be written in this format: \" string-text \""
-        }
+        IncompleteString => "Incomplete string",
 
         IncompleteList => "Incomplete list",
 
         IncompleteQuotation => "Incomplete quotation",
-        //        _ => "Syntax error, try again",
     };
-    print!("\n\tError: {error_message}!\n\n");
+    print!("\n\tError: {msg}!\n\n")
 }

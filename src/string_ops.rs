@@ -62,6 +62,7 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
 pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
     match elem {
+
         // dup duplicates the top element
         "dup" => {
             if let Some(str_ref) = stack.last() {
@@ -96,6 +97,7 @@ pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
 pub(crate) fn simple_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
     match elem {
+
         // Prints the top element to standard output
         "print" => {
             if let Some(str_ref) = stack.pop() {
