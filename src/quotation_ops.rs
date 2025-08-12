@@ -1,7 +1,5 @@
-use crate::error_handling::print_error;
-use crate::error_handling::Error::ExpectedQuotation;
-use crate::mylib::{check_operator, is_block, is_list, is_op, pop_front};
-use crate::structs::Type::{Block_, Int_, List_, String_};
+use crate::mylib::{check_operator, pop_front};
+use crate::structs::Type::{Int_, List_};
 use crate::structs::{Stack, Type};
 
 pub(crate) const QUOTATION_OPS: [&str; 2] = [
@@ -11,7 +9,7 @@ pub(crate) const QUOTATION_OPS: [&str; 2] = [
     "each",
     //    "if",
 ];
-
+/*
 pub(crate) fn do_quotation(stack: Stack<Type>) -> Stack<Type> {
     // Loops through and finds the next code block and list
     let mut block = Block_(vec![]);
@@ -52,6 +50,7 @@ pub(crate) fn find_block(stack: &mut Stack<Type>) -> Stack<Type> {
         find_block(stack)
     }
 }
+*/
 
 pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Type) -> Stack<Type> {
     let new_stack = match c {
@@ -128,10 +127,7 @@ pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
             (Some(x), rem) => {
                 old_block = rem;
 
-                let st = x.type_to_string();
-                let op = st.trim_start_matches("\"").trim_end_matches("\"");
-
-                stack = check_operator(false, op, &mut stack.to_owned());
+                stack = check_operator(false, x, &mut stack.to_owned());
             }
 
             // Loop through until the list is empty

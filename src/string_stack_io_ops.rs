@@ -1,5 +1,5 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedList, ExpectedString};
+use crate::error_handling::Error::{ExpectedString, NotEnoughValues, StackEmpty};
 use crate::mylib::{get_line, is_number, is_op, string_to_type};
 use crate::structs::Type::{Float_, Int_, List_, String_};
 use crate::structs::{Stack, Type};
@@ -61,34 +61,35 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 }
 
 pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
-    match elem {
 
-        // dup duplicates the top element
-        "dup" => {
-            if let Some(str_ref) = stack.last() {
-                stack.push(str_ref)
-            } else {
-                print_error(ExpectedString)
+    // Error handling on empty stack
+    let len = stack.len();
+    if len == 0 { print_error(StackEmpty) }
+    else {
+        
+        match elem {
+
+            // dup duplicates the top element
+            "dup" => {
+                stack.push(stack.last().unwrap())
             }
-        }
 
-        // swap swaps the top two elements
-        "swap" => {
-            let len = stack.len();
-
-            if len > 1 {
-                stack.swap((len - 2).try_into().unwrap(), (len - 1).try_into().unwrap());
-            } else {
-                print_error(ExpectedList)
+            // swap swaps the top two elements
+            "swap" => {
+                if len > 1 {
+                    stack.swap((len - 2).try_into().unwrap(), (len - 1).try_into().unwrap());
+                } else {
+                    print_error(NotEnoughValues)
+                }
             }
-        }
 
-        // pop removes the top element
-        "pop" => {
-            stack.pop();
-        }
+            // pop removes the top element
+            "pop" => {
+                stack.pop();
+            }
 
-        _ => {}
+            _ => {}
+        }
     }
 
     // Return the stack

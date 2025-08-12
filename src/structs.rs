@@ -208,6 +208,21 @@ impl Stack<Type> {
             elements: Vec::new(),
         }
     }
+    
+    // Compares the stack with another and returns true if they are equal
+    pub fn is_equal(&self, old_stack: Stack<Type>) -> bool {
+
+        let mut is_equal = true;
+        let mut old = old_stack.clone();
+        let mut new = self.clone();
+
+        loop {
+            let (Some(old_elem), Some(new_elem)) = (old.pop(), new.pop()) else { break };
+            if old_elem != new_elem { is_equal = false; break }
+        }
+        is_equal
+        
+    }
 
     pub fn len(&self) -> usize {
         self.elements.len()

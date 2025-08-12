@@ -1,18 +1,17 @@
 use std::io;
 use std::io::Write;
 
-use crate::arithmetic_ops::{ARITHMETIC_OPS, find_arithmetic};
+use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS};
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedBool, ExpectedListOrString, ExpectedNumber, ExpectedVariable, ProgramFinishedWithMultipleValues, StackEmpty, IncompleteString, IncompleteList, IncompleteQuotation};
+use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, ExpectedVariable, IncompleteList, IncompleteQuotation, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::list_ops::{find_list, list_op, LIST_OPS};
 use crate::logical_ops::{find_logical, LOGICAL_OPS};
-use crate::quotation_ops::{do_quotation, find_block, quotation, QUOTATION_OPS};
-use crate::string_ops::{IO_OPS, parse_string, simple_io, stack_op, STACK_OPS, STRING_OPS};
-use crate::structs::{Stack, Type};
+use crate::quotation_ops::{quotation, QUOTATION_OPS};
+use crate::string_stack_io_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
+use crate::structs::{Stack, Type};
 
 #[allow(dead_code)]
-
 pub fn normal() {
     let mut stack: Stack<Type> = Stack::new();
 
@@ -81,21 +80,23 @@ pub fn repl() {
 
 
 pub fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
+    let mut new_stack = Stack::new();
 
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
     loop {
 
         let old_stack = stack.clone();
 
-        if let Some(last_el) = stack.last() {
+        for elem in stack.elements.iter() {
             // If there is a code block in the stack, execute it first
-            stack = check_operator(stack.has_code(), last_el.type_to_string().trim_matches('\"'), &mut stack);
+            let result = check_operator(stack.has_code(), elem.to_owned(), &mut stack.clone());
+            new_stack = result;
         }
 
-        if old_stack == stack { break }
+        if stack.is_equal(old_stack) { break }
     }
 
-    stack.to_owned()
+    new_stack
 }
 
 pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
@@ -130,9 +131,11 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         let has_end_quote = i.trim().ends_with('"');
         
         // If it is the end of the string, 
-        // or if the string contains a single word
+        // or if the string contains a single word, 
+        // and it is not a single quotation mark
         if ((has_start_quote || has_end_quote) && is_str)
-            || (has_start_quote && has_end_quote) {
+            || (has_start_quote && has_end_quote)
+            && i.trim() != "\"" {
 
 
             // Remove the last whitespace
@@ -287,11 +290,14 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
 
 
-pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -> Stack<Type> {
-
+pub(crate) fn check_operator(has_code: bool, c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
+    
+    let old_stack = stack.clone();
+    
     // If there is code, execute it first
     if has_code {
 
+/*
         // Find and extract the code, list, and quotation operator into a separate stack
         let block_stack = find_block(&mut stack.clone());
 
@@ -305,6 +311,7 @@ pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -
         stack.reverse();
 
         stack.replace_last_match(block_stack.elements, String_(String::new()));
+        */
 
         stack.to_owned()
 
@@ -314,14 +321,17 @@ pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -
     else {
 
         // Remove the operator
-        stack.replace_last_match(vec![string_to_type(c)], String_(String::new()));
+        stack.replace_last_match(vec![c.clone()], String_(String::new()));
+
+        let c_string = c.type_to_string();
+        let op = c_string.as_str();
 
         let new_stack =
 
             // Ignores ""
-            if c == "" { stack.clone() }
+            if c.is_empty() { stack.clone() }
 
-            else if c == "length" {
+            else if c == String_("length".to_string()) {
                 if !stack.is_empty() {
                     length(stack)
                 }
@@ -332,48 +342,44 @@ pub(crate) fn check_operator(has_code: bool, c: &str, stack: &mut Stack<Type>) -
                 }
             }
 
-            else if ARITHMETIC_OPS.contains(&c) {
-                stack.push(String_(c.to_string()));
-                let mut new = &mut stack.clone();
+            else if c == String_("==".to_string()) {
+               compare(stack)
+            }
 
+            else if ARITHMETIC_OPS.contains(&op) {
+                stack.push(c);
+                let mut new = &mut stack.clone();
                 let mut new2 = new.clone();
 
                 find_arithmetic(&mut new, &mut new2, false)
             }
 
-            else if LOGICAL_OPS.contains(&c) {
-                stack.push(String_(c.to_string()));
+            else if LOGICAL_OPS.contains(&op) {
+                stack.push(c);
                 let mut new = &mut stack.clone();
-
                 let mut new2 = new.clone();
 
                 find_logical(&mut new, &mut new2, false)
             }
 
-            else if STRING_OPS.contains(&c) { parse_string(c, stack) }
+            else if STRING_OPS.contains(&op) { parse_string(op, stack) }
 
-            else if LIST_OPS.contains(&c) {
-                stack.push(String_(c.to_string()));
+            else if LIST_OPS.contains(&op) {
+                stack.push(c);
                 let mut new = &mut stack.clone();
-
                 let mut new2 = new.clone();
 
                 find_list(&mut new, &mut new2, false)
             }
 
-            else if STACK_OPS.contains(&c) { stack_op(c, stack) }
+            else if STACK_OPS.contains(&op) { stack_op(op, stack) }
 
-            else if IO_OPS.contains(&c) { simple_io(c, stack) }
+            else if IO_OPS.contains(&op) { simple_io(op, stack) }
 
-            else {
-                stack.push(string_to_type(c));
-                stack.to_owned()
-
-            };
+            else { old_stack.to_owned() };
 
         new_stack
     }
-
 }
 
 
@@ -396,15 +402,13 @@ pub(crate) fn push_to_vec(i: &str, mut stack: Vec<Type>) -> Vec<Type> {
 // Chooses which type to put the variable in
 pub fn string_to_type(var: &str) -> Type {
 
-    if is_float(var) {Float_(var.parse::<f64>().unwrap())}
+    // Checks whether the variable is a float
+    if is_number(var) && var.contains('.') {Float_(var.parse::<f64>().unwrap())}
 
     else if is_number(var) {Int_(var.parse::<i128>().unwrap())}
 
-    else if is_literal(var) {
-        if var == "True" { return Bool_(true); }
-        else if var == "False" { return Bool_(false); }
-        else { print_error(ExpectedBool); String_(String::new()) }
-    }
+    else if var == "True" {Bool_(true)}
+    else if var == "False" {Bool_(false)}
 
     else {String_(var.to_owned())}
 }
@@ -420,11 +424,6 @@ pub(crate) fn get_line() -> String {
         .expect("Failed to read line");
 
     input.trim_end().to_string()
-}
-
-
-pub(crate) fn is_literal(el: &str) -> bool {
-    el == "True" || el == "False"
 }
 
 // Checks whether the variable is a valid number
@@ -446,12 +445,6 @@ pub(crate) fn is_number(el: &str) -> bool {
     
     is_num
 }
-
-// Checks whether the variable is a float
-pub(crate) fn is_float(el: &str) -> bool {
-    is_number(el) && el.contains('.')
-}
-
 
 // Checks whether the variable is a quotation
 pub(crate) fn is_block(el: Vec<Type>) -> bool {
@@ -534,20 +527,28 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 #[allow(dead_code)]
 pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
+    let mut elem1 = None;
+    let mut elem2 = None;
+    let mut is_number = false;
+    let mut is_string = false;
 
-    let mut num1 = None;
-    let mut num2 = None;
+    let mut old_stack = stack.clone();
 
-    let mut og = stack.clone();
-
-    // Set num1 and num2 to be the next 2 numbers in the stack
+    // Set elem1 and elem2 to be the next 2 numbers or strings in the stack
     loop {
 
-        if let Some(elem) = og.pop() {
+        if let Some(elem) = old_stack.pop() {
             match elem {
+                // When the first element that is either a string or a number is found,
+                // set elem1 to be the element and set the corresponding boolean to true
+                // This ensures that elem1 and elem2 are both either strings or numbers
                 Int_(_) | Float_(_) => {
-                    if let Some(Int_(_) | Float_(_)) = num1.to_owned() { num2 = Some(elem); break }
-                    else { num1 = Some(elem) }
+                    if let Some(Int_(_) | Float_(_)) = elem1.to_owned() { elem2 = Some(elem); break }
+                    else if !is_string { elem1 = Some(elem); is_number = true; }
+                }
+                String_(_) => {
+                    if let Some(String_(_)) = elem1.to_owned() { elem2 = Some(elem); break }
+                    else if !is_number { elem1 = Some(elem); is_string = true; }
                 }
                 _ => {}
             }
@@ -556,14 +557,15 @@ pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
         else { break }
     }
 
-    if num1.is_some() && num2.is_some() {
+    if elem1.is_some() && elem2.is_some() {
 
         // This ensures that i.e., 10.0 and 10 are considered as equal
-        let v1: f64 = num1.unwrap().type_to_float();
-        let v2: f64 = num2.unwrap().type_to_float();
+        let v1: f64 = elem1.unwrap().type_to_float();
+        let v2: f64 = elem2.unwrap().type_to_float();
 
         stack.push(Bool_(v1 == v2));
-    } else { print_error(ExpectedNumber); };
+    }
+    else { print_error(ExpectedNumber); };
     
     stack.to_owned()
 

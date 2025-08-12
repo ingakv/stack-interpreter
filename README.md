@@ -83,38 +83,38 @@ All literals are simply pushed onto the stack.
   * `read` ( --> x ) reads a line from standard input and puts it into the stack as string.
 * String parsing
 
-  * `parseInteger` ( s -- i ) takes a string from stack and converts it to Integer and puts it onto the stack
-  * `parseFloat` ( s -- f ) same as above but for floats
-  * `words` ( s -- list ) takes a string from the stack, splits is with Haskell `words` or Rust `split_whitespace` command and puts a list of tokens onto the stack.
+  * `parseInteger` ( s --> i ) takes a string from stack and converts it to Integer and puts it onto the stack
+  * `parseFloat` ( s --> f ) same as above but for floats
+  * `words` ( s --> list ) takes a string from the stack, splits is with Haskell `words` or Rust `split_whitespace` command and puts a list of tokens onto the stack.
 * Arithmetic operations
 
-  * `+` ( x y -- x_plus_y ) - addition
-  * `-` ( x y -- x_minus_y ) - subtraction
-  * `*` ( x y -- mul ) - multiplication
-  * `/` ( x y -- fdivision ) - floating point division
-  * `div` ( x y -- integer_division ) - integer division
-  * `<` ( x y -- bool) checks if `x < y`, and puts true or false on the stack
-  * `>` ( x y -- bool) checks if `x > y`, and puts true or false on the stack
-  * `==` ( x y -- bool ) checks if `x == y` and puts true or false on the stack
+  * `+` ( x y --> x_plus_y ) - addition
+  * `-` ( x y --> x_minus_y ) - subtraction
+  * `*` ( x y --> mul ) - multiplication
+  * `/` ( x y --> fdivision ) - floating point division
+  * `div` ( x y --> integer_division ) - integer division
+  * `<` ( x y --> bool) checks if `x < y`, and puts true or false on the stack
+  * `>` ( x y --> bool) checks if `x > y`, and puts true or false on the stack
+  * `==` ( x y --> bool ) checks if `x == y` and puts true or false on the stack
 * Logical operations
 
   * `True` - literal
   * `False` - literal 
-  * `&&` ( x y -- bool ) - logical AND
-  * `||` ( x y -- bool ) - logical OR
-  * `not` ( x -- bool ) - logical NOT. I've implemented it such that it also works like a negation on numbers, so, if you call it: `10 not` the program will put `-10` on top of the stack.
+  * `&&` ( x y --> bool ) - logical AND
+  * `||` ( x y --> bool ) - logical OR
+  * `not` ( x --> bool ) - logical NOT. I've implemented it such that it also works like a negation on numbers, so, if you call it: `10 not` the program will put `-10` on top of the stack.
 
 * List operations
 
-    * `head` ( list -- item ) takes a list and returns its head
-    * `tail` ( list -- tail ) takes a list and returns the tail
-    * `empty` ( list -- bool ) takes a list and returns true if the list is empty 
-    * `length` ( list -- len ) puts the length of a given list onto the stack
-    * `cons` ( item list -- list ) appends the item in front of the list
-    * `append` ( list1 list2 -- list3 ) concatenates both lists
-    * `each quotation` ( list -- ) takes a list an a code block, and executes the code block on each of the elements of the list, eg. `[ 1 2 3 ] each { println }` will print three lines with 1, 2, 3 respectively in each of the lines.
-    * `map quotation` ( list -- newlist ) takes a list, and a block, and executes the block on each of the elements of the list, forming a new list that is put on the stack. E.g. `[ 1 2 3 ] map { 10 * }` will result in a list `[ 10 20 30 ]`
-    * `foldl quotation` ( list initial_accumulator -- final_accumulator ) folds the list from left to right.  E.g. `[ 1 2 3 ] 0 foldl { + }` will result in `6` on top of the stack.
+    * `head` ( list --> item ) takes a list and returns its head
+    * `tail` ( list --> tail ) takes a list and returns the tail
+    * `empty` ( list --> bool ) takes a list and returns true if the list is empty 
+    * `length` ( list --> len ) puts the length of a given list onto the stack
+    * `cons` ( item list --> list ) appends the item in front of the list
+    * `append` ( list1 list2 --> list3 ) concatenates both lists
+    * `each quotation` ( list --> ) takes a list an a code block, and executes the code block on each of the elements of the list, eg. `[ 1 2 3 ] each { println }` will print three lines with 1, 2, 3 respectively in each of the lines.
+    * `map quotation` ( list --> newlist ) takes a list, and a block, and executes the block on each of the elements of the list, forming a new list that is put on the stack. E.g. `[ 1 2 3 ] map { 10 * }` will result in a list `[ 10 20 30 ]`
+    * `foldl quotation` ( list initial_accumulator --> final_accumulator ) folds the list from left to right.  E.g. `[ 1 2 3 ] 0 foldl { + }` will result in `6` on top of the stack.
 
 * Control flow
 

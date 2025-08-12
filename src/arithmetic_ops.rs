@@ -1,6 +1,6 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{DivisionByZero, ExpectedNumber};
-use crate::mylib::{is_float, is_number};
+use crate::mylib::is_number;
 use crate::structs::Type::{Bool_, Float_, Int_, String_};
 use crate::structs::{Stack, Type};
 
@@ -46,79 +46,62 @@ pub(crate) fn find_arithmetic(
 
 fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type> {
     // Float is set as the default value to do calculations
-    let v1 = x.type_to_float();
-    let v2 = y.type_to_float();
-    let a = x.type_to_int();
-    let b = y.type_to_int();
+    let float_x = x.type_to_float();
+    let float_y = y.type_to_float();
+    let int_x = x.type_to_int();
+    let int_y = y.type_to_int();
 
-    let is_float = is_float(x.type_to_string().as_str()) || is_float(y.type_to_string().as_str());
+    let is_float = matches!(x, Float_(_)) || matches!(y, Float_(_));
 
     // Calculates the answers to the arithmetic operations
     let new_el = match c {
         // Addition
         "+" => {
             if is_float {
-                Float_(v1 + v2)
+                Float_(float_x + float_y)
             } else {
-                Int_((v1 as i128) + (v2 as i128))
+                Int_(int_x + int_y)
             }
         }
 
         // Subtraction
         "-" => {
             if is_float {
-                Float_(v1 - v2)
+                Float_(float_x - float_y)
             } else {
-                Int_((v1 as i128) - (v2 as i128))
+                Int_(int_x - int_y)
             }
         }
 
         // Multiplication
         "*" => {
             if is_float {
-                Float_(v1 * v2)
+                Float_(float_x * float_y)
             } else {
-                Int_((v1 as i128) * (v2 as i128))
+                Int_(int_x * int_y)
             }
         }
 
-        // Floating point division
-        "/" => {
-            if v2 == 0.0 {
+        // Division
+        "/" | "div" => {
+            if float_y == 0.0 {
                 print_error(DivisionByZero);
                 stack.push(x.to_owned());
                 stack.push(y.to_owned());
                 String_(String::new())
-            } else {
-                Float_(v1 / v2)
-            }
-        }
-
-        // Integer division
-        "div" => {
-            if b == 0 {
-                print_error(DivisionByZero);
-                stack.push(x.to_owned());
-                stack.push(y.to_owned());
-                String_(String::new())
-            } else {
-                Int_(a / b)
-            }
+            } else if is_float {
+                Float_(float_x / float_y)
+            } else { Int_(int_x / int_y) }
         }
 
         // Smaller than
         "<" => {
-            Bool_(v1 < v2)
+            Bool_(float_x < float_y)
         }
 
         // Bigger than
         ">" => {
-            Bool_(v1 > v2)
-        }
-
-        // Is the same as
-        "==" => {
-            Bool_(v1 == v2)
+            Bool_(float_x > float_y)
         }
 
         _ => panic!("An error occurred in arithmetic_ops!"),

@@ -8,7 +8,7 @@ mod list_ops;
 mod logical_ops;
 mod mylib;
 mod quotation_ops;
-mod string_ops;
+mod string_stack_io_ops;
 mod structs;
 
 fn main() {

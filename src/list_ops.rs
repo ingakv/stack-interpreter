@@ -1,6 +1,6 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
-use crate::string_ops::find_string;
+use crate::string_stack_io_ops::find_string;
 use crate::structs::Type::{Bool_, Int_, List_, String_};
 use crate::structs::{Stack, Type};
 
