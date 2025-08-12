@@ -1,10 +1,9 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedNumber, ExpectedVariable};
-use crate::mylib::{is_number};
-use crate::structs::Type::{Bool_, Int_, String_};
-use crate::structs::{Stack, Type};
+use crate::error_handling::Error::ExpectedVariable;
+use crate::stack::Type::{Bool_, String_};
+use crate::stack::{Stack, Type};
 
-pub(crate) const LOGICAL_OPS: [&str; 3] = ["&&", "||", "not"];
+pub(crate) const LOGICAL_OPS: [&str; 2] = ["&&", "||"];
 
 pub(crate) fn find_logical(
     stack: &mut Stack<Type>,
@@ -21,35 +20,15 @@ pub(crate) fn find_logical(
     if c.is_empty() {
         Stack { elements: vec![] }
     }
+        
     // Checks if it is an operator
     else if LOGICAL_OPS.contains(&op) && !skip {
         // Loops through and finds the next two literals
         let num2 = find_logical(stack, og, true);
         let num1 = find_logical(stack, og, true);
 
-        let number = num2.first().unwrap();
-
         if let (Some(Bool_(x)), Some(Bool_(y))) = (num1.first(), num2.first()) {
             logical_op(og, &op, x, y)
-        }
-        // If there is only 1 variable, it gets pushed back on, and the stack returns, unless "not" is used
-        else if c == String_("not".to_string())
-            && (is_number(number.type_to_string().as_str()) || number.is_bool())
-        {
-            let new_nr = if number.is_bool() {
-                if number.type_to_bool() {
-                    Bool_(false)
-                } else {
-                    Bool_(true)
-                }
-            } else {
-                invert_number(number.type_to_string().as_str())
-            };
-
-            // Removes the operator and adds the new variable
-            stack.pop();
-            stack.replace_last_match(vec![number.to_owned()], new_nr);
-            stack.to_owned()
         }
         // If there are less than two valid numbers in the stack, the original stack gets sent back
         // (without the operator)
@@ -73,9 +52,6 @@ pub fn logical_op(stack: &mut Stack<Type>, c: &str, x: bool, y: bool) -> Stack<T
         // Checks whether at least one of the predicates is True or not
         "||" => x || y,
 
-        // Inverts the predicate
-        "not" => !x,
-
         _ => panic!("An error occurred in logical_ops!"),
     };
 
@@ -86,19 +62,4 @@ pub fn logical_op(stack: &mut Stack<Type>, c: &str, x: bool, y: bool) -> Stack<T
 
     // Return the stack
     stack.to_owned()
-}
-
-
-// Turns a negative number positive, or the opposite
-pub(crate) fn invert_number(el: &str) -> Type {
-
-    let new_number =
-        if is_number(el) {
-            if el.contains('-') {el.trim_start_matches(|x| x != '-').parse().unwrap()}
-            else { let new = vec!["-", el]; new.concat().parse().unwrap() }
-        }
-        else { print_error(ExpectedNumber); 0 };
-
-    Int_(new_number)
-
 }

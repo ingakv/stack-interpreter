@@ -1,6 +1,6 @@
 use crate::mylib::{check_operator, pop_front};
-use crate::structs::Type::{Int_, List_};
-use crate::structs::{Stack, Type};
+use crate::stack::Type::{Int_, List_};
+use crate::stack::{Stack, Type};
 
 pub(crate) const QUOTATION_OPS: [&str; 2] = [
     "exec", //    "times",
@@ -127,7 +127,7 @@ pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
             (Some(x), rem) => {
                 old_block = rem;
 
-                stack = check_operator(false, x, &mut stack.to_owned());
+                stack = check_operator(x, &mut stack.to_owned());
             }
 
             // Loop through until the list is empty

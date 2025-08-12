@@ -1,10 +1,9 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{DivisionByZero, ExpectedNumber};
-use crate::mylib::is_number;
-use crate::structs::Type::{Bool_, Float_, Int_, String_};
-use crate::structs::{Stack, Type};
+use crate::stack::Type::{Bool_, Float_, Int_, String_};
+use crate::stack::{is_string_number, Stack, Type};
 
-pub(crate) const ARITHMETIC_OPS: [&str; 8] = ["+", "-", "*", "/", "div", "<", ">", "=="];
+pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">"];
 
 pub(crate) fn find_arithmetic(
     stack: &mut Stack<Type>,
@@ -37,7 +36,7 @@ pub(crate) fn find_arithmetic(
             og.pop();
             og.to_owned()
         }
-    } else if is_number(op) {
+    } else if is_string_number(op) {
         Stack { elements: vec![c] }
     } else {
         find_arithmetic(stack, og, true)

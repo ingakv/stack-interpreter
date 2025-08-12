@@ -1,15 +1,15 @@
 use std::io;
 use std::io::Write;
-
+use std::ops::Neg;
 use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS};
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedListOrString, ExpectedNumber, ExpectedVariable, IncompleteList, IncompleteQuotation, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
+use crate::error_handling::Error::{ExpectedNumber, ExpectedVariable, IncompleteList, IncompleteQuotation, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::list_ops::{find_list, list_op, LIST_OPS};
 use crate::logical_ops::{find_logical, LOGICAL_OPS};
 use crate::quotation_ops::{quotation, QUOTATION_OPS};
+use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_};
+use crate::stack::{string_to_type, is_block, Stack, Type};
 use crate::string_stack_io_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
-use crate::structs::Type::{Block_, Bool_, Float_, Int_, List_, String_};
-use crate::structs::{Stack, Type};
 
 #[allow(dead_code)]
 pub fn normal() {
@@ -84,18 +84,15 @@ pub fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
 
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
     loop {
+        
+        let Some(elem) = stack.pop_front() else { break; };
+        
+        new_stack.push(elem.to_owned());
 
-        let old_stack = stack.clone();
+        // If there is a code block in the stack, execute it first
+        new_stack = check_operator(elem.to_owned(), &mut new_stack.clone());
 
-        for elem in stack.elements.iter() {
-            // If there is a code block in the stack, execute it first
-            let result = check_operator(stack.has_code(), elem.to_owned(), &mut stack.clone());
-            new_stack = result;
-        }
-
-        if stack.is_equal(old_stack) { break }
     }
-
     new_stack
 }
 
@@ -290,12 +287,12 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
 
 
-pub(crate) fn check_operator(has_code: bool, c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
     
     let old_stack = stack.clone();
     
     // If there is code, execute it first
-    if has_code {
+    if stack.has_code() {
 
 /*
         // Find and extract the code, list, and quotation operator into a separate stack
@@ -331,19 +328,16 @@ pub(crate) fn check_operator(has_code: bool, c: Type, stack: &mut Stack<Type>) -
             // Ignores ""
             if c.is_empty() { stack.clone() }
 
-            else if c == String_("length".to_string()) {
-                if !stack.is_empty() {
-                    length(stack)
-                }
-
-                else {
-                    print_error(ExpectedListOrString);
-                    stack.to_owned()
-                }
+            else if c == String_("length".to_string()) { 
+                length(stack)
             }
 
             else if c == String_("==".to_string()) {
-               compare(stack)
+                compare(stack)
+            }
+
+            else if c == String_("not".to_string()) { 
+                invert(stack)
             }
 
             else if ARITHMETIC_OPS.contains(&op) {
@@ -396,26 +390,6 @@ pub(crate) fn push_to_vec(i: &str, mut stack: Vec<Type>) -> Vec<Type> {
     stack
 }
 
-
-
-
-// Chooses which type to put the variable in
-pub fn string_to_type(var: &str) -> Type {
-
-    // Checks whether the variable is a float
-    if is_number(var) && var.contains('.') {Float_(var.parse::<f64>().unwrap())}
-
-    else if is_number(var) {Int_(var.parse::<i128>().unwrap())}
-
-    else if var == "True" {Bool_(true)}
-    else if var == "False" {Bool_(false)}
-
-    else {String_(var.to_owned())}
-}
-
-
-
-
 pub(crate) fn get_line() -> String {
     let mut input = String::new();
 
@@ -424,38 +398,6 @@ pub(crate) fn get_line() -> String {
         .expect("Failed to read line");
 
     input.trim_end().to_string()
-}
-
-// Checks whether the variable is a valid number
-// Returns true for both ints and floats
-pub(crate) fn is_number(el: &str) -> bool {
-    
-    // Prevents error when checking empty strings
-    let mut is_num = !el.is_empty();
-
-    let st: String =  el.split_terminator('.').collect();
-
-    // Loops until a non-digit is found
-    for i in st.trim_start_matches('-').as_bytes() {
-        if !i.is_ascii_digit() {is_num = false}
-    }
-
-    // A minus sign is not a number
-    if el.trim().as_bytes() == b"-" { is_num = false; }
-    
-    is_num
-}
-
-// Checks whether the variable is a quotation
-pub(crate) fn is_block(el: Vec<Type>) -> bool {
-    for i in el { if !i.is_block() {return false} }
-    true
-}
-
-// Checks whether the variable is a list
-pub(crate) fn is_list(el: Vec<Type>) -> bool {
-    for i in el { if !i.is_list() {return false} }
-    true
 }
 
 
@@ -468,11 +410,6 @@ pub(crate) fn is_op(el: &str) -> bool {
     LOGICAL_OPS.contains(&el) ||
     LIST_OPS.contains(&el)
 }
-
-
-
-
-
 
 pub fn pop_front(t: Type) -> (Option<Type>, Type) {
 
@@ -497,6 +434,8 @@ pub fn pop_front(t: Type) -> (Option<Type>, Type) {
 
 // Returns the length of the list or string
 pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
+    
+    if stack.is_empty() { print_error(StackEmpty); return stack.to_owned(); }
 
     let mut og = stack.clone();
 
@@ -505,11 +444,8 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
     // If it is a list
     if let List_(x) = elem.to_owned() {
-
         list_op(&mut og.to_owned(), "length", x, String_(String::new()))
-
     }
-
 
     // If it is a code block
     else if is_block(vec![elem.to_owned()]) {
@@ -517,14 +453,12 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
         quotation(&mut og.to_owned(), "length", elem, List_(vec![]))
     }
 
-
     else { parse_string("length", &mut og) }
 
 }
 
 
 // By making this a separate function, several datatypes can be compared
-#[allow(dead_code)]
 pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
     let mut elem1 = None;
@@ -569,5 +503,35 @@ pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
     
     stack.to_owned()
 
+}
+
+pub(crate) fn invert(stack: &mut Stack<Type>) -> Stack<Type> {
+
+    let mut old_stack = stack.clone();
+    loop {
+
+        if let Some(elem) = old_stack.pop() {
+            match elem {
+
+                // Turns a negative number positive, or the opposite
+                Int_(el) => {
+                    stack.replace_last_match(vec![elem.to_owned()], Int_(el.neg())); break; }
+                
+                Float_(el) => {
+                    stack.replace_last_match(vec![elem.to_owned()], Float_(el.neg())); break; }
+
+                // Inverts the predicate
+                Bool_(el) => {
+                    let new_elem = if el { Some(Bool_(false)) }
+                    else { Some(Bool_(true)) };
+                    stack.replace_last_match(vec![elem.to_owned()], new_elem.unwrap()); break;
+                }
+                _ => {}
+            }
+        }
+        else { break }
+    }
+    
+    stack.to_owned()
 }
 

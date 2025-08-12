@@ -115,7 +115,7 @@ mod test_arithmetic_with_type_coercion {
 
     #[test]
     fn test_division_with_float() {
-        assert_eq!(t("20 2 div"), "10");
+        assert_eq!(t("20.0 2 div"), "10.0");
     }
 }
 

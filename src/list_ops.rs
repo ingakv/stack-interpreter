@@ -1,8 +1,8 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
+use crate::stack::Type::{Bool_, Int_, List_, String_};
+use crate::stack::{Stack, Type};
 use crate::string_stack_io_ops::find_string;
-use crate::structs::Type::{Bool_, Int_, List_, String_};
-use crate::structs::{Stack, Type};
 
 pub(crate) const LIST_OPS: [&str; 5] = ["head", "tail", "empty", "cons", "append"];
 

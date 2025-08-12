@@ -1,8 +1,8 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedString, NotEnoughValues, StackEmpty};
-use crate::mylib::{get_line, is_number, is_op, string_to_type};
-use crate::structs::Type::{Float_, Int_, List_, String_};
-use crate::structs::{Stack, Type};
+use crate::mylib::{get_line, is_op};
+use crate::stack::Type::{Float_, Int_, List_, String_};
+use crate::stack::{is_string_number, string_to_type, Stack, Type};
 
 pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
 
@@ -134,7 +134,7 @@ pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
     if c.is_empty() {
         Stack { elements: vec![] }
     } else if !is_op(c.type_to_string().as_str())
-        && (c.is_string() || is_number(c.type_to_string().as_str()))
+        && (c.is_string() || is_string_number(c.type_to_string().as_str()))
     {
         Stack { elements: vec![c] }
     } else {

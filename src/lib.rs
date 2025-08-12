@@ -1,5 +1,5 @@
 ﻿use crate::mylib::{exec_stack, read_stack};
-use crate::structs::{Stack, Type};
+use crate::stack::{Stack, Type};
 
 mod arithmetic_ops;
 mod error_handling;
@@ -8,7 +8,7 @@ mod logical_ops;
 mod mylib;
 mod quotation_ops;
 mod string_stack_io_ops;
-mod structs;
+mod stack;
 
 pub fn t(input: &str) -> String {
     // Warning: don't move this function to another module, as integration tests in

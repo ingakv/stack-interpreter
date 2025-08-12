@@ -1,7 +1,7 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumber, StackEmpty};
-use crate::mylib::{is_op, string_to_type};
-use crate::structs::Type::*;
+use crate::mylib::{is_op};
+use crate::stack::Type::*;
 
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
@@ -188,6 +188,14 @@ impl Type {
         }
     }
 
+    pub fn is_number(&self) -> bool {
+        match self {
+            Int_(_) => true,
+            Float_(_) => true,
+            _ => false,
+        }
+    }
+
     // Prints a single variable
     pub fn print(&self) {
         println!("{}", self.type_to_string())
@@ -238,6 +246,13 @@ impl Stack<Type> {
 
     pub fn last(&self) -> Option<Type> {
         self.elements.last().cloned()
+    }
+
+    pub fn pop_front(&mut self) -> Option<Type> {
+        self.reverse();
+        let elem = self.elements.pop();
+        self.reverse();
+        elem
     }
 
     pub fn pop(&mut self) -> Option<Type> {
@@ -346,4 +361,57 @@ impl Stack<Type> {
             String::new()
         }
     }
+}
+
+
+
+//////////////////////////////////// Additional functions //////////////////////////////////////
+
+// Chooses which type to put the variable in
+pub fn string_to_type(var: &str) -> Type {
+
+    // Checks whether the variable is a float
+    if is_string_number(var) {
+        if var.contains('.') { Float_(var.parse::<f64>().unwrap()) }
+        else {Int_(var.parse::<i128>().unwrap())}
+    }
+
+    else if var == "True" {Bool_(true)}
+    else if var == "False" {Bool_(false)}
+
+    else {String_(var.to_owned())}
+}
+
+// Checks whether the variable is a valid number
+// Returns true for both ints and floats
+pub(crate) fn is_string_number(el: &str) -> bool {
+
+    // Prevents error when checking empty strings
+    let mut is_num = !el.is_empty();
+
+    let st: String =  el.split_terminator('.').collect();
+
+    // Loops until a non-digit is found
+    for i in st.trim_start_matches('-').as_bytes() {
+        if !i.is_ascii_digit() {is_num = false}
+    }
+
+    // A minus sign is not a number
+    if el.trim().as_bytes() == b"-" { is_num = false; }
+
+    is_num
+}
+
+
+
+// Checks whether the variable is a quotation
+pub(crate) fn is_block(el: Vec<Type>) -> bool {
+    for i in el { if !i.is_block() {return false} }
+    true
+}
+
+// Checks whether the variable is a list
+pub(crate) fn is_list(el: Vec<Type>) -> bool {
+    for i in el { if !i.is_list() {return false} }
+    true
 }

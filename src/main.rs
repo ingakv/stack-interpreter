@@ -9,7 +9,7 @@ mod logical_ops;
 mod mylib;
 mod quotation_ops;
 mod string_stack_io_ops;
-mod structs;
+mod stack;
 
 fn main() {
     // For REPL mode, run with
