@@ -135,18 +135,6 @@ impl Type {
             }
         }
     }
-
-
-    // Returns the variable as a bool
-    pub fn type_to_bool(&self) -> bool {
-        match self {
-            Bool_(val) => *val,
-            _ => {
-                print_error(ExpectedNumber);
-                panic!()
-            }
-        }
-    }
     
 
     // Returns the variable as a bool

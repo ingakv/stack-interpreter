@@ -4,7 +4,7 @@ use crate::error_handling::Error::*;
 #[derive(PartialEq)]
 pub(crate) enum Error {
     StackEmpty,
-    ExpectedBool,
+    ExpectedNumberStringOrList,
     ExpectedNumber,
     ExpectedString,
     ExpectedListOrString,
@@ -27,7 +27,7 @@ pub(crate) fn print_error(err: Error) {
 
         StackEmpty => "Stack is empty",
 
-        ExpectedBool => "Expected a bool",
+        ExpectedNumberStringOrList => "Expected a number, a string or a list",
 
         ExpectedNumber => "Expected a number",
 

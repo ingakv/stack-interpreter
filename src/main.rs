@@ -10,6 +10,7 @@ mod mylib;
 mod quotation_ops;
 mod string_stack_io_ops;
 mod stack;
+mod combination_ops;
 
 fn main() {
     // For REPL mode, run with

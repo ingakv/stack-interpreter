@@ -9,6 +9,7 @@ mod mylib;
 mod quotation_ops;
 mod string_stack_io_ops;
 mod stack;
+mod combination_ops;
 
 pub fn t(input: &str) -> String {
     // Warning: don't move this function to another module, as integration tests in
