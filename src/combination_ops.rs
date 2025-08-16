@@ -1,10 +1,10 @@
+use crate::list_logical_ops::list_op;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumberStringOrList, StackEmpty};
-use crate::list_ops::list_op;
 use crate::quotation_ops::quotation;
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
 use crate::stack::{is_block, Stack, Type};
-use crate::string_stack_io_ops::parse_string;
+use crate::string_ops::parse_string;
 use std::ops::Neg;
 
 
@@ -21,14 +21,14 @@ pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
     // If it is a list
-    if let List_(x) = elem.to_owned() {
-        list_op(&mut og.to_owned(), "length", x, String_(String::new()))
+    if let List_(x) = elem {
+        list_op(&mut og, "length", x, String_(String::new()))
     }
 
     // If it is a code block
     else if is_block(vec![elem.to_owned()]) {
         og.replace_last_match(vec![elem.to_owned()], String_(String::new()));
-        quotation(&mut og.to_owned(), "length", elem, List_(vec![]))
+        quotation(&mut og, "length", elem, List_(vec![]))
     }
 
     else { parse_string("length", &mut og) }
@@ -55,15 +55,15 @@ pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
                 // set elem1 to be the element and set the corresponding boolean to true
                 // This ensures that elem1 and elem2 are both either strings or numbers
                 Int_(_) | Float_(_) => {
-                    if let Some(Int_(_) | Float_(_)) = elem1.to_owned() { elem2 = Some(elem); break }
+                    if let Some(Int_(_) | Float_(_)) = elem1 { elem2 = Some(elem); break }
                     else if !is_string && !is_list { elem1 = Some(elem); is_number = true; }
                 }
                 String_(_) => {
-                    if let Some(String_(_)) = elem1.to_owned() { elem2 = Some(elem); break }
+                    if let Some(String_(_)) = elem1 { elem2 = Some(elem); break }
                     else if !is_number && !is_list { elem1 = Some(elem); is_string = true; }
                 }
                 List_(_) => {
-                    if let Some(List_(_)) = elem1.to_owned() { elem2 = Some(elem); break }
+                    if let Some(List_(_)) = elem1 { elem2 = Some(elem); break }
                     else if !is_number && !is_string { elem1 = Some(elem); is_list = true; }
                 }
                 _ => {}
@@ -98,16 +98,16 @@ pub(crate) fn invert(stack: &mut Stack<Type>) -> Stack<Type> {
 
                 // Turns a negative number positive, or the opposite
                 Int_(el) => {
-                    stack.replace_last_match(vec![elem.to_owned()], Int_(el.neg())); break; }
+                    stack.replace_last_match(vec![elem], Int_(el.neg())); break; }
 
                 Float_(el) => {
-                    stack.replace_last_match(vec![elem.to_owned()], Float_(el.neg())); break; }
+                    stack.replace_last_match(vec![elem], Float_(el.neg())); break; }
 
                 // Inverts the predicate
                 Bool_(el) => {
                     let new_elem = if el { Some(Bool_(false)) }
                     else { Some(Bool_(true)) };
-                    stack.replace_last_match(vec![elem.to_owned()], new_elem.unwrap()); break;
+                    stack.replace_last_match(vec![elem], new_elem.unwrap()); break;
                 }
                 _ => {}
             }

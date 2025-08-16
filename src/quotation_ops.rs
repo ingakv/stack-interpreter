@@ -60,7 +60,7 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
             let mut count = 0;
 
             loop {
-                match pop_front(copy.to_owned()) {
+                match pop_front(copy) {
                     (Some(_), rem) => {
                         count = count + 1;
                         copy = rem;
@@ -88,7 +88,7 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
         "each" => {
             let mut new_stack = Stack::new();
 
-            if let List_(elems) = list.to_owned() {
+            if let List_(elems) = list {
                 let list_copy = elems.clone();
 
                 for i in &list_copy {
@@ -99,13 +99,12 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
                         },
                         block.to_owned(),
                     )
-                    .pop()
-                    {
+                    .pop() {
                         new_stack.push(item);
                     }
                 }
             }
-            new_stack.to_owned()
+            new_stack
         }
 
         // Checks whether at least one of the predicates is True or not
@@ -114,7 +113,7 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
         _ => stack.to_owned(),
     };
 
-    new_stack.to_owned()
+    new_stack
 }
 
 // Execute a code block
@@ -123,11 +122,11 @@ pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
 
     loop {
         // Execute the code from the first element
-        match pop_front(old_block.to_owned()) {
+        match pop_front(old_block) {
             (Some(x), rem) => {
                 old_block = rem;
 
-                stack = check_operator(x, &mut stack.to_owned());
+                stack = check_operator(x, &mut stack);
             }
 
             // Loop through until the list is empty

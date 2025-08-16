@@ -1,15 +1,17 @@
-use crate::arithmetic_ops::{find_arithmetic, ARITHMETIC_OPS};
+use crate::list_logical_ops::ARITHMETIC_OPS;
+use crate::list_logical_ops::LIST_OPS;
+use crate::list_logical_ops::LOGICAL_OPS;
+use crate::combination_ops::{compare, invert, length};
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedVariable, IncompleteList, IncompleteQuotation, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
-use crate::list_ops::{find_list, LIST_OPS};
-use crate::logical_ops::{find_logical, LOGICAL_OPS};
+use crate::find_ops::handle_literal_and_operator;
+use crate::find_ops::Operations::{Arithmetic, List, Logical};
 use crate::quotation_ops::QUOTATION_OPS;
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 use crate::stack::{string_to_type, Stack, Type};
-use crate::string_stack_io_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
+use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::Write;
-use crate::combination_ops::{length, invert, compare};
 
 #[allow(dead_code)]
 pub fn normal() {
@@ -31,7 +33,7 @@ pub fn normal() {
             else {
 
                 // Execute the stack and print it out
-                stack = exec_stack(stack.to_owned());
+                stack = exec_stack(stack);
 
                 if stack.len() > 1 {print_error(ProgramFinishedWithMultipleValues)}
                 if let Some(result) = stack.pop() { result.print(); }
@@ -246,13 +248,13 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         //////////////// Push to buffer /////////////////
 
         // If a block is currently being read, push it to the buffer
-        else if is_block { bl_buf = push_to_vec(i, bl_buf.to_owned()); }
+        else if is_block { bl_buf = push_to_vec(i, bl_buf); }
 
         // If a sublist is currently being read, push it to the buffer, with a comma after
-        else if is_sublist { sub_buf = push_to_vec(i, sub_buf.to_owned()); }
+        else if is_sublist { sub_buf = push_to_vec(i, sub_buf); }
 
         // If it is not a sublist, push the element to the regular list
-        else if is_list { li_buf = push_to_vec(i, li_buf.to_owned()); }
+        else if is_list { li_buf = push_to_vec(i, li_buf); }
 
 
 
@@ -260,10 +262,10 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
         else {
             match string_to_type(i) {
-                Int_(i) => stack.push(Int_(i.to_owned())),
-                Float_(i) => stack.push(Float_(i.to_owned())),
-                Bool_(i) => stack.push(Bool_(i.to_owned())),
-                String_(i) => stack.push(String_(i.to_owned())),
+                Int_(i) => stack.push(Int_(i)),
+                Float_(i) => stack.push(Float_(i)),
+                Bool_(i) => stack.push(Bool_(i)),
+                String_(i) => stack.push(String_(i)),
                 _ => {}
             };
         }
@@ -280,7 +282,7 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         print_error(IncompleteList);
     }
 
-    stack.to_owned()
+    stack
 
 }
 
@@ -301,7 +303,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
         // Push the result of the code block to the front of the regular stack
         stack.reverse();
 
-        for el in do_quotation(block_stack.to_owned()).elements {
+        for el in do_quotation(block_stack).elements {
             stack.push(el);
         }
 
@@ -345,7 +347,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
                 let mut new = &mut stack.clone();
                 let mut new2 = new.clone();
 
-                find_arithmetic(&mut new, &mut new2, false)
+                handle_literal_and_operator(Arithmetic, &mut new, &mut new2, false)
             }
 
             else if LOGICAL_OPS.contains(&op) {
@@ -353,7 +355,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
                 let mut new = &mut stack.clone();
                 let mut new2 = new.clone();
 
-                find_logical(&mut new, &mut new2, false)
+                handle_literal_and_operator(Logical, &mut new, &mut new2, false)
             }
 
             else if STRING_OPS.contains(&op) { parse_string(op, stack) }
@@ -363,14 +365,14 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
                 let mut new = &mut stack.clone();
                 let mut new2 = new.clone();
 
-                find_list(&mut new, &mut new2, false)
+                handle_literal_and_operator(List, &mut new, &mut new2, false)
             }
 
             else if STACK_OPS.contains(&op) { stack_op(op, stack) }
 
             else if IO_OPS.contains(&op) { simple_io(op, stack) }
 
-            else { old_stack.to_owned() };
+            else { old_stack };
 
         new_stack
     }
@@ -381,10 +383,10 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 // Pattern matches the types to push to vector
 pub(crate) fn push_to_vec(i: &str, mut stack: Vec<Type>) -> Vec<Type> {
     match string_to_type(i) {
-        Int_(i) => stack.push(Int_(i.to_owned())),
-        Float_(i) => stack.push(Float_(i.to_owned())),
-        Bool_(i) => stack.push(Bool_(i.to_owned())),
-        String_(i) => stack.push(String_(i.to_owned())),
+        Int_(i) => stack.push(Int_(i)),
+        Float_(i) => stack.push(Float_(i)),
+        Bool_(i) => stack.push(Bool_(i)),
+        String_(i) => stack.push(String_(i)),
         _ => { print_error(ExpectedVariable) }
     };
     stack

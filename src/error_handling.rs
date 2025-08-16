@@ -1,6 +1,5 @@
 use crate::error_handling::Error::*;
 
-#[allow(dead_code)]
 #[derive(PartialEq)]
 pub(crate) enum Error {
     StackEmpty,
@@ -14,7 +13,7 @@ pub(crate) enum Error {
     DivisionByZero,
     ProgramFinishedWithMultipleValues,
     NotEnoughValues,
-    NumberConversionError,
+    ExpectedBoolean,
     IncompleteString,
     IncompleteList,
     IncompleteQuotation,
@@ -47,7 +46,7 @@ pub(crate) fn print_error(err: Error) {
         
         NotEnoughValues => "Not enough values on stack to perform operation",
 
-        NumberConversionError => "String couldnt be converted to a number",
+        ExpectedBoolean => "Expected a boolean",
 
         IncompleteString => "Incomplete string",
 

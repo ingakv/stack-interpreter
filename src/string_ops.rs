@@ -122,13 +122,8 @@ pub(crate) fn simple_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 }
 
 pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
-    let c = if stack.is_empty() {
-        String_(String::new())
-    }
     // Remove the top element and store it
-    else {
-        stack.pop().unwrap_or_else(|| String_(String::new()))
-    };
+    let c = stack.pop().unwrap_or_else(|| String_(String::new()));
 
     // Skips if the stack is empty
     if c.is_empty() {

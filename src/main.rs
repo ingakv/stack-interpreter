@@ -2,15 +2,14 @@ use std::env;
 
 use crate::mylib::{normal, repl};
 
-mod arithmetic_ops;
+mod list_logical_ops;
 mod error_handling;
-mod list_ops;
-mod logical_ops;
 mod mylib;
 mod quotation_ops;
-mod string_stack_io_ops;
+mod string_ops;
 mod stack;
 mod combination_ops;
+mod find_ops;
 
 fn main() {
     // For REPL mode, run with

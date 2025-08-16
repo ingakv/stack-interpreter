@@ -2,9 +2,9 @@
 
 This is a simple concatenative, stack-based, programming language interpreter that can do simple math, io, parsing, and simple code blocks. I wrote this in Rust.
 
-Currently I have Ints, Floats, Bools, Strings, Lists, and Code blocks as separate file types. It also has the ability to execute code for a list with the each function.
+Currently, I have Ints, Floats, Bools, Strings, Lists, and Code blocks as separate file types. It also has the ability to execute code for a list with the 'each' function.
 
-However, this version does not pass the majority of the tests. This is due to an issue concerning the order of which the variables or operations are executed.
+However, this version does not pass the majority of the tests. This is due to an issue concerning the order in which the variables or operations are executed.
 
 The previous version with less functionality is commit 2d53a09e53b97eb99820a3f1148bf8b8e7d9efd9
 
@@ -41,7 +41,7 @@ The program can run in two different modes:
 * **NORMAL mode**
   * Write the input in postfix line for line. When you want to see the result, type in `:q`.
   * To see the stack without exiting, type `:s`
-  * There should only be 1 variable left on the stack when the program is ended, if used correctly.
+  * There should only be one variable left on the stack when the program is ended, if used correctly.
     * There is an error message being printed when the stack contains more than one item at the end of normal mode. In that case, the top element will still be returned as the answer, but the rest of the stack will be printed out as well.
 * **REPL mode**
   * For each line of input, the stack will be printed. The program loops forever.
@@ -64,7 +64,7 @@ All literals are simply pushed onto the stack.
 * Quotations (aka code blocks: `{ 1 2 + }`
   * Code block (aka just `block` or `quotation`) is a program sequence delimited by curly braces. For example `{ 1 + }` is a quotation that increments the current top element on the stack by 1.
     There is a function `exec` that picks a quotation from the top of the stack and executes it.
-  * **Note**: in some of the functions quotation is expected, but, for single instruction quotation the curly braces can be skipped.  So, for example `3 times { 10 }` is the same as `3 times 10` because the quotation contains ONLY one instruction. The notation without curly braces for single instruction quotations is more ergonomic. `times`, `map`, `foldl`, `each`, `if` should all work with both, quotations for multiple instructions and for single values (no curly braces needed). 
+  * **Note**: in some of the functions quotation is expected, but, for a single instruction quotation the curly braces can be skipped.  So, for example `3 times { 10 }` is the same as `3 times 10` because the quotation contains ONLY one instruction. The notation without curly braces for single instruction quotations is more ergonomic. `times`, `map`, `foldl`, `each`, `if` should all work with both, quotations for multiple instructions and for single values (no curly braces needed). 
 * Symbols: `a_symbol` Note: because there are no restrictions on symbols, anything that is not a reserved keyword in the language can become a valid symbol, and therefore, a function name.
 
 
@@ -78,14 +78,14 @@ All literals are simply pushed onto the stack.
   * `swap` ( x y --> y x ) swaps the two top elements on the stack
   * `pop` ( x --> ) removes the top element from the stack
 * Simple IO
-  * We limit our language to TEXT only. All read/write operation operate on `String` types.
+  * We limit our language to TEXT only. All read/write operations operate on `String` types.
   * `print` ( x --> ) takes the top element from the stack and prints it to the standard output.
   * `read` ( --> x ) reads a line from standard input and puts it into the stack as string.
 * String parsing
 
   * `parseInteger` ( s --> i ) takes a string from stack and converts it to Integer and puts it onto the stack
   * `parseFloat` ( s --> f ) same as above but for floats
-  * `words` ( s --> list ) takes a string from the stack, splits is with Haskell `words` or Rust `split_whitespace` command and puts a list of tokens onto the stack.
+  * `words` ( s --> list ) takes a string from the stack, splits it with Haskell `words` or Rust `split_whitespace` command, and puts a list of tokens onto the stack.
 * Arithmetic operations
 
   * `+` ( x y --> x_plus_y ) - addition
@@ -110,9 +110,9 @@ All literals are simply pushed onto the stack.
     * `tail` ( list --> tail ) takes a list and returns the tail
     * `empty` ( list --> bool ) takes a list and returns true if the list is empty 
     * `length` ( list --> len ) puts the length of a given list onto the stack
-    * `cons` ( item list --> list ) appends the item in front of the list
-    * `append` ( list1 list2 --> list3 ) concatenates both lists
-    * `each quotation` ( list --> ) takes a list an a code block, and executes the code block on each of the elements of the list, eg. `[ 1 2 3 ] each { println }` will print three lines with 1, 2, 3 respectively in each of the lines.
+    * `append` ( item list --> list ) appends the item in front of the list
+    * `cons` ( list1 list2 --> list3 ) concatenates both lists
+    * `each quotation` ( list --> ) takes a list and a code block, and executes the code block on each of the elements of the list, e.g. `[ 1 2 3 ] each { println }` will print three lines with 1, 2, 3 respectively in each of the lines.
     * `map quotation` ( list --> newlist ) takes a list, and a block, and executes the block on each of the elements of the list, forming a new list that is put on the stack. E.g. `[ 1 2 3 ] map { 10 * }` will result in a list `[ 10 20 30 ]`
     * `foldl quotation` ( list initial_accumulator --> final_accumulator ) folds the list from left to right.  E.g. `[ 1 2 3 ] 0 foldl { + }` will result in `6` on top of the stack.
 
@@ -129,7 +129,7 @@ All literals are simply pushed onto the stack.
 * Assignment to a symbol (variable)
 
   - Assignment `:=`
-    - *variable_name* any value different from a symbol, eg. number, bool, list or code_block `:=`
+    - *variable_name* any value different from a symbol, e.g. number, bool, list or code_block `:=`
 
   - Function definition `fun`:
     - *function_name* quotation (code block) `fun`
@@ -179,7 +179,7 @@ This is also valid code (white space is needed, indentation is not needed):
 
 
 
-This is a code block, that you can assign a name, and use in your program later on. This code block says nothing about the argument stack, so, it can be applied in various contexts, or, assigned to a variable/function name.
+This is a code block that you can assign a name and use in your program later on. This code block says nothing about the argument stack, so it can be applied in various contexts or assigned to a variable/function name.
 
 Note, that assignment to variable expects the name to be deeper on the stack, and the value to be on top of the stack, this is why we had to do `swap` before `:=` or `fun`.
 
@@ -204,15 +204,15 @@ fun
 * `age 10 :=` the symbol age now is of value `10`
   * can also be written as: `10 age swap :=`
 
-In order to actually put a bound symbol onto the stack (without executing the function or without evaluating to a value in case of variable), we use `tick` operator, which is a single quote symbol `'`. Observe these two programs:
+To actually put a bound symbol onto the stack (without executing the function or without evaluating to a value in case of variable), we use `tick` operator, which is a single quote symbol `'`. Observe these two programs:
 
 * `age 10 := age` -- produces 10 on top of the stack
 * `age 10 := ' age` -- puts symbol age on top of the stack. The symbol `age` represents a variable, but the variable has not been evaluated to a value and the raw symbol is put onto the stack.  
 * `age 10 := age 20 :=` -- this program is illegal, because assignment expects a symbol on the left-hand side, but instead, it gets 10.
 * `age 10 := ' age 20 :=` -- this program defines a variable `age` and binds it to 10 first, then puts symbol `age` onto the stack, and re-binds it to value 20.
-* Note, if the symbol has not been bound to function or variable, using it will put it onto the stack raw. Because unbound symbol evaluates to itself.
+* Note, if the symbol has not been bound to a function or variable, using it will put it onto the stack raw. Because an unbound symbol evaluates to itself.
 
-In order to evaluate bound symbol to a value, one can use `eval` function. Eval expects symbol on the stack, and returns the value of that symbol. In the case of variable it will be the value, and in the case of the function name it will be the quotation that is the function body. Observe:
+To evaluate bound symbol to a value, one can use `eval` function. Eval expects a symbol on the stack and returns the value of that symbol. In the case of variable it will be the value, and in the case of the function name it will be the quotation that is the function body. Observe:
 
 * `age 10 := ' age eval` will bind age to value 10, then it will put age onto the stack as symbol, and then evaluate it to value 10. So, this program will end up with 10 on top of the stack.
 

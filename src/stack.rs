@@ -1,6 +1,6 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumber, StackEmpty};
-use crate::mylib::{is_op};
+use crate::mylib::is_op;
 use crate::stack::Type::*;
 
 /////////////////////////////////////////// Type //////////////////////////////////////////////
@@ -269,7 +269,7 @@ impl Stack<Type> {
         // Only pushes the new value if it isn't empty
         let mut swap = if !new.is_empty() {
             self.reverse();
-            self.push(new.to_owned());
+            self.push(new);
             self.reverse();
             true
         } else {
