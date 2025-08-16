@@ -1,11 +1,11 @@
-use crate::list_logical_ops::ARITHMETIC_OPS;
-use crate::list_logical_ops::LIST_OPS;
-use crate::list_logical_ops::LOGICAL_OPS;
 use crate::combination_ops::{compare, invert, length};
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedVariable, IncompleteList, IncompleteQuotation, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::find_ops::handle_literal_and_operator;
 use crate::find_ops::Operations::{Arithmetic, List, Logical};
+use crate::list_logical_ops::ARITHMETIC_OPS;
+use crate::list_logical_ops::LIST_OPS;
+use crate::list_logical_ops::LOGICAL_OPS;
 use crate::quotation_ops::QUOTATION_OPS;
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 use crate::stack::{string_to_type, Stack, Type};
@@ -139,7 +139,9 @@ pub fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
             // Remove the last whitespace
             if !str_buf.is_empty() &&
-                str_buf.last().unwrap().trim().is_empty() {
+                str_buf.last().unwrap().trim().is_empty() &&
+                has_start_quote && has_end_quote
+                    {
                 str_buf.pop();
             }
             
@@ -322,9 +324,10 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
         // Remove the operator
         stack.pop();
 
-        let c_string = c.type_to_string().to_ascii_lowercase();
+        let c_string = c.type_to_string().to_lowercase()
+                               .trim_matches(|c| c == ' ' || c == '"').to_string();
         let op = c_string.as_str();
-
+        
         let new_stack =
 
             if c == String_("length".to_string()) { 
