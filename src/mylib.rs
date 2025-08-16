@@ -322,15 +322,12 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
         // Remove the operator
         stack.pop();
 
-        let c_string = c.type_to_string();
+        let c_string = c.type_to_string().to_ascii_lowercase();
         let op = c_string.as_str();
 
         let new_stack =
 
-            // Ignores ""
-            if c.is_empty() { stack.clone() }
-
-            else if c == String_("length".to_string()) { 
+            if c == String_("length".to_string()) { 
                 length(stack)
             }
 
@@ -345,28 +342,25 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
             else if ARITHMETIC_OPS.contains(&op) {
                 stack.push(c);
                 let mut new = &mut stack.clone();
-                let mut new2 = new.clone();
 
-                handle_literal_and_operator(Arithmetic, &mut new, &mut new2, false)
+                handle_literal_and_operator(Arithmetic, &mut new, false)
             }
 
             else if LOGICAL_OPS.contains(&op) {
                 stack.push(c);
                 let mut new = &mut stack.clone();
-                let mut new2 = new.clone();
 
-                handle_literal_and_operator(Logical, &mut new, &mut new2, false)
+                handle_literal_and_operator(Logical, &mut new, false)
             }
-
-            else if STRING_OPS.contains(&op) { parse_string(op, stack) }
 
             else if LIST_OPS.contains(&op) {
                 stack.push(c);
                 let mut new = &mut stack.clone();
-                let mut new2 = new.clone();
 
-                handle_literal_and_operator(List, &mut new, &mut new2, false)
+                handle_literal_and_operator(List, &mut new, false)
             }
+
+            else if STRING_OPS.contains(&op) { parse_string(op, stack) }
 
             else if STACK_OPS.contains(&op) { stack_op(op, stack) }
 

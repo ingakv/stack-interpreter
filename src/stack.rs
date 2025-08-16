@@ -91,10 +91,11 @@ impl Type {
                 }
             }
             String_(val) => {
-                if let Int_(x) = string_to_type(val) {
-                    x
-                } else {
-                    {
+                match string_to_type(val) {
+                    Float_(x) => Float_(x).type_to_int(),
+                    Int_(x) => Int_(x).type_to_int(),
+                    Bool_(x) => Bool_(x).type_to_int(),
+                    _ =>  {
                         print_error(ExpectedNumber);
                         0
                     }
@@ -120,10 +121,11 @@ impl Type {
                 }
             }
             String_(val) => {
-                if let Float_(x) = string_to_type(val) {
-                    x
-                } else {
-                    {
+                match string_to_type(val) { 
+                    Float_(x) => Float_(x).type_to_float(),
+                    Int_(x) => Int_(x).type_to_float(),
+                    Bool_(x) => Bool_(x).type_to_float(),
+                    _ =>  {
                         print_error(ExpectedNumber);
                         0.0
                     }
@@ -206,6 +208,7 @@ impl Stack<Type> {
     }
     
     // Compares the stack with another and returns true if they are equal
+    #[allow(dead_code)]
     pub fn is_equal(&self, old_stack: Stack<Type>) -> bool {
 
         let mut is_equal = true;
@@ -320,6 +323,7 @@ impl Stack<Type> {
         ans
     }
 
+    #[allow(dead_code)]
     pub fn stack_to_string(&self) -> String {
         if !self.is_empty() {
             let mut buf = vec![];
@@ -399,6 +403,7 @@ pub(crate) fn is_block(el: Vec<Type>) -> bool {
 }
 
 // Checks whether the variable is a list
+#[allow(dead_code)]
 pub(crate) fn is_list(el: Vec<Type>) -> bool {
     for i in el { if !i.is_list() {return false} }
     true

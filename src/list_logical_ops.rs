@@ -107,16 +107,17 @@ pub(crate) fn list_op(stack: &mut Stack<Type>, c: &str, li: Vec<Type>, el: Type)
     // Removes the operator
     stack.pop();
 
-    let head = if !li.is_empty() {
-        li.first().unwrap().to_owned()
-    } else {
-        print_error(ExpectedList);
-        String_(String::new())
-    };
-
     let (new_el, remove_el) = match c {
         // Returns the first item of the list
-        "head" => (head, true),
+        "head" => {
+            let head = if !li.is_empty() {
+                li.first().unwrap().to_owned()
+            } else {
+                print_error(ExpectedList);
+                String_(String::new())
+            };
+            (head, true)
+        }
 
         // Returns the last item of the list
         "tail" => {

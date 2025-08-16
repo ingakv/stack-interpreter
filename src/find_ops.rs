@@ -17,9 +17,11 @@ pub enum Operations {
 pub(crate) fn handle_literal_and_operator(
     ops: Operations,
     stack: &mut Stack<Type>,
-    og: &mut Stack<Type>,
     skip: bool,
 ) -> Stack<Type> {
+    
+    let mut old_stack = stack.clone();
+    
     // Remove the top element and store it
     let c = stack.pop().unwrap_or_else(|| String_(String::new()));
 
@@ -34,22 +36,22 @@ pub(crate) fn handle_literal_and_operator(
     // Checks if it is an operator
     else if operation_type(ops).contains(&st) && !skip {
         // Loops through and finds the next two items of the correct literal type
-        let item2 = handle_literal_and_operator(ops, stack, og, true);
-        let item1 = handle_literal_and_operator(ops, stack, og, true);
+        let item2 = handle_literal_and_operator(ops, stack, true);
+        let item1 = handle_literal_and_operator(ops, stack, true);
         
         // Lists are handled differently
         if let Some(List_(x)) = item2.first() {
 
             // Loops through and finds the next non-list (AKA string)
-            let mut new_li = stack.clone();
+            let mut new_li = old_stack.clone();
             new_li.elements.pop();
             let str = find_string(&mut new_li);
 
             // Functions with two lists
-            if let Some(y) = item1.first() { list_op(og, &st, x, y) }
+            if let Some(y) = item1.first() { list_op(&mut old_stack, &st, x, y) }
                 
             // Functions with a list and a string
-            else if let Some(y) = str.first() { list_op(og, &st, x, y) }
+            else if let Some(y) = str.first() { list_op(&mut old_stack, &st, x, y) }
 
             // Functions that require only one list
             else {
@@ -58,26 +60,26 @@ pub(crate) fn handle_literal_and_operator(
                     "each" => Stack {
                         elements: x,
                     },
-                    _ => list_op(og, &st, x, String_(String::new())),
+                    _ => list_op(&mut old_stack, &st, x, String_(String::new())),
                 }
             }
         }
         
         else if let (Some(x), Some(y)) = (item1.first(), item2.first()) {
-            find_wanted_literal_type(ops, og, &st, x, y)
+            find_wanted_literal_type(ops, &mut old_stack, &st, x, y)
         }
             
         // If there are less than two valid items in the stack, the original stack gets sent back
         // (without the operator)
         else {
             print_error_literal(ops);
-            og.pop();
-            og.to_owned()
+            old_stack.pop();
+            old_stack.to_owned()
         }
     } else if is_wanted_literal_type(ops, c.to_owned()) {
         Stack { elements: vec![c] }
     } else {
-        handle_literal_and_operator(ops, stack, og, true)
+        handle_literal_and_operator(ops, stack, true)
     }
 }
 

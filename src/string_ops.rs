@@ -8,12 +8,12 @@ pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
 
 pub(crate) const IO_OPS: [&str; 2] = ["print", "read"];
 
-pub(crate) const STRING_OPS: [&str; 3] = ["parseInteger", "parseFloat", "words"];
+pub(crate) const STRING_OPS: [&str; 3] = ["parseinteger", "parsefloat", "words"];
 
 pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
     match elem {
         // Converts a string to an integer
-        "parseInteger" => {
+        "parseinteger" => {
             if let Some(str_ref) = stack.pop() {
                 stack.push(Int_(str_ref.type_to_int()))
             } else {
@@ -22,7 +22,7 @@ pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
         }
 
         // Converts a string to a float
-        "parseFloat" => {
+        "parsefloat" => {
             if let Some(str_ref) = stack.pop() {
                 stack.push(Float_(str_ref.type_to_float()))
             } else {

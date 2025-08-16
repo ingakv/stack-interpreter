@@ -1,6 +1,6 @@
 use crate::error_handling::Error::*;
 
-#[derive(PartialEq)]
+#[allow(dead_code)]
 pub(crate) enum Error {
     StackEmpty,
     ExpectedNumberStringOrList,
