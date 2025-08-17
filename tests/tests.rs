@@ -68,6 +68,11 @@ mod test_literals {
     }
 
     #[test]
+    fn test_nested_quotation_exec() {
+        assert_eq!(t("{ { print } exec }"), "{ { print } exec }");
+    }
+
+    #[test]
     fn test_literal_list_of_blocks() {
         assert_eq!(
             t("[ { + } { 10 + } { 20 10 + } ]"),
@@ -117,6 +122,11 @@ mod test_arithmetic_with_type_coercion {
     fn test_division_with_float() {
         assert_eq!(t("20.0 2 div"), "10.0");
     }
+
+    #[test]
+    fn test_bool_int_equality() {
+        assert_eq!(t("True 0 + False 0 + =="), "False");
+    }
 }
 
 mod test_bool_operations {
@@ -165,7 +175,33 @@ mod test_comparison {
     fn test_float_greater_than_operation() {
         assert_eq!(t("20.0 20.0 >"), "False");
     }
+    
+    #[test]
+    fn test_greater_than_or_equal_true() {
+        assert_eq!(t("20 10 >="), "True");
+    }
 
+    #[test]
+    fn test_greater_than_or_equal_false() {
+        assert_eq!(t("10 20 >="), "False");
+    }
+
+    #[test]
+    fn test_greater_than_or_equal_equal_values() {
+        assert_eq!(t("10 10 >="), "True");
+    }
+
+    #[test]
+    fn test_greater_than_or_equal_with_float() {
+        assert_eq!(t("20 10.0 >="), "True");
+    }
+
+    #[test]
+    fn test_greater_than_or_equal_int_float_equal() {
+        use bprog::t;
+        assert_eq!(t("10 10.0 >="), "True");
+    }
+    
     #[test]
     fn test_equality_operation() {
         assert_eq!(t("10 10 =="), "True");
@@ -358,13 +394,33 @@ mod test_list_quotations {
     }
 
     #[test]
+    fn test_each_multiply_append() {
+        assert_eq!(t("[ 1 2 3 ] each { 10 * } [ ] append append append"), "[10,20,30]");
+    }
+
+    #[test]
     fn test_each_add() {
         assert_eq!(t("[ 1 2 3 4 ] each { 10 * } + + +"), "100");
     }
 
     #[test]
+    fn test_each_add_with_block() {
+        assert_eq!(t("10 [ 1 2 3 ] each { + }"), "16");
+    }
+
+    #[test]
+    fn test_each_add_condensed() {
+        assert_eq!(t("10 [ 1 2 3 ] each + "), "16");
+    }
+
+    #[test]
     fn test_foldl_sum() {
         assert_eq!(t("[ 1 2 3 4 ] 0 foldl { + }"), "10");
+    }
+
+    #[test]
+    fn test_foldl_sum_short() {
+        assert_eq!(t("[ 1 2 3 4 ] 0 foldl +"), "10");
     }
 
     #[test]
@@ -426,6 +482,31 @@ mod test_assignments {
     fn test_variable_update() {
         assert_eq!(t("age 20 := [ 10 age ]"), "[10,20]");
     }
+
+    #[test]
+    fn test_assignments_quote() {
+        assert_eq!(t("' age"), "age");
+    }
+
+    #[test]
+    fn test_assignments_reassign() {
+        assert_eq!(t("age 10 := ' age 20 := age"), "20");
+    }
+
+    #[test]
+    fn test_assignments_eval() {
+        assert_eq!(t("age 10 := ' age eval"), "10");
+    }
+
+    #[test]
+    fn test_assignments_fun_inc() {
+        assert_eq!(t("inc { 1 + } fun 1 inc"), "2");
+    }
+
+    #[test]
+    fn test_assignments_fun_mul10_inc() {
+        assert_eq!(t("mul10 { 10 * } fun inc { 1 + } fun 10 inc mul10"), "110");
+    }
 }
 
 mod test_quotations {
@@ -457,7 +538,7 @@ mod test_quotations {
     }
 }
 
-mod test_if {
+mod test_if_with_quotation_blocks {
     use bprog::t;
 
     #[test]
@@ -570,6 +651,36 @@ mod test_loop {
             "[10,9,8,7,6,5,4,3,2,1]"
         );
     }
+
+    #[test]
+    fn test_odd_function_false_case() {
+        assert_eq!(t("odd { dup 2 div swap 2 / == if False True } fun 2 odd"), "False");
+    }
+
+    #[test]
+    fn test_odd_function_true_case() {
+        assert_eq!(t("odd { dup 2 div swap 2 / == if False True } fun 3 odd"), "True");
+    }
+
+    #[test]
+    fn test_to_list_function() {
+        assert_eq!(t("toList { [ ] swap times append } fun 1 2 3 4 4 toList"), "[1,2,3,4]");
+    }
+
+    #[test]
+    fn test_gen1to_num_function_sum() {
+        assert_eq!(t("gen1toNum { ' max swap := 1 loop { dup max > } { dup 1 + } } fun 3 gen1toNum + + +"), "10");
+    }
+
+    #[test]
+    fn test_gen1to_num_function_sum_with_gte() {
+        assert_eq!(t("gen1toNum { ' max swap := 1 loop { dup max >= } { dup 1 + } } fun 3 gen1toNum + +"), "6");
+    }
+
+    #[test]
+    fn test_odd_to_list_gen1to_num_functions_combined() {
+        assert_eq!(t("odd { dup 2 div swap 2 / == if False True } fun toList { [ ] swap times append } fun gen1toNum { ' max swap := 1 loop { dup max > } { dup 1 + } } fun 4 gen1toNum 5 toList map odd"), "[True,False,True,False,True]");
+    }
 }
 
 mod test_functions {
@@ -634,4 +745,10 @@ mod test_functions {
     fn test_mul10_and_inc_functions() {
         assert_eq!(t("mul10 { 10 * } fun inc { 1 + } fun 10 inc mul10"), "110");
     }
+    
+    #[test]
+    fn test_drop_function() {
+        assert_eq!(t("drop { times tail } fun [ 1 2 3 4 5 ] 3 drop"), "[4,5]");
+    }
+
 }

@@ -3,7 +3,7 @@ use crate::error_handling::Error::{DivisionByZero, ExpectedList, ExpectedListOrS
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
 use crate::stack::{Stack, Type};
 
-pub(crate) const ARITHMETIC_OPS: [&str; 7] = ["+", "-", "*", "/", "div", "<", ">"];
+pub(crate) const ARITHMETIC_OPS: [&str; 9] = ["+", "-", "*", "/", "div", "<", ">", "<=", ">="];
 pub(crate) const LOGICAL_OPS: [&str; 2] = ["&&", "||"];
 pub(crate) const LIST_OPS: [&str; 5] = ["head", "tail", "empty", "cons", "append"];
 
@@ -63,9 +63,19 @@ pub fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<T
             Bool_(float_x < float_y)
         }
 
+        // Smaller than or equal to
+        "<=" => {
+            Bool_(float_x <= float_y)
+        }
+
         // Bigger than
         ">" => {
             Bool_(float_x > float_y)
+        }
+
+        // Bigger than or equal to
+        ">=" => {
+            Bool_(float_x >= float_y)
         }
 
         _ => panic!("An error occurred in arithmetic_ops!"),

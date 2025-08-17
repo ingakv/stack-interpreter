@@ -2,8 +2,6 @@
 
 This is a simple concatenative, stack-based, programming language interpreter that can do simple math, io, parsing, and simple code blocks. I wrote this in Rust.
 
-Currently, I have Ints, Floats, Bools, Strings, Lists, and Code blocks as separate file types. It also has the ability to execute code for a list with the 'each' function.
-
 However, this version does not pass the majority of the tests. This is due to an issue concerning the order in which the variables or operations are executed.
 
 The previous version with less functionality is commit 2d53a09e53b97eb99820a3f1148bf8b8e7d9efd9
@@ -30,7 +28,7 @@ The program searches through the entire stack from the bottom up.
 If an operator has been added, it will loop through until it finds two (or one, depending on the operator) variables of the correct type, even if there are other variables in between.
 I.e., if the stack is `[1, "hello", 2, +]` the program will extract 1 and 2, and push the result to the back, resulting in the stack now being `["hello", 3]`.
 
-Everything in `bprog` is white-space delimited, so you need white space between all the symbols, and white space between " and the string. 
+Everything in `bprog` is white-space delimited, so you need white space between all the symbols, and white space between " and the string.
 
 
 
@@ -218,34 +216,6 @@ To evaluate bound symbol to a value, one can use `eval` function. Eval expects a
 
 
 
-* The program should handle errors and print them to help user understand what went wrong
-* The program should be able to parse input into custom types.
-  * Strings, bools, operators, lists
+## Error handling
 
-
-
-
-
-**Implemented**
-
-- NORMAL mode
-- REPL mode
-- Literals
-- Stack operations
-- Simple IO operations
-- String parsing
-- Arithmetic operations
-- Logical operations
-- List operations
-- Parsing initial input
-- Error handling that explains what the user did wrong
-  - The program should never panic. I have rather implemented that if an error occurs, i.e., the user tries to pop an empty stack, an appropriate error message will be printed out, but the program should not continue to run. In the case of any user-related error, the stack will not be changed.
-
-
-
-
-**Not Implemented**
-
-- Control flow ( if, then, else, loop, times, break, block)
-- Assigning variables
-
+The program should never panic. I have rather implemented that if an error occurs, i.e., the user tries to pop an empty stack, an appropriate error message will be printed out, but the program should not continue to run. In the case of any user-related error, the stack will not be changed.
