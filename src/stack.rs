@@ -1,8 +1,10 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumber, StackEmpty};
-use crate::mylib::is_op;
 use crate::stack::Type::*;
-
+use crate::string_ops::StringOnlyOps;
+use crate::string_ops::StringOnlyOps::{StackFloat, StackInt};
+use std::mem::discriminant;
+use crate::mylib::is_op;
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
 #[derive(PartialEq, Clone, Debug)]
@@ -43,9 +45,7 @@ impl Type {
                 }
             }
             List_(str) => {
-                let mut new_li: Vec<String> = vec![];
-
-                new_li.push("[".to_string());
+                let mut new_li: Vec<String> = vec!["[".to_string()];
 
                 if !str.is_empty() {
                     for i in str {
@@ -79,45 +79,39 @@ impl Type {
     }
 
     // Returns the variable as an int
-    pub fn type_to_int(&self) -> i128 {
+    pub fn type_to_int(&self) -> Option<i128> {
         match self {
-            Int_(val) => *val,
-            Float_(val) => *val as i128,
+            Int_(val) => Some(*val),
+            Float_(val) => Some(*val as i128),
             Bool_(val) => {
                 if *val {
-                    1i128
+                    Some(1i128)
                 } else {
-                    0i128
+                    Some(0i128)
                 }
             }
             String_(val) => {
                 match string_to_type(val) {
-                    Float_(x) => Float_(x).type_to_int(),
                     Int_(x) => Int_(x).type_to_int(),
+                    Float_(x) => Float_(x).type_to_int(),
                     Bool_(x) => Bool_(x).type_to_int(),
-                    _ =>  {
-                        print_error(ExpectedNumber);
-                        0
-                    }
+                    _ =>  None
                 }
             }
-            _ => {
-                print_error(ExpectedNumber);
-                0
-            }
+            _ => { print_error(ExpectedNumber); Some(0) }
         }
     }
 
     // Returns the variable as a float
-    pub fn type_to_float(&self) -> f64 {
+    pub fn type_to_float(&self) -> Option<f64> {
         match self {
-            Int_(val) => *val as f64,
-            Float_(val) => *val,
+            Int_(val) => Some(*val as f64),
+            Float_(val) => Some(*val),
             Bool_(val) => {
                 if *val {
-                    1.0f64
+                    Some(1.0f64)
                 } else {
-                    0.0f64
+                    Some(0.0f64)
                 }
             }
             String_(val) => {
@@ -125,16 +119,10 @@ impl Type {
                     Float_(x) => Float_(x).type_to_float(),
                     Int_(x) => Int_(x).type_to_float(),
                     Bool_(x) => Bool_(x).type_to_float(),
-                    _ =>  {
-                        print_error(ExpectedNumber);
-                        0.0
-                    }
+                    _ =>  None
                 }
             }
-            _ => {
-                print_error(ExpectedNumber);
-                0.0
-            }
+            _ => { print_error(ExpectedNumber); Some(0.0) }
         }
     }
     
@@ -182,6 +170,16 @@ impl Type {
         match self {
             Int_(_) => true,
             Float_(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn same_type(&self, other: StringOnlyOps) -> bool {
+        match self {
+            Int_(_) => discriminant(&other) == discriminant(&StackInt),
+            Float_(_) => discriminant(&other) == discriminant(&StackFloat),
+            String_(_) => discriminant(&other) != discriminant(&StackInt) && 
+                          discriminant(&other) != discriminant(&StackFloat),
             _ => false,
         }
     }

@@ -1,4 +1,4 @@
-use crate::combination_ops::{compare, invert, length};
+use crate::combination_ops::{combination_op, COMBINATION_OPS};
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedVariable, IncompleteList, IncompleteQuotation, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::find_ops::handle_literal_and_operator;
@@ -9,7 +9,7 @@ use crate::list_logical_ops::LOGICAL_OPS;
 use crate::quotation_ops::QUOTATION_OPS;
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 use crate::stack::{string_to_type, Stack, Type};
-use crate::string_ops::{parse_string, simple_io, stack_op, IO_OPS, STACK_OPS, STRING_OPS};
+use crate::string_ops::{stack_string_io, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::Write;
 
@@ -330,17 +330,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
         
         let new_stack =
 
-            if c == String_("length".to_string()) { 
-                length(stack)
-            }
-
-            else if c == String_("==".to_string()) {
-                compare(stack)
-            }
-
-            else if c == String_("not".to_string()) { 
-                invert(stack)
-            }
+            if COMBINATION_OPS.contains(&op) { combination_op(op, stack) }
 
             else if ARITHMETIC_OPS.contains(&op) {
                 stack.push(c);
@@ -362,12 +352,11 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 
                 handle_literal_and_operator(List, &mut new, false)
             }
+                
+            else if IO_OPS.contains(&op) ||
+                    STRING_OPS.contains(&op) ||
+                    STACK_OPS.contains(&op) { stack_string_io(op, stack) }
 
-            else if STRING_OPS.contains(&op) { parse_string(op, stack) }
-
-            else if STACK_OPS.contains(&op) { stack_op(op, stack) }
-
-            else if IO_OPS.contains(&op) { simple_io(op, stack) }
 
             else { old_stack };
 
@@ -378,7 +367,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 
 
 // Pattern matches the types to push to vector
-pub(crate) fn push_to_vec(i: &str, mut stack: Vec<Type>) -> Vec<Type> {
+fn push_to_vec(i: &str, mut stack: Vec<Type>) -> Vec<Type> {
     match string_to_type(i) {
         Int_(i) => stack.push(Int_(i)),
         Float_(i) => stack.push(Float_(i)),
@@ -407,25 +396,8 @@ pub(crate) fn is_op(el: &str) -> bool {
     STRING_OPS.contains(&el) ||
     ARITHMETIC_OPS.contains(&el) ||
     LOGICAL_OPS.contains(&el) ||
-    LIST_OPS.contains(&el)
+    LIST_OPS.contains(&el) ||
+    COMBINATION_OPS.contains(&el)
 }
 
-pub fn pop_front(t: Type) -> (Option<Type>, Type) {
-
-    match t {
-
-        Block_(val) => {
-
-            let mut new = val.clone();
-
-            new.reverse();
-            let el = new.pop();
-            new.reverse();
-
-            (el, Block_(new))
-
-        }
-        _ => { (None, t) }
-    }
-}
 

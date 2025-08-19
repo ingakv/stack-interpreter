@@ -1,5 +1,5 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{DivisionByZero, ExpectedList, ExpectedListOrString};
+use crate::error_handling::Error::{DivisionByZero, ExpectedList, ExpectedListOrString, ExpectedNumber};
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
 use crate::stack::{Stack, Type};
 
@@ -10,10 +10,10 @@ pub(crate) const LIST_OPS: [&str; 5] = ["head", "tail", "empty", "cons", "append
 
 pub fn arithmetic(stack: &mut Stack<Type>, c: &str, x: Type, y: Type) -> Stack<Type> {
     // Float is set as the default value to do calculations
-    let float_x = x.type_to_float();
-    let float_y = y.type_to_float();
-    let int_x = x.type_to_int();
-    let int_y = y.type_to_int();
+    let float_x = x.type_to_float().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
+    let float_y = y.type_to_float().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
+    let int_x = x.type_to_int().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
+    let int_y = y.type_to_int().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
 
     let is_float = matches!(x, Float_(_)) || matches!(y, Float_(_));
 

@@ -1,5 +1,5 @@
-use crate::mylib::{check_operator, pop_front};
-use crate::stack::Type::{Int_, List_};
+use crate::mylib::{check_operator};
+use crate::stack::Type::{Block_, Int_, List_};
 use crate::stack::{Stack, Type};
 
 pub(crate) const QUOTATION_OPS: [&str; 2] = [
@@ -117,7 +117,7 @@ pub(crate) fn quotation(stack: &mut Stack<Type>, c: &str, block: Type, list: Typ
 }
 
 // Execute a code block
-pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
+fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
     let mut old_block = block.clone();
 
     loop {
@@ -135,4 +135,24 @@ pub(crate) fn exec(mut stack: Stack<Type>, block: Type) -> Stack<Type> {
     }
 
     stack
+}
+
+
+fn pop_front(t: Type) -> (Option<Type>, Type) {
+
+    match t {
+        
+        Block_(val) => {
+
+            let mut new = val.clone();
+
+            new.reverse();
+            let el = new.pop();
+            new.reverse();
+
+            (el, Block_(new))
+
+        }
+        _ => { (None, t) }
+    }
 }

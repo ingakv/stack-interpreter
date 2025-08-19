@@ -89,8 +89,7 @@ All literals are simply pushed onto the stack.
   * `+` ( x y --> x_plus_y ) - addition
   * `-` ( x y --> x_minus_y ) - subtraction
   * `*` ( x y --> mul ) - multiplication
-  * `/` ( x y --> fdivision ) - floating point division
-  * `div` ( x y --> integer_division ) - integer division
+  * `/` / `div` ( x y --> division ) - integer or floating point division
   * `<` ( x y --> bool) checks if `x < y`, and puts true or false on the stack
   * `>` ( x y --> bool) checks if `x > y`, and puts true or false on the stack
   * `==` ( x y --> bool ) checks if `x == y` and puts true or false on the stack

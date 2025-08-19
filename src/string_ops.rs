@@ -1,66 +1,83 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedString, NotEnoughValues, StackEmpty};
-use crate::mylib::{get_line, is_op};
-use crate::stack::Type::{Float_, Int_, List_, String_};
-use crate::stack::{is_string_number, string_to_type, Stack, Type};
+use crate::mylib::get_line;
+use crate::stack::Type::{Int_, List_, String_};
+use crate::stack::{string_to_type, Stack, Type};
+use crate::string_ops::StringOnlyOps::{Print, StackFloat, StackInt, Words};
 
 pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
 
+#[derive(Clone, Copy)]
+pub enum StringOnlyOps {
+    Print,
+    Words,
+    StackInt,
+    StackFloat,
+}
 pub(crate) const IO_OPS: [&str; 2] = ["print", "read"];
 
 pub(crate) const STRING_OPS: [&str; 3] = ["parseinteger", "parsefloat", "words"];
 
-pub(crate) fn parse_string(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
-    match elem {
-        // Converts a string to an integer
-        "parseinteger" => {
-            if let Some(str_ref) = stack.pop() {
-                stack.push(Int_(str_ref.type_to_int()))
-            } else {
-                print_error(ExpectedString)
-            }
-        }
 
-        // Converts a string to a float
-        "parsefloat" => {
-            if let Some(str_ref) = stack.pop() {
-                stack.push(Float_(str_ref.type_to_float()))
-            } else {
-                print_error(ExpectedString)
-            }
-        }
+
+
+// Performs string-only operations
+fn parse_string(operator: StringOnlyOps, elem: Type) -> Type {
+    
+    match operator {
+        
+        // Prints the top string to standard output and removes it from the stack
+        Print => { elem.print(); String_(String::new()) }
 
         // Divides the string into words and puts them in a list
-        "words" => {
-            if let Some(String_(str_ref)) = stack.pop() {
-                let str_val: Vec<&str> = str_ref.split_whitespace().collect();
+        Words => {
 
-                let mut new_li = vec![];
+            let st = elem.type_to_string();
+            let str_val: Vec<&str> = st.trim_matches(|c| c == ' ' || c == '"').split_whitespace().collect();
+            let mut new_li = vec![];
 
-                for i in str_val {
-                    new_li.push(string_to_type(i));
-                }
-
-                stack.push(List_(new_li));
-            } else {
-                print_error(ExpectedString)
-            }
+            for i in str_val { new_li.push(string_to_type(i)); }
+            List_(new_li)
+        
         }
-
-        // Returns the length of the string
-        "length" => {
-            let st = stack.last().unwrap_or_else(|| String_(String::new()));
-            stack.push(Int_(st.type_to_string().trim_matches('\"').len() as i128))
-        }
-
-        _ => {}
+        _ => { elem }
     }
-
-    // Return the stack
-    stack.to_owned()
 }
 
-pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
+// Parses a string from the stack to a specific type
+fn parse_string_from_stack(stack: &mut Stack<Type>, parse_type: StringOnlyOps) -> Stack<Type> {
+    
+    let mut parsed = false;
+    
+    // Iterate through the stack from the end
+    for elem in stack.to_owned().elements.iter().rev() {
+
+        // Skip if the element is not a string
+        if let String_(elem) = elem {
+            let mut str = string_to_type(elem);
+
+            // Try to parse the string to the given type
+            if str.same_type(parse_type) {
+
+                // If the parse type is a string, perform string operations
+                if str.is_string() { str = parse_string(parse_type, str); }
+                
+            stack.replace_last_match(vec![String_(elem.to_string())], str);
+                
+                parsed = true;
+                
+                break;
+            }
+
+        }
+    }
+
+    if !parsed {print_error(ExpectedString) }
+    stack.to_owned()
+    
+}
+
+pub(crate) fn stack_string_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
     // Error handling on empty stack
     let len = stack.len();
@@ -69,12 +86,12 @@ pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
         
         match elem {
 
-            // dup duplicates the top element
+            // Duplicates the top element
             "dup" => {
                 stack.push(stack.last().unwrap())
             }
 
-            // swap swaps the top two elements
+            // Swaps the top two elements
             "swap" => {
                 if len > 1 {
                     stack.swap((len - 2).try_into().unwrap(), (len - 1).try_into().unwrap());
@@ -83,9 +100,29 @@ pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
                 }
             }
 
-            // pop removes the top element
-            "pop" => {
-                stack.pop();
+            // Removes the top element
+            "pop" => { stack.pop(); }
+            
+            // Converts a string to an integer
+            "parseinteger" => { parse_string_from_stack(stack, StackInt); }
+
+            // Converts a string to a float
+            "parsefloat" => { parse_string_from_stack(stack, StackFloat); }
+
+            "words" => { parse_string_from_stack(stack, Words); }
+
+            // Returns the length of the string
+            "length" => {
+                let st = stack.pop().unwrap_or_else(|| String_(String::new()));
+                stack.push(Int_(st.type_to_string().trim_matches('\"').len() as i128))
+            }
+
+            "print" => { parse_string_from_stack(stack, Print); }
+
+            // Reads an input and adds it to the stack as a string
+            "read" => {
+                let input = get_line();
+                stack.push(String_(input));
             }
 
             _ => {}
@@ -94,45 +131,4 @@ pub(crate) fn stack_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
 
     // Return the stack
     stack.to_owned()
-}
-
-pub(crate) fn simple_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
-    match elem {
-
-        // Prints the top element to standard output
-        "print" => {
-            if let Some(str_ref) = stack.pop() {
-                str_ref.print()
-            } else {
-                print_error(ExpectedString)
-            }
-        }
-
-        // Reads an input and adds it to the stack
-        "read" => {
-            let input = get_line();
-            stack.push(string_to_type(input.as_str()));
-        }
-
-        _ => {}
-    }
-
-    // Return the stack
-    stack.to_owned()
-}
-
-pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
-    // Remove the top element and store it
-    let c = stack.pop().unwrap_or_else(|| String_(String::new()));
-
-    // Skips if the stack is empty
-    if c.is_empty() {
-        Stack { elements: vec![] }
-    } else if !is_op(c.type_to_string().as_str())
-        && (c.is_string() || is_string_number(c.type_to_string().as_str()))
-    {
-        Stack { elements: vec![c] }
-    } else {
-        find_string(stack)
-    }
 }

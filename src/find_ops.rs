@@ -3,9 +3,9 @@ use crate::list_logical_ops::{list_op, LIST_OPS};
 use crate::list_logical_ops::{logical_op, LOGICAL_OPS};
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedList, ExpectedNumber};
+use crate::mylib::is_op;
 use crate::stack::Type::{Bool_, List_, String_};
-use crate::stack::{Stack, Type};
-use crate::string_ops::find_string;
+use crate::stack::{is_string_number, Stack, Type};
 
 #[derive(Clone, Copy)]
 pub enum Operations {
@@ -118,5 +118,22 @@ fn find_wanted_literal_type(wanted_type: Operations, stack: &mut Stack<Type>, op
             }
         }
         _ => stack.to_owned()
+    }
+}
+
+
+pub(crate) fn find_string(stack: &mut Stack<Type>) -> Stack<Type> {
+    // Remove the top element and store it
+    let c = stack.pop().unwrap_or_else(|| String_(String::new()));
+
+    // Skips if the stack is empty
+    if c.is_empty() {
+        Stack { elements: vec![] }
+    } else if !is_op(c.type_to_string().as_str())
+        && (c.is_string() || is_string_number(c.type_to_string().as_str()))
+    {
+        Stack { elements: vec![c] }
+    } else {
+        find_string(stack)
     }
 }

@@ -1,42 +1,53 @@
-use crate::list_logical_ops::list_op;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumberStringOrList, StackEmpty};
+use crate::list_logical_ops::list_op;
 use crate::quotation_ops::quotation;
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
 use crate::stack::{is_block, Stack, Type};
-use crate::string_ops::parse_string;
+use crate::string_ops::stack_string_io;
 use std::ops::Neg;
 
 
+pub(crate) const COMBINATION_OPS: [&str; 3] = ["length", "==", "not"];
+
+
 // By making these separate functions, several datatypes can be compared
+pub(crate) fn combination_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
+    match elem {
+        "length" => { length(stack); }
+        "==" => { compare(stack); }
+        "not" => { invert(stack); }
+        _ => {}
+    }
+
+    // Return the stack
+    stack.to_owned()
+}
+
+
 
 // Returns the length of the list or string
-pub(crate) fn length(stack: &mut Stack<Type>) -> Stack<Type> {
+fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
-    if stack.is_empty() { print_error(StackEmpty); return stack.to_owned(); }
-
-    let mut og = stack.clone();
-
-    let elem = stack.pop().unwrap_or_else(|| String_(String::new()));
-
+    let elem = stack.last().unwrap_or_else(|| { print_error(StackEmpty); String_(String::new())});
 
     // If it is a list
     if let List_(x) = elem {
-        list_op(&mut og, "length", x, String_(String::new()))
+        list_op(stack, "length", x, String_(String::new()))
     }
 
     // If it is a code block
     else if is_block(vec![elem.to_owned()]) {
-        og.replace_last_match(vec![elem.to_owned()], String_(String::new()));
-        quotation(&mut og, "length", elem, List_(vec![]))
+        stack.replace_last_match(vec![elem.to_owned()], String_(String::new()));
+        quotation(stack, "length", elem, List_(vec![]))
     }
 
-    else { parse_string("length", &mut og) }
+    else { stack_string_io("length", stack) }
 
 }
 
 
-pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
+fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
     let mut elem1 = None;
     let mut elem2 = None;
@@ -77,8 +88,8 @@ pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
         
         if is_number {
             // This ensures that i.e., 10.0 and 10 are considered as equal
-            elem1 = Some(Float_(elem1.unwrap().type_to_float()));
-            elem2 = Some(Float_(elem2.unwrap().type_to_float()));
+            elem1 = Some(Float_(elem1.unwrap().type_to_float().unwrap()));
+            elem2 = Some(Float_(elem2.unwrap().type_to_float().unwrap()));
         }
         stack.push(Bool_(elem1 == elem2));
     }
@@ -88,7 +99,7 @@ pub(crate) fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
 
 }
 
-pub(crate) fn invert(stack: &mut Stack<Type>) -> Stack<Type> {
+fn invert(stack: &mut Stack<Type>) -> Stack<Type> {
 
     let mut old_stack = stack.clone();
     loop {
