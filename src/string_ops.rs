@@ -32,8 +32,8 @@ fn parse_string(operator: StringOnlyOps, elem: Type) -> Type {
         // Divides the string into words and puts them in a list
         Words => {
 
-            let st = elem.type_to_string();
-            let str_val: Vec<&str> = st.trim_matches(|c| c == ' ' || c == '"').split_whitespace().collect();
+            let st = elem.type_to_string_trimmed();
+            let str_val: Vec<&str> = st.split_whitespace().collect();
             let mut new_li = vec![];
 
             for i in str_val { new_li.push(string_to_type(i)); }
@@ -114,7 +114,7 @@ pub(crate) fn stack_string_io(elem: &str, stack: &mut Stack<Type>) -> Stack<Type
             // Returns the length of the string
             "length" => {
                 let st = stack.pop().unwrap_or_else(|| String_(String::new()));
-                stack.push(Int_(st.type_to_string().trim_matches('\"').len() as i128))
+                stack.push(Int_(st.type_to_string_trimmed().len() as i128))
             }
 
             "print" => { parse_string_from_stack(stack, Print); }

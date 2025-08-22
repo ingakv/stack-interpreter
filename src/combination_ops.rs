@@ -1,7 +1,6 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumberStringOrList, StackEmpty};
-use crate::list_logical_ops::list_op;
-use crate::quotation_ops::quotation;
+use crate::list_codeblock_ops::{list_op, codeblock};
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
 use crate::stack::{is_block, Stack, Type};
 use crate::string_ops::stack_string_io;
@@ -12,8 +11,11 @@ pub(crate) const COMBINATION_OPS: [&str; 3] = ["length", "==", "not"];
 
 
 // By making these separate functions, several datatypes can be compared
-pub(crate) fn combination_op(elem: &str, stack: &mut Stack<Type>) -> Stack<Type> {
-    match elem {
+pub(crate) fn combination_op(stack: &mut Stack<Type>) -> Stack<Type> {
+    
+    let op = stack.pop().unwrap().type_to_string_trimmed().to_lowercase();
+    
+    match op.as_str() {
         "length" => { length(stack); }
         "==" => { compare(stack); }
         "not" => { invert(stack); }
@@ -33,13 +35,12 @@ fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
     // If it is a list
     if let List_(x) = elem {
-        list_op(stack, "length", x, String_(String::new()))
+        list_op(stack, "length".to_string(), x, String_(String::new()))
     }
 
     // If it is a code block
     else if is_block(vec![elem.to_owned()]) {
-        stack.replace_last_match(vec![elem.to_owned()], String_(String::new()));
-        quotation(stack, "length", elem, List_(vec![]))
+        codeblock(stack, "length".to_string(), List_(vec![]), elem)
     }
 
     else { stack_string_io("length", stack) }

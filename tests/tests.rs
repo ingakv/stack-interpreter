@@ -68,7 +68,7 @@ mod test_literals {
     }
 
     #[test]
-    fn test_nested_quotation_exec() {
+    fn test_nested_codeblock_exec() {
         assert_eq!(t("{ { print } exec }"), "{ { print } exec }");
     }
 
@@ -372,7 +372,7 @@ mod test_lists {
     }
 }
 
-mod test_list_quotations {
+mod test_list_codeblocks {
     use bprog::t;
 
     #[test]
@@ -509,7 +509,7 @@ mod test_assignments {
     }
 }
 
-mod test_quotations {
+mod test_codeblocks {
     use bprog::t;
 
     #[test]
@@ -538,7 +538,7 @@ mod test_quotations {
     }
 }
 
-mod test_if_with_quotation_blocks {
+mod test_if_with_codeblocks {
     use bprog::t;
 
     #[test]
@@ -567,7 +567,7 @@ mod test_if_with_quotation_blocks {
     }
 }
 
-mod test_if_without_quotation {
+mod test_if_without_codeblock {
     use bprog::t;
 
     #[test]

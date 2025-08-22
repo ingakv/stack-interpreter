@@ -1,9 +1,10 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedNumber, StackEmpty};
+use crate::error_handling::Error::ExpectedNumber;
 use crate::stack::Type::*;
 use crate::string_ops::StringOnlyOps;
 use crate::string_ops::StringOnlyOps::{StackFloat, StackInt};
 use std::mem::discriminant;
+use std::vec;
 use crate::mylib::is_op;
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
@@ -15,6 +16,7 @@ pub enum Type {
     String_(String),
     List_(Vec<Type>),
     Block_(Vec<Type>),
+    Variable(String),
 }
 
 // Type functions
@@ -26,24 +28,13 @@ impl Type {
             Float_(str) => {
                 if !str.to_string().contains('.') {
                     format!("{}.0", str.to_string())
-                } else {
-                    str.to_string()
-                }
+                } else { str.to_string() }
             }
             Bool_(str) => {
-                if str.to_string() == "true" {
-                    "True".to_string()
-                } else {
-                    "False".to_string()
-                }
+                if str.to_string().to_lowercase() == "true" { "True".to_string() } 
+                else { "False".to_string() }
             }
-            String_(str) => {
-                if !is_op(str.as_str()) {
-                    ("\"".to_owned() + &str + "\"").to_string()
-                } else {
-                    str.to_string()
-                }
-            }
+            String_(str) => { ("\"".to_owned() + &str + "\"").to_string() }
             List_(str) => {
                 let mut new_li: Vec<String> = vec!["[".to_string()];
 
@@ -66,7 +57,7 @@ impl Type {
 
                 if !str.is_empty() {
                     for i in str {
-                        new_li.push(i.type_to_string());
+                        new_li.push(i.type_to_string_trimmed());
                         new_li.push(" ".to_string());
                     }
                     new_li.pop();
@@ -75,7 +66,12 @@ impl Type {
 
                 new_li.concat()
             }
+            Variable(str) => {str.to_string()}
         }
+    }
+    
+    pub fn type_to_string_trimmed(&self) -> String {
+        self.type_to_string().trim_matches(|c| c == ' ' || c == '"').to_string()
     }
 
     // Returns the variable as an int
@@ -273,9 +269,7 @@ impl Stack<Type> {
             self.push(new);
             self.reverse();
             true
-        } else {
-            false
-        };
+        } else { false };
 
         while !remove.is_empty() {
             // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
@@ -304,51 +298,7 @@ impl Stack<Type> {
         if !self.is_empty() {
             // Prints the stack
             println!("\nStack: ");
-            for i in self.elements.iter().rev() {
-                i.print();
-            }
-        }
-    }
-
-    pub fn has_code(&self) -> bool {
-        let mut ans = false;
-
-        for i in &self.elements {
-            if i.is_block() {
-                ans = true
-            }
-        }
-        ans
-    }
-
-    #[allow(dead_code)]
-    pub fn stack_to_string(&self) -> String {
-        if !self.is_empty() {
-            let mut buf = vec![];
-
-            for i in self.elements.iter() {
-                match i {
-                    List_(_) | String_(_) | Block_(_) => {
-                        let mut new_li = i.type_to_string();
-                        new_li = new_li.replace("[", " [ ");
-                        new_li = new_li.replace("{", " { ");
-                        new_li = new_li.replace("}", " } ");
-                        new_li = new_li.replace("]", " ] ");
-                        new_li = new_li.replace(",", " ");
-                        new_li = new_li.replace("\"", " \" ");
-
-                        buf.push(new_li)
-                    }
-                    _ => {
-                        buf.push(i.type_to_string());
-                        buf.push(" ".to_string());
-                    }
-                }
-            }
-            buf.concat()
-        } else {
-            print_error(StackEmpty);
-            String::new()
+            for i in self.elements.iter().rev() { i.print(); }
         }
     }
 }
@@ -368,6 +318,7 @@ pub fn string_to_type(var: &str) -> Type {
 
     else if var == "True" {Bool_(true)}
     else if var == "False" {Bool_(false)}
+    else if is_op(var) {Variable(var.to_owned())}
 
     else {String_(var.to_owned())}
 }
@@ -394,7 +345,7 @@ pub(crate) fn is_string_number(el: &str) -> bool {
 
 
 
-// Checks whether the variable is a quotation
+// Checks whether the variable is a code block
 pub(crate) fn is_block(el: Vec<Type>) -> bool {
     for i in el { if !i.is_block() {return false} }
     true

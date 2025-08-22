@@ -7,7 +7,7 @@ pub(crate) enum Error {
     ExpectedNumber,
     ExpectedString,
     ExpectedListOrString,
-    ExpectedQuotation,
+    ExpectedCodeBlock,
     ExpectedList,
     ExpectedVariable,
     DivisionByZero,
@@ -16,7 +16,7 @@ pub(crate) enum Error {
     ExpectedBoolean,
     IncompleteString,
     IncompleteList,
-    IncompleteQuotation,
+    IncompleteCodeBlock,
 }
 
 
@@ -34,7 +34,7 @@ pub(crate) fn print_error(err: Error) {
 
         ExpectedListOrString => "Expected a list or a string",
 
-        ExpectedQuotation => "Expected a quotation",
+        ExpectedCodeBlock => "Expected a code block",
 
         ExpectedList => "Expected a list",
 
@@ -52,7 +52,7 @@ pub(crate) fn print_error(err: Error) {
 
         IncompleteList => "Incomplete list",
 
-        IncompleteQuotation => "Incomplete quotation",
+        IncompleteCodeBlock => "Incomplete code block",
     };
     print!("\n\tError: {msg}!\n\n")
 }

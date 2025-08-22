@@ -1,10 +1,10 @@
 ﻿use crate::mylib::{exec_stack, read_stack};
 use crate::stack::{Stack, Type};
 
-mod list_logical_ops;
+mod logical_ops;
 mod error_handling;
 mod mylib;
-mod quotation_ops;
+mod list_codeblock_ops;
 mod string_ops;
 mod stack;
 mod combination_ops;

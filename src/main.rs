@@ -2,10 +2,10 @@ use std::env;
 
 use crate::mylib::{normal, repl};
 
-mod list_logical_ops;
+mod logical_ops;
 mod error_handling;
 mod mylib;
-mod quotation_ops;
+mod list_codeblock_ops;
 mod string_ops;
 mod stack;
 mod combination_ops;
