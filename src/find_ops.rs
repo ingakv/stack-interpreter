@@ -2,7 +2,7 @@ use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedList, ExpectedNumber, ExpectedCodeBlock};
 use crate::logical_ops::{arithmetic, ARITHMETIC_OPS};
 use crate::logical_ops::{logical_op, LOGICAL_OPS};
-use crate::mylib::is_op;
+use crate::is_op;
 use crate::list_codeblock_ops::{list_op, codeblock, LIST_OPS, CODEBLOCK_OPS};
 use crate::stack::Type::{Bool_, List_, String_};
 use crate::stack::{is_list, is_string_number, Stack, Type};

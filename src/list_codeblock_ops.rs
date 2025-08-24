@@ -1,6 +1,6 @@
 use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
 use crate::error_handling::print_error;
-use crate::mylib::check_operator;
+use crate::check_operator;
 use crate::stack::Type::{Block_, Bool_, Int_, List_, String_, Variable};
 use crate::stack::{Stack, Type};
 

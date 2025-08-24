@@ -1,6 +1,6 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedString, NotEnoughValues, StackEmpty};
-use crate::mylib::get_line;
+use crate::get_line;
 use crate::stack::Type::{Int_, List_, String_};
 use crate::stack::{string_to_type, Stack, Type};
 use crate::string_ops::StringOnlyOps::{Print, StackFloat, StackInt, Words};

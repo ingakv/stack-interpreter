@@ -1,15 +1,5 @@
 use std::env;
-
-use crate::mylib::{normal, repl};
-
-mod logical_ops;
-mod error_handling;
-mod mylib;
-mod list_codeblock_ops;
-mod string_ops;
-mod stack;
-mod combination_ops;
-mod find_ops;
+use bprog::run;
 
 fn main() {
     // For REPL mode, run with
@@ -24,13 +14,14 @@ fn main() {
 
         if arg.eq_ignore_ascii_case("REPL") {
             println!("Running whole file...");
-            repl();
+            run(false);
         } else {
             println!("Unknown argument... starting interpreter");
-            normal();
+            // REPL mode (looping through and executing the code for each user input)
+            run(true);
         }
     } else {
         println!("No argument given... starting interpreter");
-        normal();
+        run(true);
     }
 }

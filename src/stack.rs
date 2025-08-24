@@ -5,7 +5,7 @@ use crate::string_ops::StringOnlyOps;
 use crate::string_ops::StringOnlyOps::{StackFloat, StackInt};
 use std::mem::discriminant;
 use std::vec;
-use crate::mylib::is_op;
+use crate::is_op;
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
 #[derive(PartialEq, Clone, Debug)]

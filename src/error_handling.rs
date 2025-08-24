@@ -1,7 +1,7 @@
 use crate::error_handling::Error::*;
 
 #[allow(dead_code)]
-pub(crate) enum Error {
+pub enum Error {
     StackEmpty,
     ExpectedNumberStringOrList,
     ExpectedNumber,
