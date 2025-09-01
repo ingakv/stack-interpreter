@@ -1,15 +1,15 @@
-﻿use std::io;
-use std::io::Write;
-use crate::combination_ops::{combination_op, COMBINATION_OPS};
-use crate::error_handling::Error::{ExpectedVariable, IncompleteCodeBlock, IncompleteList, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
+﻿use crate::combination_ops::{combination_op, COMBINATION_OPS};
 use crate::error_handling::print_error;
+use crate::error_handling::Error::{ExpectedVariable, IncompleteCodeBlock, IncompleteList, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::find_ops::handle_literal_and_operator;
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
 use crate::list_codeblock_ops::{CODEBLOCK_OPS, LIST_OPS};
 use crate::logical_ops::{ARITHMETIC_OPS, LOGICAL_OPS};
-use crate::stack::{string_to_type, Stack, Type};
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_, Variable};
+use crate::stack::{string_to_type, Stack, Type};
 use crate::string_ops::{stack_string_io, IO_OPS, STACK_OPS, STRING_OPS};
+use std::io;
+use std::io::Write;
 
 mod combination_ops;
 mod error_handling;
@@ -45,7 +45,6 @@ fn print_stack_lib(mut ans: Stack<Type>) -> String {
 }
 
 
-//#[allow(dead_code)]
 pub fn run(normal: bool) {
     let mut stack: Stack<Type> = Stack::new();
 
@@ -295,9 +294,6 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
 pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 
-    let old_stack = stack.clone();
-
-
     let c_string = c.type_to_string_trimmed().to_lowercase();
     let op = c_string.as_str();
 
@@ -310,20 +306,20 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 
         if COMBINATION_OPS.contains(&op) { combination_op(stack) }
 
-        else if CODEBLOCK_OPS.contains(&op) { handle_literal_and_operator(Block, stack, false) }
+        else if c.is_block() { handle_literal_and_operator(Block, stack) }
 
-        else if ARITHMETIC_OPS.contains(&op) { handle_literal_and_operator(Arithmetic, stack, false) }
+        else if ARITHMETIC_OPS.contains(&op) { handle_literal_and_operator(Arithmetic, stack) }
 
-        else if LOGICAL_OPS.contains(&op) { handle_literal_and_operator(Logical, stack, false) }
+        else if LOGICAL_OPS.contains(&op) { handle_literal_and_operator(Logical, stack) }
 
-        else if LIST_OPS.contains(&op) { handle_literal_and_operator(List, stack, false) }
+        else if LIST_OPS.contains(&op) { handle_literal_and_operator(List, stack) }
 
         else if IO_OPS.contains(&op) ||
             STRING_OPS.contains(&op) ||
             STACK_OPS.contains(&op) { stack_string_io(op, new) }
 
 
-        else { old_stack };
+        else { stack.to_owned() };
 
     new_stack
 }
@@ -337,7 +333,7 @@ fn push_to_vec(i: &str, vec: &mut Vec<Type>) {
             Float_(elem) => vec.push(Float_(elem)),
             Bool_(elem) => vec.push(Bool_(elem)),
             String_(elem) => vec.push(String_(elem)),
-            Variable(elem) => vec.push(String_(elem)),
+            Variable(elem) => vec.push(Variable(elem)),
             _ => { print_error(ExpectedVariable) }
         };
     }
@@ -357,12 +353,12 @@ pub(crate) fn get_line() -> String {
 
 pub(crate) fn is_op(el: &str) -> bool {
     CODEBLOCK_OPS.contains(&el) ||
-        IO_OPS.contains(&el) ||
-        STACK_OPS.contains(&el) ||
-        STRING_OPS.contains(&el) ||
-        ARITHMETIC_OPS.contains(&el) ||
-        LOGICAL_OPS.contains(&el) ||
-        LIST_OPS.contains(&el) ||
-        COMBINATION_OPS.contains(&el)
+    IO_OPS.contains(&el) ||
+    STACK_OPS.contains(&el) ||
+    STRING_OPS.contains(&el) ||
+    ARITHMETIC_OPS.contains(&el) ||
+    LOGICAL_OPS.contains(&el) ||
+    LIST_OPS.contains(&el) ||
+    COMBINATION_OPS.contains(&el)
 }
 

@@ -1,8 +1,8 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedNumberStringOrList, StackEmpty};
-use crate::list_codeblock_ops::{list_op, codeblock};
+use crate::error_handling::Error::ExpectedNumberStringOrList;
+use crate::list_codeblock_ops::{codeblock, list_op};
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
-use crate::stack::{is_block, Stack, Type};
+use crate::stack::{Stack, Type};
 use crate::string_ops::stack_string_io;
 use std::ops::Neg;
 
@@ -31,15 +31,15 @@ pub(crate) fn combination_op(stack: &mut Stack<Type>) -> Stack<Type> {
 // Returns the length of the list or string
 fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
-    let elem = stack.last().unwrap_or_else(|| { print_error(StackEmpty); String_(String::new())});
+    let elem = stack.last().unwrap_or_default();
 
     // If it is a list
     if let List_(x) = elem {
-        list_op(stack, "length".to_string(), x, String_(String::new()))
+        list_op(stack, "length".to_string(), List_(x), None)
     }
 
     // If it is a code block
-    else if is_block(vec![elem.to_owned()]) {
+    else if elem.is_block() {
         codeblock(stack, "length".to_string(), List_(vec![]), elem)
     }
 
@@ -110,16 +110,16 @@ fn invert(stack: &mut Stack<Type>) -> Stack<Type> {
 
                 // Turns a negative number positive, or the opposite
                 Int_(el) => {
-                    stack.replace_last_match(vec![elem], Int_(el.neg())); break; }
+                    stack.replace_last_match(vec![elem], vec![Int_(el.neg())]); break; }
 
                 Float_(el) => {
-                    stack.replace_last_match(vec![elem], Float_(el.neg())); break; }
+                    stack.replace_last_match(vec![elem], vec![Float_(el.neg())]); break; }
 
                 // Inverts the predicate
                 Bool_(el) => {
                     let new_elem = if el { Some(Bool_(false)) }
                     else { Some(Bool_(true)) };
-                    stack.replace_last_match(vec![elem], new_elem.unwrap()); break;
+                    stack.replace_last_match(vec![elem], vec![new_elem.unwrap()]); break;
                 }
                 _ => {}
             }

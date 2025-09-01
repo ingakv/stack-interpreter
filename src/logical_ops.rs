@@ -81,7 +81,7 @@ pub fn arithmetic(stack: &mut Stack<Type>, c: String, x: Type, y: Type) -> Stack
     };
 
     // Remove the operator, the original numbers or replaces them with the new element
-    stack.replace_last_match(vec![Variable(c), x, y], new_el);
+    stack.replace_last_match(vec![Variable(c), x, y], vec![new_el]);
 
     stack.to_owned()
 }
@@ -99,7 +99,7 @@ pub fn logical_op(stack: &mut Stack<Type>, c: String, x: bool, y: bool) -> Stack
     };
 
     // Removes the operator and adds the new variable
-    stack.replace_last_match(vec![Variable(c), Bool_(x), Bool_(y)], Bool_(new));
+    stack.replace_last_match(vec![Variable(c), Bool_(x), Bool_(y)], vec![Bool_(new)]);
 
     // Return the stack
     stack.to_owned()

@@ -109,7 +109,7 @@ All literals are simply pushed onto the stack.
     * `length` ( list --> len ) puts the length of a given list onto the stack
     * `append` ( item list --> list ) appends the item in front of the list
     * `cons` ( list1 list2 --> list3 ) concatenates both lists
-    * `each quotation` ( list --> ) takes a list and a code block, and executes the code block on each of the elements of the list, e.g. `[ 1 2 3 ] each { println }` will print three lines with 1, 2, 3 respectively in each of the lines.
+    * `each quotation` ( list --> ) takes a list and a code block, and executes the code block on each of the elements of the list, e.g. `[ 1 2 3 ] each { print }` will print three lines with 1, 2, 3 respectively in each of the lines.
     * `map quotation` ( list --> newlist ) takes a list, and a block, and executes the block on each of the elements of the list, forming a new list that is put on the stack. E.g. `[ 1 2 3 ] map { 10 * }` will result in a list `[ 10 20 30 ]`
     * `foldl quotation` ( list initial_accumulator --> final_accumulator ) folds the list from left to right.  E.g. `[ 1 2 3 ] 0 foldl { + }` will result in `6` on top of the stack.
 

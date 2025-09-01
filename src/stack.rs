@@ -19,6 +19,10 @@ pub enum Type {
     Variable(String),
 }
 
+impl Default for Type {
+    fn default() -> Self { String_(String::new()) }
+}
+
 // Type functions
 impl Type {
     // Returns the variable as a string
@@ -200,22 +204,6 @@ impl Stack<Type> {
             elements: Vec::new(),
         }
     }
-    
-    // Compares the stack with another and returns true if they are equal
-    #[allow(dead_code)]
-    pub fn is_equal(&self, old_stack: Stack<Type>) -> bool {
-
-        let mut is_equal = true;
-        let mut old = old_stack.clone();
-        let mut new = self.clone();
-
-        loop {
-            let (Some(old_elem), Some(new_elem)) = (old.pop(), new.pop()) else { break };
-            if old_elem != new_elem { is_equal = false; break }
-        }
-        is_equal
-        
-    }
 
     pub fn len(&self) -> usize {
         self.elements.len()
@@ -223,10 +211,6 @@ impl Stack<Type> {
 
     pub fn is_empty(&self) -> bool {
         self.elements.is_empty()
-    }
-
-    pub fn first(&self) -> Option<Type> {
-        self.elements.first().cloned()
     }
 
     pub fn last(&self) -> Option<Type> {
@@ -262,14 +246,11 @@ impl Stack<Type> {
     }
 
     // Removes the last element of the stack that matches the one given
-    pub fn replace_last_match(&mut self, mut remove: Vec<Type>, new: Type) -> Self {
+    pub fn replace_last_match(&mut self, mut remove: Vec<Type>, new: Vec<Type>) -> Self {
         // Only pushes the new value if it isn't empty
-        let mut swap = if !new.is_empty() {
-            self.reverse();
-            self.push(new);
-            self.reverse();
-            true
-        } else { false };
+        if !new.is_empty() {
+            for i in new.iter() { self.push(i.to_owned()); }
+        }
 
         while !remove.is_empty() {
             // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
@@ -277,20 +258,13 @@ impl Stack<Type> {
 
             if let Some(rem) = remove.pop() {
                 if let Some(str_ref) = self.elements.iter().position(|r| r == &rem) {
-                    // Swaps the first element in 'remove' with the new element
-                    if swap {
-                        self.elements.swap_remove(str_ref);
-                        swap = false;
-                    } else {
-                        self.elements.remove(str_ref);
-                    }
+                    self.elements.remove(str_ref);
                 }
             };
 
             // Reverse it back
             self.reverse();
         }
-
         self.to_owned()
     }
 
@@ -341,19 +315,4 @@ pub(crate) fn is_string_number(el: &str) -> bool {
     if el.trim().as_bytes() == b"-" { is_num = false; }
 
     is_num
-}
-
-
-
-// Checks whether the variable is a code block
-pub(crate) fn is_block(el: Vec<Type>) -> bool {
-    for i in el { if !i.is_block() {return false} }
-    true
-}
-
-// Checks whether the variable is a list
-#[allow(dead_code)]
-pub(crate) fn is_list(el: Vec<Type>) -> bool {
-    for i in el { if !i.is_list() {return false} }
-    true
 }
