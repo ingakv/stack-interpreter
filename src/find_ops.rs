@@ -2,7 +2,7 @@ use crate::combination_ops::COMBINATION_OPS;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedNumber};
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
-use crate::list_codeblock_ops::{codeblock, list_op, CODEBLOCK_OPS, LIST_OPS};
+use crate::list_codeblock_ops::{codeblock_custom, list_op, CODEBLOCK_OPS, LIST_OPS};
 use crate::logical_ops::{arithmetic, ARITHMETIC_OPS};
 use crate::logical_ops::{logical_op, LOGICAL_OPS};
 use crate::stack::Type::{Bool_, List_};
@@ -52,10 +52,15 @@ pub(crate) fn handle_literal_and_operator_recursive(
         
     // Checks if it is an operator
     else if (operation_type(ops).contains(&st.as_str()) || c.is_block()) && !skip {
-        // Loops through and finds the next two items of the correct literal type
-        let item2 = if !ops.is_block() { handle_literal_and_operator_recursive(ops, stack, true)} else { stack.to_owned() };
-        let item1 = if !ops.is_block() { handle_literal_and_operator_recursive(ops, stack, true)} else { stack.to_owned() };
+        let mut item2 = stack.to_owned();
+        let mut item1 = stack.to_owned();
 
+        // Loops through and finds the next two items of the correct literal type
+        if !ops.is_block() {
+            item2 = handle_literal_and_operator_recursive(ops, stack, true);
+            item1 = handle_literal_and_operator_recursive(ops, stack, true);
+        }
+        
         let mut new_li = old_stack.clone();
         
         // Lists are handled differently
@@ -66,10 +71,12 @@ pub(crate) fn handle_literal_and_operator_recursive(
             let str = find_string(&mut new_li);
 
             // Functions with two lists
-            if let Some(_) = item1.last() { list_op(&mut old_stack, st, List_(item2_some), item1.last()) }
+            let (remove_vec, new_vec) = if let Some(_) = item1.last() { list_op(st, List_(item2_some), item1.last()) }
                 
             // Functions with a list and a string, or only one list
-            else { list_op(&mut old_stack, st, List_(item2_some), str) }
+            else { list_op(st, List_(item2_some), str) };
+            
+            old_stack.replace_last_match(remove_vec, new_vec)
         }
         
         else if let Some(item2_some) = item2.last() {
@@ -79,26 +86,28 @@ pub(crate) fn handle_literal_and_operator_recursive(
                 // Loops through and finds the next operator and list
                 let mut list = None;
                 let mut op = None;
-
-                loop {
-                    if let Some(elem) = new_li.pop() {
-                        let elem_str = elem.type_to_string_trimmed();
-                        if elem.is_list() && list.is_none() {
-                            list = Some(elem)
-                        } else if CODEBLOCK_OPS.contains(&elem_str.as_str()) && op.is_none() {
-                            op = Some(elem_str)
-                        }
-                    } else { break; }
+                new_li = Stack::new();
+                
+                for elem in old_stack.elements.iter() {
+                        
+                    let elem_str = elem.type_to_string_trimmed();
+                    if elem.is_list() && list.is_none() {
+                        list = Some(elem.to_owned());
+                    } else if CODEBLOCK_OPS.contains(&elem_str.as_str()) && op.is_none() {
+                        op = Some(elem_str);
+                    }
+                    // Save other elements of the stack
+                    else if elem.to_owned() != c { new_li.push(elem.to_owned()); }
                 }
 
                 if let (Some(list_some), Some(op_some)) = (list, op) {
-                    old_stack = find_wanted_literal_type(ops, &mut old_stack, op_some, list_some, c);
+                    old_stack = find_wanted_literal_type(ops, &mut old_stack, new_li, op_some, list_some, c);
                 }
 
             }
             
             else if let Some(item1_some) = item1.last() {
-                old_stack = find_wanted_literal_type(ops, &mut old_stack, st, item1_some, item2_some);
+                old_stack = find_wanted_literal_type(ops, &mut old_stack, Stack::new(), st, item1_some, item2_some);
             }
 
             old_stack.to_owned()
@@ -142,20 +151,28 @@ fn operation_type(op: Operations) -> &'static [&'static str] {
     }
 }
 
-fn find_wanted_literal_type(wanted_type: Operations, stack: &mut Stack<Type>, op: String, x: Type, y: Type) -> Stack<Type> {
-    match wanted_type { 
-        Arithmetic => arithmetic(stack, op, x, y),
+fn find_wanted_literal_type(wanted_type: Operations, stack: &mut Stack<Type>, additional_elems: Stack<Type>, op: String, x: Type, y: Type) -> Stack<Type> {
+    
+    let (remove_vec, new_el) = match wanted_type { 
+        Arithmetic => arithmetic(op, x, y),
         Logical => {
             if let (Bool_(a), Bool_(b)) = (x, y) {
-                logical_op(stack, op, a, b)
+                logical_op(op, a, b)
             } else {
                 // Fallback: types were not booleans; return stack unchanged
-                stack.to_owned()
+                (vec![], vec![])
             }
         },
-        Block => {codeblock(&mut stack.to_owned(), op, x, y)}
-        _ => stack.to_owned()
-    }
+        Block => { codeblock_custom(op, additional_elems, x, y)}
+        _ => (vec![], vec![])
+    };
+
+    // Removes the operator, the original numbers or replaces them with the new element
+    stack.replace_last_match(remove_vec, new_el);
+
+    // Return the stack
+    stack.to_owned()
+
 }
 
 

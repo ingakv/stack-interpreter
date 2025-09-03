@@ -3,7 +3,7 @@ use crate::error_handling::Error::ExpectedNumberStringOrList;
 use crate::list_codeblock_ops::{codeblock, list_op};
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
 use crate::stack::{Stack, Type};
-use crate::string_ops::stack_string_io;
+use crate::string_ops::stack_io;
 use std::ops::Neg;
 
 
@@ -33,17 +33,26 @@ fn length(stack: &mut Stack<Type>) -> Stack<Type> {
 
     let elem = stack.last().unwrap_or_default();
 
+    let (remove_vec, new_el);
+
     // If it is a list
-    if let List_(x) = elem {
-        list_op(stack, "length".to_string(), List_(x), None)
+    (remove_vec, new_el) = if let List_(x) = elem {
+        list_op("length".to_string(), List_(x), None)
     }
 
     // If it is a code block
     else if elem.is_block() {
-        codeblock(stack, "length".to_string(), List_(vec![]), elem)
+        codeblock("length".to_string(), List_(vec![]), elem)
     }
 
-    else { stack_string_io("length", stack) }
+    else { stack_io("length", (stack.last(), None)) };
+
+
+    // Removes the operator, the original numbers or replaces them with the new element
+    stack.replace_last_match(remove_vec, new_el);
+
+    // Return the stack
+    stack.to_owned()
 
 }
 

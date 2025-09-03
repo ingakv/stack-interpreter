@@ -228,10 +228,11 @@ impl Stack<Type> {
         self.elements.pop()
     }
 
-    pub fn swap(&mut self, pos1: usize, pos2: usize) -> Option<Stack<Type>> {
+    pub fn second_to_last(&mut self) -> Option<Type> {
         if self.len() > 1 {
-            self.elements.swap(pos1, pos2);
-            Some(self.to_owned())
+            let mut copy = self.clone();
+            copy.pop();
+            copy.pop()
         } else {
             None
         }
@@ -247,10 +248,6 @@ impl Stack<Type> {
 
     // Removes the last element of the stack that matches the one given
     pub fn replace_last_match(&mut self, mut remove: Vec<Type>, new: Vec<Type>) -> Self {
-        // Only pushes the new value if it isn't empty
-        if !new.is_empty() {
-            for i in new.iter() { self.push(i.to_owned()); }
-        }
 
         while !remove.is_empty() {
             // Ensures that if there are duplicates of the numbers, the ones removed are the ones in the back
@@ -265,6 +262,12 @@ impl Stack<Type> {
             // Reverse it back
             self.reverse();
         }
+        
+        // Only pushes the new value if it isn't empty
+        if !new.is_empty() {
+            for i in new.iter() { self.push(i.to_owned()); }
+        }
+        
         self.to_owned()
     }
 

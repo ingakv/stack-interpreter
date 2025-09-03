@@ -7,7 +7,7 @@ use crate::list_codeblock_ops::LIST_OPS;
 use crate::logical_ops::{ARITHMETIC_OPS, LOGICAL_OPS};
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_, Variable};
 use crate::stack::{string_to_type, Stack, Type};
-use crate::string_ops::{stack_string_io, IO_OPS, STACK_OPS, STRING_OPS};
+use crate::string_ops::{stack_io, string_ops, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::Write;
 
@@ -279,7 +279,7 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
                 Bool_(elem) => stack.push(Bool_(elem)),
                 String_(elem) => stack.push(String_(elem)),
                 Variable(elem) => stack.push(Variable(elem)),
-                _ => {}
+                _ => {  }
             };
         }
     }
@@ -316,9 +316,19 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 
         else if IO_OPS.contains(&op) ||
             STRING_OPS.contains(&op) ||
-            STACK_OPS.contains(&op) { stack_string_io(op, new) }
+            STACK_OPS.contains(&op) {
 
+            let (remove_vec, new_vec) =
 
+            if STRING_OPS.contains(&op) { string_ops(op, new) }
+            else if IO_OPS.contains(&op) ||
+                STACK_OPS.contains(&op) { stack_io(op, (new.last(), new.second_to_last())) }
+            else { (vec![], vec![]) };
+
+            new.replace_last_match(remove_vec, new_vec);
+            new.to_owned()
+        }
+            
         else { stack.to_owned() };
 
     new_stack

@@ -116,11 +116,11 @@ All literals are simply pushed onto the stack.
 * Control flow
 
   * `if then_block else_block` ( bool ) `if` expression takes a boolean value from the stack, and executes the `then_code_block` if true, or `else_code_block` if false. The executed block operates in the context of the global stack.
+    * The condition must be on the operand stack BEFORE `if` is called. Both blocks for `if` statement are needed, the THEN block and the ELSE block, but, one of the (or both) can be empty.  The code blocks are curly brace delimited.
 
   * `loop break block` execute the block until `break` becomes True. `break` and `block` are expected to be quotations. `break` evaluating to True or False does not leave that value on the stack (it is consumed by the `loop`)
 
   * `times block` ( num ) repeat the block `num` times
-  * The condition must be on the operand stack BEFORE `if` is called. Both blocks for `if` statement are needed, the THEN block and the ELSE block, but, one of the (or both) can be empty.  The code blocks are curly brace delimited.
 
 
 * Assignment to a symbol (variable)
