@@ -3,7 +3,7 @@ use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedVariable, IncompleteCodeBlock, IncompleteList, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::find_ops::handle_literal_and_operator;
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
-use crate::list_codeblock_ops::{CODEBLOCK_OPS, LIST_OPS};
+use crate::list_codeblock_ops::LIST_OPS;
 use crate::logical_ops::{ARITHMETIC_OPS, LOGICAL_OPS};
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_, Variable};
 use crate::stack::{string_to_type, Stack, Type};
@@ -349,16 +349,3 @@ pub(crate) fn get_line() -> String {
 
     input.trim_end().to_string()
 }
-
-
-pub(crate) fn is_op(el: &str) -> bool {
-    CODEBLOCK_OPS.contains(&el) ||
-    IO_OPS.contains(&el) ||
-    STACK_OPS.contains(&el) ||
-    STRING_OPS.contains(&el) ||
-    ARITHMETIC_OPS.contains(&el) ||
-    LOGICAL_OPS.contains(&el) ||
-    LIST_OPS.contains(&el) ||
-    COMBINATION_OPS.contains(&el)
-}
-

@@ -1,3 +1,4 @@
+use crate::combination_ops::COMBINATION_OPS;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedNumber};
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
@@ -6,7 +7,7 @@ use crate::logical_ops::{arithmetic, ARITHMETIC_OPS};
 use crate::logical_ops::{logical_op, LOGICAL_OPS};
 use crate::stack::Type::{Bool_, List_};
 use crate::stack::{is_string_number, Stack, Type};
-use crate::is_op;
+use crate::string_ops::{IO_OPS, STACK_OPS, STRING_OPS};
 
 #[derive(Clone, Copy)]
 pub enum Operations {
@@ -168,4 +169,16 @@ pub(crate) fn find_string(stack: &mut Stack<Type>) -> Option<Type> {
             (c.is_string() || is_string_number(c.type_to_string_trimmed().as_str()))
     { Some(c) }
     else { find_string(stack) }
+}
+
+
+pub(crate) fn is_op(el: &str) -> bool {
+    CODEBLOCK_OPS.contains(&el) ||
+        IO_OPS.contains(&el) ||
+        STACK_OPS.contains(&el) ||
+        STRING_OPS.contains(&el) ||
+        ARITHMETIC_OPS.contains(&el) ||
+        LOGICAL_OPS.contains(&el) ||
+        LIST_OPS.contains(&el) ||
+        COMBINATION_OPS.contains(&el)
 }

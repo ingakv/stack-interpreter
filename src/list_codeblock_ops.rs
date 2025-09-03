@@ -4,9 +4,9 @@ use crate::error_handling::Error::{ExpectedList, ExpectedListOrString};
 use crate::stack::Type::{Block_, Bool_, Int_, List_, String_, Variable};
 use crate::stack::{Stack, Type};
 
-pub(crate) const CODEBLOCK_OPS: [&str; 2] = [
+pub(crate) const CODEBLOCK_OPS: [&str; 3] = [
     "exec", //    "times",
-    //    "map",
+    "map",
     //    "foldl",
     "each",
     //    "if",
@@ -32,18 +32,21 @@ pub(crate) fn codeblock(stack: &mut Stack<Type>, c: String, list: Type, block: T
             new_el.push(list.to_owned());
         },
 
-        "each" => {
+        "each" | "map" => {
             let mut new_list = vec![];
 
+            // Execute the code block for each element in the list
             if let List_(elems) = list.to_owned() {
                 for i in &elems {
-                    // Execute the code block
                     if let Some(item) = exec(block.to_owned(), i.to_owned()) {
                         new_list.push(item);
                     }
                 }
             }
-            new_el = new_list;
+            
+            if c.as_str() == "each" { new_el = new_list; }
+            else { new_el.push(List_(new_list.to_owned())); }
+            
         }
 
         _ => panic!("An error occurred in list_ops!"),
