@@ -94,6 +94,8 @@ pub fn run(normal: bool) {
 
 fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
     let mut new_stack = Stack::new();
+    let mut is_if = false;
+    let mut is_if_block = false;
 
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
     loop {
@@ -102,8 +104,19 @@ fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
 
         new_stack.push(elem.to_owned());
 
-        // If there is a code block in the stack, execute it first
-        new_stack = check_operator(elem.to_owned(), &mut new_stack.clone());
+        // If statements read the two next code blocks instead of one.
+        // Therefore, this extra code block will already be processed
+        
+        if is_if == is_if_block {
+            new_stack = check_operator(elem.to_owned(), &mut new_stack.clone());
+        }
+
+        if is_if && is_if_block {
+            is_if = false;
+            is_if_block = false;
+        }
+        if elem.type_to_string_trimmed() == "if" { is_if = true; }
+        if elem.is_block() && is_if { is_if_block = true; }
 
     }
     new_stack

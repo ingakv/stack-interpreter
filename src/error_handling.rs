@@ -4,6 +4,7 @@ pub enum Error {
     StackEmpty,
     ExpectedNumberStringOrList,
     ExpectedNumber,
+    ExpectedNumberOrBoolean,
     ExpectedString,
     ExpectedListOrString,
     ExpectedCodeBlock,
@@ -28,6 +29,8 @@ pub(crate) fn print_error(err: Error) {
         ExpectedNumberStringOrList => "Expected a number, a string or a list",
 
         ExpectedNumber => "Expected a number",
+
+        ExpectedNumberOrBoolean => "Expected a number or a boolean",
 
         ExpectedString => "Expected a string",
 

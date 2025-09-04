@@ -1,11 +1,6 @@
 # BPROG - Stack Interpreter
 
-This is a simple concatenative, stack-based, programming language interpreter that can do simple math, io, parsing, and simple code blocks. I wrote this in Rust.
-
-However, this version does not pass the majority of the tests. This is due to an issue concerning the order in which the variables or operations are executed.
-
-The previous version with less functionality is commit 2d53a09e53b97eb99820a3f1148bf8b8e7d9efd9
-
+This is a simple concatenative, stack-based, programming language interpreter that can do simple math, io, parsing, and simple code blocks, written in Rust.
 
 ## Usage
 

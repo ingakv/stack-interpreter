@@ -2,7 +2,7 @@ use crate::combination_ops::COMBINATION_OPS;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedNumber};
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
-use crate::list_codeblock_ops::{codeblock_custom, list_op, CODEBLOCK_OPS, LIST_OPS};
+use crate::list_codeblock_ops::{codeblock_custom, list_op, find_block_elements, CODEBLOCK_OPS, LIST_OPS};
 use crate::logical_ops::{arithmetic, ARITHMETIC_OPS};
 use crate::logical_ops::{logical_op, LOGICAL_OPS};
 use crate::stack::Type::{Bool_, List_};
@@ -83,33 +83,26 @@ pub(crate) fn handle_literal_and_operator_recursive(
 
             // Code blocks are handled differently
             if ops.is_block() {
-                // Loops through and finds the next operator and list
-                let mut list = None;
-                let mut op = None;
-                new_li = Stack::new();
                 
-                for elem in old_stack.elements.iter() {
-                        
-                    let elem_str = elem.type_to_string_trimmed();
-                    if elem.is_list() && list.is_none() {
-                        list = Some(elem.to_owned());
-                    } else if CODEBLOCK_OPS.contains(&elem_str.as_str()) && op.is_none() {
-                        op = Some(elem_str);
-                    }
-                    // Save other elements of the stack
-                    else if elem.to_owned() != c { new_li.push(elem.to_owned()); }
-                }
+                // Finds the next operator and list
+                let (additional_elems, list, operator, condition, then_block) = 
+                    find_block_elements(old_stack.to_owned(), c.to_owned());
+                
+                
+                if let Some(op_some) = operator {
+                    let (rem, new) = codeblock_custom(op_some, c, then_block, additional_elems, list, condition);
 
-                if let (Some(list_some), Some(op_some)) = (list, op) {
-                    old_stack = find_wanted_literal_type(ops, &mut old_stack, new_li, op_some, list_some, c);
+                    // Removes the operator, the original numbers or replaces them with the new element
+                    old_stack.replace_last_match(rem, new);
                 }
 
             }
             
-            else if let Some(item1_some) = item1.last() {
-                old_stack = find_wanted_literal_type(ops, &mut old_stack, Stack::new(), st, item1_some, item2_some);
+            else if item1.last().is_some() {
+                old_stack = find_wanted_literal_type(ops, &mut old_stack, st, item1.last(), item2_some);
             }
 
+            // Return the stack
             old_stack.to_owned()
         }
             
@@ -151,20 +144,28 @@ fn operation_type(op: Operations) -> &'static [&'static str] {
     }
 }
 
-fn find_wanted_literal_type(wanted_type: Operations, stack: &mut Stack<Type>, additional_elems: Stack<Type>, op: String, x: Type, y: Type) -> Stack<Type> {
+fn find_wanted_literal_type(wanted_type: Operations, stack: &mut Stack<Type>, op: String, x: Option<Type>, y: Type) -> Stack<Type> {
     
     let (remove_vec, new_el) = match wanted_type { 
-        Arithmetic => arithmetic(op, x, y),
+        Arithmetic => {
+            if let Some(a) = x {
+                arithmetic(op, a, y)
+            } else {
+                // Fallback: types were not numbers; return stack unchanged
+                print_error(ExpectedNumber);
+                return stack.to_owned()
+            }
+        },
         Logical => {
-            if let (Bool_(a), Bool_(b)) = (x, y) {
+            if let (Some(Bool_(a)), Bool_(b)) = (x, y) {
                 logical_op(op, a, b)
             } else {
                 // Fallback: types were not booleans; return stack unchanged
-                (vec![], vec![])
+                print_error(ExpectedBoolean);
+                return stack.to_owned()
             }
         },
-        Block => { codeblock_custom(op, additional_elems, x, y)}
-        _ => (vec![], vec![])
+        _ => return stack.to_owned()
     };
 
     // Removes the operator, the original numbers or replaces them with the new element

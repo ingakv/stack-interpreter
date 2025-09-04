@@ -1,5 +1,5 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::ExpectedNumberStringOrList;
+use crate::error_handling::Error::{ExpectedNumberOrBoolean, ExpectedNumberStringOrList};
 use crate::list_codeblock_ops::{codeblock, list_op};
 use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
 use crate::stack::{Stack, Type};
@@ -12,15 +12,21 @@ pub(crate) const COMBINATION_OPS: [&str; 3] = ["length", "==", "not"];
 
 // By making these separate functions, several datatypes can be compared
 pub(crate) fn combination_op(stack: &mut Stack<Type>) -> Stack<Type> {
+    // Removes the operator from the stack
+    let operator = stack.pop().unwrap();
+    let op = operator.type_to_string_trimmed().to_lowercase();
     
-    let op = stack.pop().unwrap().type_to_string_trimmed().to_lowercase();
+    let (mut rem, new) = match op.as_str() {
+        "length" => { length(stack) }
+        "==" => { compare(stack) }
+        "not" => { invert(stack) }
+        _ => { (vec![], vec![]) }
+    };
     
-    match op.as_str() {
-        "length" => { length(stack); }
-        "==" => { compare(stack); }
-        "not" => { invert(stack); }
-        _ => {}
-    }
+    rem.push(operator);
+    
+    // Removes the operator, the original numbers or replaces them with the new element
+    stack.replace_last_match(rem, new);
 
     // Return the stack
     stack.to_owned()
@@ -29,7 +35,7 @@ pub(crate) fn combination_op(stack: &mut Stack<Type>) -> Stack<Type> {
 
 
 // Returns the length of the list or string
-fn length(stack: &mut Stack<Type>) -> Stack<Type> {
+fn length(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
     let elem = stack.last().unwrap_or_default();
 
@@ -46,18 +52,12 @@ fn length(stack: &mut Stack<Type>) -> Stack<Type> {
     }
 
     else { stack_io("length", (stack.last(), None)) };
-
-
-    // Removes the operator, the original numbers or replaces them with the new element
-    stack.replace_last_match(remove_vec, new_el);
-
-    // Return the stack
-    stack.to_owned()
-
+    
+    (remove_vec, new_el)
 }
 
 
-fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
+fn compare(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
     let mut elem1 = None;
     let mut elem2 = None;
@@ -95,21 +95,23 @@ fn compare(stack: &mut Stack<Type>) -> Stack<Type> {
     }
 
     if elem1.is_some() && elem2.is_some() {
+
+        let mut is_equal = Bool_(elem1 == elem2);
         
         if is_number {
             // This ensures that i.e., 10.0 and 10 are considered as equal
-            elem1 = Some(Float_(elem1.unwrap().type_to_float().unwrap()));
-            elem2 = Some(Float_(elem2.unwrap().type_to_float().unwrap()));
+            let elem1_float = Some(Float_(elem1.to_owned().unwrap().type_to_float().unwrap()));
+            let elem2_float = Some(Float_(elem2.to_owned().unwrap().type_to_float().unwrap()));
+            is_equal = Bool_(elem1_float == elem2_float);
         }
-        stack.push(Bool_(elem1 == elem2));
-    }
-    else { print_error(ExpectedNumberStringOrList); };
+        (vec![elem1.unwrap_or_default(), elem2.unwrap_or_default()], vec![is_equal])
 
-    stack.to_owned()
+    }
+    else { print_error(ExpectedNumberStringOrList); (vec![], vec![]) }
 
 }
 
-fn invert(stack: &mut Stack<Type>) -> Stack<Type> {
+fn invert(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
     let mut old_stack = stack.clone();
     loop {
@@ -119,24 +121,22 @@ fn invert(stack: &mut Stack<Type>) -> Stack<Type> {
 
                 // Turns a negative number positive, or the opposite
                 Int_(el) => {
-                    stack.replace_last_match(vec![elem], vec![Int_(el.neg())]); break; }
+                    return (vec![elem], vec![Int_(el.neg())]) }
 
                 Float_(el) => {
-                    stack.replace_last_match(vec![elem], vec![Float_(el.neg())]); break; }
+                    return (vec![elem], vec![Float_(el.neg())]) }
 
                 // Inverts the predicate
                 Bool_(el) => {
                     let new_elem = if el { Some(Bool_(false)) }
                     else { Some(Bool_(true)) };
-                    stack.replace_last_match(vec![elem], vec![new_elem.unwrap()]); break;
+                    return (vec![elem], vec![new_elem.unwrap()]);
                 }
                 _ => {}
             }
         }
-        else { break }
+        else { print_error(ExpectedNumberOrBoolean) ;return (vec![], vec![]) }
     }
-
-    stack.to_owned()
 }
 
 
