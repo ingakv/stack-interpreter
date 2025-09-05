@@ -1,8 +1,8 @@
-use crate::check_operator;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedListOrString};
 use crate::stack::Type::{Block_, Bool_, Int_, List_, String_, Variable};
 use crate::stack::{Stack, Type};
+use crate::exec;
 
 pub(crate) const CODEBLOCK_OPS: [&str; 4] = [
     "exec",
@@ -37,7 +37,7 @@ pub(crate) fn codeblock_custom(c: String, block: Type, then_block: Option<Type>,
             // Execute the code block for each element in the list
             if let Some(elems) = list.to_owned() {
                 exec_stack.push(elems.to_owned());
-                exec_stack = exec(block.to_owned(), exec_stack);
+                exec_stack = exec(Some(block.to_owned()), exec_stack);
             }
             new_el = exec_stack.elements;
         },
@@ -47,7 +47,7 @@ pub(crate) fn codeblock_custom(c: String, block: Type, then_block: Option<Type>,
         "if" => {
             if let Some(Bool_(cond)) = condition {
                 if let Some(then) = then_block.to_owned() {
-                    if cond { exec_stack = exec(then.to_owned(), exec_stack); } else { exec_stack = exec(block.to_owned(), exec_stack); }
+                    if cond { exec_stack = exec(Some(then.to_owned()), exec_stack); } else { exec_stack = exec(Some(block.to_owned()), exec_stack); }
                     new_el = exec_stack.elements;
                 } else { print_error(ExpectedCodeBlock); return (vec![], vec![]); }
             } else { print_error(ExpectedBoolean); return (vec![], vec![]); }
@@ -59,7 +59,7 @@ pub(crate) fn codeblock_custom(c: String, block: Type, then_block: Option<Type>,
             if let Some(List_(elems)) = list.to_owned() {
                 for i in &elems {
                     exec_stack.push(i.to_owned());
-                    exec_stack = exec(block.to_owned(), exec_stack);
+                    exec_stack = exec(Some(block.to_owned()), exec_stack);
                 }
             }
             
@@ -151,26 +151,6 @@ pub(crate) fn list_op(c: String, list: Type, el: Option<Type>) -> (Vec<Type>, Ve
     (remove_vec, new_el)
 }
 
-
-// Execute a code block
-fn exec(mut block: Type, mut stack: Stack<Type>) -> Stack<Type> {
-    
-    loop {
-        // Execute the code from the first element
-        match pop_front(block.to_owned()) {
-            (Some(elem), rem) => {
-                block = rem;
-                stack.push(elem.to_owned());
-                stack = check_operator(elem, &mut stack);
-            }
-
-            // Loop through until the list is empty
-            _ => break,
-        }
-    }
-    stack
-}
-
 // Execute a code block
 fn exec_custom<F>(mut code_block: Type, stack_ref: &mut F) -> ()
 where F: FnMut(Type) {
@@ -190,7 +170,7 @@ where F: FnMut(Type) {
 }
 
 
-fn pop_front(t: Type) -> (Option<Type>, Type) {
+pub(crate) fn pop_front(t: Type) -> (Option<Type>, Type) {
     match t {
         Block_(val) => {
             let mut new = val.clone();

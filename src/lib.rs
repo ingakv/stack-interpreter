@@ -3,10 +3,11 @@ use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedVariable, IncompleteCodeBlock, IncompleteList, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
 use crate::find_ops::handle_literal_and_operator;
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
-use crate::list_codeblock_ops::LIST_OPS;
+use crate::list_codeblock_ops::{pop_front, LIST_OPS};
 use crate::logical_ops::{ARITHMETIC_OPS, LOGICAL_OPS};
-use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_, Variable};
-use crate::stack::{string_to_type, Stack, Type};
+use crate::stack::DataTypes::{BlockType, ListType, StringType};
+use crate::stack::Type::{Bool_, Float_, Int_, String_, Variable};
+use crate::stack::{push_block_to_buffer, push_to_buffer, string_to_type, Buffers, Stack, Type};
 use crate::string_ops::{stack_io, string_ops, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::Write;
@@ -80,7 +81,7 @@ pub fn run(normal: bool) {
 
         else if normal && input == ":s" { stack.print_stack(); }
 
-        else { stack = read_stack(input, stack.clone()); }
+        else { stack = read_stack(input, stack); }
 
         if !normal {
             stack = exec_stack(stack);
@@ -92,7 +93,7 @@ pub fn run(normal: bool) {
     }
 }
 
-fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
+fn exec(mut block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
     let mut new_stack = Stack::new();
     let mut is_if = false;
     let mut is_if_block = false;
@@ -100,15 +101,21 @@ fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
     loop {
 
-        let Some(elem) = stack.pop_front() else { break; };
+        let (elem_opt, rem) = if let Some(exec_block) = block.to_owned() {
+                pop_front(exec_block.to_owned())
+        } else { stack.pop_front() };
+        
+        let Some(elem) = elem_opt else { break };
+        
+        if block.is_some() { block = Some(rem); }
 
         new_stack.push(elem.to_owned());
 
         // If statements read the two next code blocks instead of one.
         // Therefore, this extra code block will already be processed
-        
+
         if is_if == is_if_block {
-            new_stack = check_operator(elem.to_owned(), &mut new_stack.clone());
+            new_stack = check_operator(elem.to_owned(), &mut new_stack);
         }
 
         if is_if && is_if_block {
@@ -117,9 +124,12 @@ fn exec_stack(mut stack: Stack<Type>) -> Stack<Type> {
         }
         if elem.type_to_string_trimmed() == "if" { is_if = true; }
         if elem.is_block() && is_if { is_if_block = true; }
-
+    
     }
     new_stack
+}
+fn exec_stack(stack: Stack<Type>) -> Stack<Type> {
+    exec(None, stack)
 }
 
 fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
@@ -130,17 +140,7 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
     if new_el.is_empty() { print_error(StackEmpty); }
 
     // Variables to help join the elements together
-    let str_buf: &mut Vec<&str> = &mut Vec::new();
-    let mut is_str: bool = false;
-
-    let bl_buf: &mut Vec<Type> = &mut Vec::new();
-    let mut is_block: bool = false;
-
-    let li_buf: &mut Vec<Type> = &mut Vec::new();
-    let mut is_list: bool = false;
-
-    let sub_buf: &mut Vec<Type> = &mut Vec::new();
-    let mut is_sublist = false;
+    let mut buffers = Buffers::default();
 
     for i in new_el {
 
@@ -156,93 +156,67 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         let is_list_end = i.trim().ends_with(']');
 
 
+        let is_string = if let Some(nested_el) = buffers.nested_elements.last() {
+            nested_el.is_string_type()
+        } else { false };
+
         //////////////// String /////////////////
 
         // If it is the end of the string, 
         // or if the string contains a single word, 
         // and it is not a single quotation mark
-        if ((has_start_quote || has_end_quote) && is_str)
+        if ((has_start_quote || has_end_quote) && is_string)
             || (has_start_quote && has_end_quote)
             && i.trim() != "\"" {
 
 
             // Remove the last whitespace
-            if !str_buf.is_empty() &&
-                str_buf.last().unwrap().trim().is_empty() &&
+            if !buffers.string.is_empty() &&
+                buffers.string.last().unwrap().trim().is_empty() &&
                 has_start_quote && has_end_quote {
-                str_buf.pop();
+                buffers.string.pop();
             }
 
-            if !elem.is_empty() { str_buf.push(elem); }
-
-            // If we are in a list, copy the new list over
-            if is_list { li_buf.push(String_(str_buf.concat())); }
-
-            else if is_block { bl_buf.push(String_(str_buf.concat())); }
+            if !elem.is_empty() { buffers.string.push(elem.to_string()); }
 
             // Join the vector together to form a sentence / string and send it to the stack
-            else { stack.push(String_(str_buf.concat().to_string())) }
-
-            // Reset the buffer so that a potential new string can be read
-            str_buf.clear();
-
-            is_str = false;
-
+            push_to_buffer(&mut stack, elem, &mut buffers);
         }
 
         // If a string is currently being read, push it to the buffer, with a whitespace after
-        else if has_start_quote || is_str {
+        else if has_start_quote || is_string {
 
             // Push the element to the buffer
             if !elem.is_empty() {
-                str_buf.push(elem);
+                buffers.string.push(elem.to_string());
 
                 // Add a whitespace between elements / words
-                str_buf.push(" ");
+                buffers.string.push(" ".to_string());
             }
-            is_str = true;
+            if has_start_quote { buffers.nested_elements.push(StringType) }
         }
-
 
         //////////////// List /////////////////
 
         // If it is the end of the list, 
         // or if the list contains a single element
-        else if (is_list && is_list_end) ||
-            (is_list_start && is_list_end) {
-
-            // If the list is a sublist, continue reading it
-            if is_sublist {
-                push_to_vec(elem, sub_buf);
-                li_buf.push(List_(sub_buf.to_owned()));
-                sub_buf.clear();
-                is_sublist = false;
+        else if is_list_end {
+            if is_list_start {
+                push_block_to_buffer(&mut stack, &mut buffers);
             }
-
-            else {
-                // If the list is not a sublist, set is_list to false
-                is_list = false;
-
-                // Join the vector together to form a list and send it to the stack
-                stack.push(List_(li_buf.to_owned()));
-
-                // Reset the buffer so that a potential new list can be read
-                li_buf.clear();
+            if let Some(is_list) = buffers.nested_elements.last() { 
+                if is_list.is_list_type() {
+                    push_block_to_buffer(&mut stack, &mut buffers);
+                }
             }
         }
 
         // If it is the start of a list
         else if is_list_start {
-            // If it is a sublist, push the sublist one to the list buffer
-            if is_list {
-                push_to_vec(elem, sub_buf);
-                is_sublist = true;
-            }
-            else {
-                // If it is not a sublist, push the element to the regular list
-                push_to_vec(elem, li_buf);
-                is_list = true;
-            }
+
+            buffers.nested_elements.push(ListType);
+            // If it is not a sublist, push the element to the regular list
+            push_to_buffer(&mut stack.to_owned(), elem, &mut buffers);
         }
 
 
@@ -251,56 +225,32 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         //////////////// Code block AKA quotation /////////////////
 
         // If it is the start of a block
-        else if i.contains('{') { is_block = true; }
-
-
+        else if i.contains('{') {
+            buffers.nested_elements.push(BlockType);
+            // If it is not a sublist, push the element to the regular list
+            push_to_buffer(&mut stack.to_owned(), elem, &mut buffers);
+        }
+    
         // If it is the end of the block
         else if i.contains('}') {
-
-            // If we are in a list, copy the new list over
-            if is_list { li_buf.push(Block_(bl_buf.to_owned())); }
-
             // Push the code block to the stack or execute it
-            else { stack.push(Block_(bl_buf.to_owned())); }
-
-            // Reset the buffer so that a potential new block can be read
-            bl_buf.clear();
-            is_block = false;
+            push_block_to_buffer(&mut stack, &mut buffers);
         }
+            
+        // Push to buffer or stack
+        else { push_to_buffer(&mut stack, elem, &mut buffers); }
 
-
-
-        //////////////// Push to buffer /////////////////
-
-        // If a block is currently being read, push it to the buffer
-        else if is_block { push_to_vec(elem, bl_buf); }
-
-        // If a sublist is currently being read, push it to the buffer, with a comma after
-        else if is_sublist { push_to_vec(elem, sub_buf); }
-
-        // If it is not a sublist, push the element to the regular list
-        else if is_list { push_to_vec(elem, li_buf); }
-
-
-
-        //////////////// Push to stack /////////////////
-
-        else {
-            match string_to_type(elem) {
-                Int_(elem) => stack.push(Int_(elem)),
-                Float_(elem) => stack.push(Float_(elem)),
-                Bool_(elem) => stack.push(Bool_(elem)),
-                String_(elem) => stack.push(String_(elem)),
-                Variable(elem) => stack.push(Variable(elem)),
-                _ => {  }
-            };
-        }
     }
 
     // Error handling for incomplete code blocks, lists, and strings
-    if is_str { print_error(IncompleteString); }
-    if is_block { print_error(IncompleteCodeBlock); }
-    if is_list || is_sublist { print_error(IncompleteList); }
+    let elem_type = buffers.nested_elements.pop();
+    
+    match elem_type {
+        Some(ListType) => { print_error(IncompleteList); }
+        Some(BlockType) => { print_error(IncompleteCodeBlock); }
+        Some(StringType) => { print_error(IncompleteString); }
+        _ => {}
+    }
 
     stack
 }
@@ -310,7 +260,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
     let c_string = c.type_to_string_trimmed().to_lowercase();
     let op = c_string.as_str();
 
-    let new = &mut stack.clone();
+    let new = &mut stack.to_owned();
 
     // Remove the operator
     new.pop();
@@ -348,10 +298,19 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 }
 
 // Pattern matches the types to push to vector
+pub(crate) fn trim(i: &str) -> String {
+    i.trim().trim_matches(|c| 
+        c == ' ' || c == '"' ||
+        c == '[' || c == ']' ||
+        c == '{' || c == '}')
+    .to_string()
+}
+
+// Pattern matches the types to push to vector
 fn push_to_vec(i: &str, vec: &mut Vec<Type>) {
-    let elem =  i.trim().trim_matches(|c| c == ' ' || c == '"' || c == '[' || c == ']');
+    let elem =  trim(i);
     if !elem.is_empty() {
-        match string_to_type(elem) {
+        match string_to_type(elem.as_str()) {
             Int_(elem) => vec.push(Int_(elem)),
             Float_(elem) => vec.push(Float_(elem)),
             Bool_(elem) => vec.push(Bool_(elem)),

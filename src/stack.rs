@@ -1,11 +1,12 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::ExpectedNumber;
+use crate::find_ops::is_op;
+use crate::{push_to_vec, trim};
 use crate::stack::Type::*;
 use crate::string_ops::StringOnlyOps;
 use crate::string_ops::StringOnlyOps::{StackFloat, StackInt};
 use std::mem::discriminant;
 use std::vec;
-use crate::find_ops::is_op;
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
 #[derive(PartialEq, Clone, Debug)]
@@ -217,11 +218,11 @@ impl Stack<Type> {
         self.elements.last().cloned()
     }
 
-    pub fn pop_front(&mut self) -> Option<Type> {
+    pub fn pop_front(&mut self) -> (Option<Type>, Type) {
         self.reverse();
         let elem = self.elements.pop();
         self.reverse();
-        elem
+        (elem, String_(String::new()))
     }
 
     pub fn pop(&mut self) -> Option<Type> {
@@ -280,11 +281,121 @@ impl Stack<Type> {
     }
 }
 
+///////////////////////////////////////// Buffers //////////////////////////////////////////////
 
+
+
+#[derive(Clone)]
+pub enum DataTypes {
+    ListType,
+    BlockType,
+    StringType,
+}
+
+
+impl DataTypes {
+    
+    pub fn is_list_type(&self) -> bool {
+        match self {
+            DataTypes::ListType => true,
+            _ => false,
+        }
+    }
+    
+    pub fn is_block_type(&self) -> bool {
+        match self {
+            DataTypes::BlockType => true,
+            _ => false,
+        }
+    }
+    
+    pub fn is_string_type(&self) -> bool {
+        match self {
+            DataTypes::StringType => true,
+            _ => false,
+        }
+    }
+}
+
+
+pub struct Buffers {
+    pub(crate) string: Vec<String>,
+    pub(crate) block: Vec<Vec<Type>>,
+    pub(crate) list: Vec<Vec<Type>>,
+    pub(crate) nested_elements: Vec<DataTypes>,
+}
+
+impl Default for Buffers {
+    fn default() -> Self {
+        Buffers {
+            string: Vec::new(),
+            block: Vec::new(),
+            list: Vec::new(),
+            nested_elements: Vec::new(),
+        }
+    }
+}
+
+// Copy the code block to the correct buffer
+pub(crate) fn push_block_to_buffer(stack: &mut Stack<Type>, buffers: &mut Buffers) {
+
+    if let Some(els) = buffers.nested_elements.pop() {
+
+        let obj: Type =
+            if els.is_block_type() { Block_(buffers.block.pop().unwrap()) } 
+            else if els.is_list_type() { List_(buffers.list.pop().unwrap()) } else { return; };
+
+        push_to_buffer(stack, obj.type_to_string().as_str(), buffers);
+    }
+}
+
+// Copy the element from the buffer to the correct stack
+pub(crate) fn push_to_buffer(stack: &mut Stack<Type>, elem: &str, buffers: &mut Buffers) {
+
+    if let Some(el) = buffers.nested_elements.last() {
+
+        let buf_type = if el.is_block_type() { &mut buffers.block }
+        else if el.is_list_type() { &mut buffers.list } 
+        else if el.is_string_type() {
+            stack.push(String_(buffers.string.concat()));
+            // Reset the buffer so that a potential new string can be read
+            buffers.string.clear();
+            buffers.nested_elements.pop();
+            return
+        } else { return; };
+
+        let new: &mut Vec<Type> = &mut buf_type.pop().unwrap_or_else(|| Vec::new());
+        push_to_vec(elem, new);
+        buf_type.push(new.to_owned());
+
+    }
+
+    //////////////// Push to stack /////////////////
+    else {
+        match string_to_type(elem) {
+            Int_(elem) => stack.push(Int_(elem)),
+            Float_(elem) => stack.push(Float_(elem)),
+            Bool_(elem) => stack.push(Bool_(elem)),
+            String_(elem) => stack.push(String_(elem)),
+            Variable(elem) => stack.push(Variable(elem)),
+            List_(elem) => stack.push(List_(elem)),
+            Block_(elem) => stack.push(Block_(elem)),
+        };
+    }
+}
 
 //////////////////////////////////// Additional functions //////////////////////////////////////
 
-// Chooses which type to put the variable in
+// Converts a string to a vector of Types
+pub fn string_to_vector(var: &str) -> Vec<Type> {
+    let mut new_li: Vec<Type> = vec![];
+    let str = var.split_terminator(' ');
+    for i in str {
+        let elem = string_to_type(trim(i).as_str());
+        if !elem.is_empty() { new_li.push(elem); }
+    }
+    new_li
+}
 pub fn string_to_type(var: &str) -> Type {
 
     // Checks whether the variable is a float
@@ -295,6 +406,11 @@ pub fn string_to_type(var: &str) -> Type {
 
     else if var == "True" {Bool_(true)}
     else if var == "False" {Bool_(false)}
+    else if is_op(var) {Variable(var.to_owned())}
+
+    else if var.contains('[') || var.contains(']') { List_(string_to_vector(var)) }
+
+    else if var.contains('{') || var.contains('}') { Block_(string_to_vector(var)) }
     else if is_op(var) {Variable(var.to_owned())}
 
     else {String_(var.to_owned())}

@@ -2,7 +2,7 @@ use crate::combination_ops::COMBINATION_OPS;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedNumber};
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
-use crate::list_codeblock_ops::{codeblock_custom, list_op, find_block_elements, CODEBLOCK_OPS, LIST_OPS};
+use crate::list_codeblock_ops::{codeblock_custom, find_block_elements, list_op, CODEBLOCK_OPS, LIST_OPS};
 use crate::logical_ops::{arithmetic, ARITHMETIC_OPS};
 use crate::logical_ops::{logical_op, LOGICAL_OPS};
 use crate::stack::Type::{Bool_, List_};
