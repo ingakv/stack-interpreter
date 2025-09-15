@@ -9,7 +9,7 @@ pub enum Error {
     ExpectedListOrString,
     ExpectedCodeBlock,
     ExpectedList,
-    ExpectedVariable,
+    UnexpectedError,
     DivisionByZero,
     ProgramFinishedWithMultipleValues,
     NotEnoughValues,
@@ -40,7 +40,7 @@ pub(crate) fn print_error(err: Error) {
 
         ExpectedList => "Expected a list",
 
-        ExpectedVariable => "Expected a variable",
+        UnexpectedError => "There was an unexpected error",
 
         DivisionByZero => "Can't divide by 0",
 

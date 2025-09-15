@@ -1,12 +1,13 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::ExpectedNumber;
+use crate::error_handling::Error::{ExpectedNumber, UnexpectedError};
 use crate::find_ops::is_op;
-use crate::{push_to_vec, trim};
-use crate::stack::Type::*;
+use crate::stack::DataTypes::{BlockType, ListType, StringType};
+use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_, Variable};
 use crate::string_ops::StringOnlyOps;
 use crate::string_ops::StringOnlyOps::{StackFloat, StackInt};
 use std::mem::discriminant;
-use std::vec;
+use std::ops::Deref;
+use std::{io, vec};
 /////////////////////////////////////////// Type //////////////////////////////////////////////
 
 #[derive(PartialEq, Clone, Debug)]
@@ -26,6 +27,33 @@ impl Default for Type {
 
 // Type functions
 impl Type {
+
+    pub fn push(&mut self, elem: Type) {
+        match self {
+            List_(vec) | Block_(vec) => {
+                if let String_(elem_str) = elem.to_owned() {
+                    match elem_str.as_str() { 
+                        "[" => { vec.push(List_(Vec::new())); return; },
+                        "{" => { vec.push(Block_(Vec::new())); return; },
+                        _ => {vec.push(String_(trim(elem_str.as_str()))); return; }
+                    }
+                }
+                vec.push(elem);
+            }
+            String_(str) => {
+                // Add a whitespace between elements / words
+                let mut vec = 
+                    if !str.is_empty() { vec![str.deref().to_owned(), " ".to_owned()] }
+                    else { vec![] };
+                
+                if let String_(el) = elem { vec.push(el); }
+                vec.concat();
+            }
+            _ => {}
+        }
+    }
+    
+    
     // Returns the variable as a string
     pub fn type_to_string(&self) -> String {
         match self {
@@ -285,7 +313,7 @@ impl Stack<Type> {
 
 
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum DataTypes {
     ListType,
     BlockType,
@@ -297,31 +325,32 @@ impl DataTypes {
     
     pub fn is_list_type(&self) -> bool {
         match self {
-            DataTypes::ListType => true,
+            ListType => true,
             _ => false,
         }
     }
     
     pub fn is_block_type(&self) -> bool {
         match self {
-            DataTypes::BlockType => true,
+            BlockType => true,
             _ => false,
         }
     }
     
     pub fn is_string_type(&self) -> bool {
         match self {
-            DataTypes::StringType => true,
+            StringType => true,
             _ => false,
         }
     }
 }
 
 
+#[derive(Clone)]
 pub struct Buffers {
-    pub(crate) string: Vec<String>,
-    pub(crate) block: Vec<Vec<Type>>,
-    pub(crate) list: Vec<Vec<Type>>,
+    pub(crate) string: Vec<Type>,
+    pub(crate) block: Vec<Type>,
+    pub(crate) list: Vec<Type>,
     pub(crate) nested_elements: Vec<DataTypes>,
 }
 
@@ -336,66 +365,113 @@ impl Default for Buffers {
     }
 }
 
-// Copy the code block to the correct buffer
+// Finds the current target buffer and its type, plus the next outer data type if any
+pub(crate) fn find_target_buffer(buffers: Buffers) -> (Option<(DataTypes, Vec<Type>)>, Option<DataTypes>) {
+    
+    // Check if there is a nested element to determine the current context
+    if let Some(elem) = buffers.nested_elements.last() {
+        
+        // Select the correct buffer based on the data type
+        let buf =
+            if elem.is_block_type() { buffers.block }
+            else if elem.is_list_type() { buffers.list }
+            else if elem.is_string_type() { buffers.string }
+            else {
+                // Handle unexpected data type
+                print_error(UnexpectedError);
+                buffers.string
+            };
+
+        // Return the current data type and buffer, and the next outer data type if it exists
+        let next = buffers.nested_elements.iter().rev().nth(1);
+
+        (Some((*elem, buf)), next.cloned())
+    } else { (None, None) }
+}
+
+
+// Converts a vector of `Type` elements into the appropriate container type
+// and pushes it to the corresponding buffer in `buffers`.
+pub(crate) fn datatype_to_type(dt: DataTypes, mut elem: Vec<Type>, buffers: &mut Buffers) {
+    match dt {
+        // If the data type is a list
+        ListType => {
+            // Try to pop the last list from the buffer
+            let new_li = 
+                if let Some(List_(mut li))  = buffers.list.pop() {
+                    // Add the new element to the existing list
+                    li.push(elem.pop().unwrap());
+                    List_(li.to_owned()) 
+                    
+                // If no existing list, create a new one from elem
+                } else { List_(elem) };
+            buffers.list.push(new_li);
+        }
+        // If the data type is a block, wrap elem in Block_ and push to buffer
+        BlockType => { 
+            buffers.block.push(Block_(elem)) 
+        }
+        // If the data type is a string, join all elements as a string and push
+        StringType => { 
+            buffers.string.push(
+                String_(trim(
+                    elem.iter()
+                        .map(|t| t.type_to_string())
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                        .as_str()
+                ))
+            )
+        }
+    }
+}
+
+
+//////////////////////////////////// Additional functions //////////////////////////////////////
+
+// Moves a code block or element from the buffer to the correct place (buffer or stack)
 pub(crate) fn push_block_to_buffer(stack: &mut Stack<Type>, buffers: &mut Buffers) {
+    
+    // Try to find the current target buffer and its type, plus the next outer data type
+    if let (Some((dt, target_buffer)), nested) = find_target_buffer(buffers.to_owned()) {
 
-    if let Some(els) = buffers.nested_elements.pop() {
-
-        let obj: Type =
-            if els.is_block_type() { Block_(buffers.block.pop().unwrap()) } 
-            else if els.is_list_type() { List_(buffers.list.pop().unwrap()) } else { return; };
-
-        push_to_buffer(stack, obj.type_to_string().as_str(), buffers);
+        // Convert the target buffer into the correct type and push to the appropriate buffer
+        if let Some(nest_dt) = nested { datatype_to_type(nest_dt, target_buffer.to_owned(), buffers); }
+            
+        // If there is no nested type, push the last element of the buffer to the stack
+        else { stack.elements.push(target_buffer.last().unwrap().to_owned()); }
+        // Clear the target buffer and remove the last nested element type
+        if dt.is_block_type() { buffers.block.pop(); }
+        else if dt.is_list_type() { buffers.list.pop(); }
+        else if dt.is_string_type() { buffers.string.pop(); }
+        else { print_error(UnexpectedError); }
+        
+        buffers.nested_elements.pop();
     }
 }
 
 // Copy the element from the buffer to the correct stack
-pub(crate) fn push_to_buffer(stack: &mut Stack<Type>, elem: &str, buffers: &mut Buffers) {
+pub(crate) fn push_to_buffer(stack: &mut Stack<Type>, elem_str: &str, buffers: &mut Buffers) {
 
-    if let Some(el) = buffers.nested_elements.last() {
+    if let Some((buf_type, mut target_buf)) = find_target_buffer(buffers.to_owned()).0 {
 
-        let buf_type = if el.is_block_type() { &mut buffers.block }
-        else if el.is_list_type() { &mut buffers.list } 
-        else if el.is_string_type() {
-            stack.push(String_(buffers.string.concat()));
-            // Reset the buffer so that a potential new string can be read
-            buffers.string.clear();
-            buffers.nested_elements.pop();
-            return
-        } else { return; };
-
-        let new: &mut Vec<Type> = &mut buf_type.pop().unwrap_or_else(|| Vec::new());
-        push_to_vec(elem, new);
-        buf_type.push(new.to_owned());
-
+        if let Some(mut elem) = target_buf.pop() {
+            elem.push(string_to_type(elem_str));
+            target_buf.push(elem);
+        }
+        else { push_to_vec(elem_str, &mut target_buf); }
+        
+        // Returns the correct buffer depending on the data type
+        match buf_type {
+            ListType => {buffers.list = target_buf}
+            BlockType => {buffers.block = target_buf}
+            StringType => {buffers.string = target_buf}
+        }
     }
-
-    //////////////// Push to stack /////////////////
-    else {
-        match string_to_type(elem) {
-            Int_(elem) => stack.push(Int_(elem)),
-            Float_(elem) => stack.push(Float_(elem)),
-            Bool_(elem) => stack.push(Bool_(elem)),
-            String_(elem) => stack.push(String_(elem)),
-            Variable(elem) => stack.push(Variable(elem)),
-            List_(elem) => stack.push(List_(elem)),
-            Block_(elem) => stack.push(Block_(elem)),
-        };
-    }
+    else { push_to_vec(elem_str, &mut stack.elements); };
 }
 
-//////////////////////////////////// Additional functions //////////////////////////////////////
 
-// Converts a string to a vector of Types
-pub fn string_to_vector(var: &str) -> Vec<Type> {
-    let mut new_li: Vec<Type> = vec![];
-    let str = var.split_terminator(' ');
-    for i in str {
-        let elem = string_to_type(trim(i).as_str());
-        if !elem.is_empty() { new_li.push(elem); }
-    }
-    new_li
-}
 pub fn string_to_type(var: &str) -> Type {
 
     // Checks whether the variable is a float
@@ -406,11 +482,6 @@ pub fn string_to_type(var: &str) -> Type {
 
     else if var == "True" {Bool_(true)}
     else if var == "False" {Bool_(false)}
-    else if is_op(var) {Variable(var.to_owned())}
-
-    else if var.contains('[') || var.contains(']') { List_(string_to_vector(var)) }
-
-    else if var.contains('{') || var.contains('}') { Block_(string_to_vector(var)) }
     else if is_op(var) {Variable(var.to_owned())}
 
     else {String_(var.to_owned())}
@@ -434,4 +505,47 @@ pub(crate) fn is_string_number(el: &str) -> bool {
     if el.trim().as_bytes() == b"-" { is_num = false; }
 
     is_num
+}
+
+pub(crate) fn get_line() -> String {
+    let mut input = String::new();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    input.trim_end().to_string()
+}
+
+// Pattern matches the types to push to vector
+fn push_to_vec(i: &str, vec: &mut Vec<Type>) {
+    let elem =  trim(i);
+    let new_elem;
+    if !elem.is_empty() {
+        new_elem =
+            match string_to_type(elem.as_str()) {
+                Int_(elem) => Int_(elem),
+                Float_(elem) => Float_(elem),
+                Bool_(elem) => Bool_(elem),
+                String_(elem) => String_(elem),
+                Variable(elem) => Variable(elem),
+                _ => { String_(elem) }
+            };
+    }
+    else {
+        new_elem =
+            if i.contains('[') { List_(Vec::new()) }
+            else if i.contains('{') { Block_(Vec::new()) }
+            else { return; };
+    }
+    vec.push(new_elem);
+}
+
+// Removes unnecessary characters
+fn trim(i: &str) -> String {
+    i.trim().trim_matches(|c|
+        c == ' ' || c == '"' ||
+            c == '[' || c == ']' ||
+            c == '{' || c == '}')
+        .to_string()
 }

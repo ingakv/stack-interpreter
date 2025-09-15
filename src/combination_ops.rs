@@ -1,7 +1,7 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumberOrBoolean, ExpectedNumberStringOrList};
 use crate::list_codeblock_ops::{codeblock, list_op};
-use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
+use crate::stack::Type::{Bool_, Float_, Int_, List_, String_, Variable};
 use crate::stack::{Stack, Type};
 use crate::string_ops::stack_io;
 use std::ops::Neg;
@@ -16,14 +16,12 @@ pub(crate) fn combination_op(stack: &mut Stack<Type>) -> Stack<Type> {
     let operator = stack.pop().unwrap();
     let op = operator.type_to_string_trimmed().to_lowercase();
     
-    let (mut rem, new) = match op.as_str() {
+    let (rem, new) = match op.as_str() {
         "length" => { length(stack) }
         "==" => { compare(stack) }
         "not" => { invert(stack) }
         _ => { (vec![], vec![]) }
     };
-    
-    rem.push(operator);
     
     // Removes the operator, the original numbers or replaces them with the new element
     stack.replace_last_match(rem, new);
@@ -104,7 +102,7 @@ fn compare(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
             let elem2_float = Some(Float_(elem2.to_owned().unwrap().type_to_float().unwrap()));
             is_equal = Bool_(elem1_float == elem2_float);
         }
-        (vec![elem1.unwrap_or_default(), elem2.unwrap_or_default()], vec![is_equal])
+        (vec![Variable("compare".to_string()), elem1.unwrap_or_default(), elem2.unwrap_or_default()], vec![is_equal])
 
     }
     else { print_error(ExpectedNumberStringOrList); (vec![], vec![]) }
@@ -113,29 +111,32 @@ fn compare(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
 fn invert(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
+    let mut rem_vec = vec![Variable("not".to_string())];
+    let mut new_el = Type::default();
+    
     let mut old_stack = stack.clone();
     loop {
 
         if let Some(elem) = old_stack.pop() {
-            match elem {
+            new_el = match elem {
 
                 // Turns a negative number positive, or the opposite
-                Int_(el) => {
-                    return (vec![elem], vec![Int_(el.neg())]) }
+                Int_(el) => { Int_(el.neg())}
 
-                Float_(el) => {
-                    return (vec![elem], vec![Float_(el.neg())]) }
+                Float_(el) => { Float_(el.neg()) }
 
                 // Inverts the predicate
                 Bool_(el) => {
-                    let new_elem = if el { Some(Bool_(false)) }
+                    let new_elem2 = if el { Some(Bool_(false)) }
                     else { Some(Bool_(true)) };
-                    return (vec![elem], vec![new_elem.unwrap()]);
+                    new_elem2.unwrap()
                 }
-                _ => {}
-            }
+                _ => { Type::default() }
+            };
+            rem_vec.push(elem);
         }
-        else { print_error(ExpectedNumberOrBoolean) ;return (vec![], vec![]) }
+        else { print_error(ExpectedNumberOrBoolean); }
+        return (rem_vec, vec![new_el])
     }
 }
 
