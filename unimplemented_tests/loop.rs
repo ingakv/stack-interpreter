@@ -1,5 +1,5 @@
 mod test_loop {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_loop_with_conditional() {

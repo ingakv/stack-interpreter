@@ -1,5 +1,5 @@
 mod test_lists {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_list_creation() {

@@ -1,5 +1,5 @@
 mod test_codeblocks {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_exec_block() {

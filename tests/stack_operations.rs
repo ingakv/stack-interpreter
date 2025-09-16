@@ -1,5 +1,5 @@
 mod test_stack_operations {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_swap_pop() {

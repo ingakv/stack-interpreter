@@ -1,5 +1,5 @@
 mod test_functions {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_odd_function() {

@@ -1,4 +1,4 @@
-# **bprog** :: simple concatenative, stack-based interpreter
+# Simple concatenative, stack-based interpreter
 
 * [Assignment walkthrough video](https://youtu.be/Dw0dWN3yehM)
 * Check `haskell/rpn-calc` project for basics for parsing and using stack to represent your program state.
@@ -9,7 +9,7 @@
 
 ## Overview
 
-We will implement a simple concatenative, stack-based, programming language interpreter. The interpreter is called `bprog`. `bprog` will accept instruction from standard input and execute them following the semantics of the language that we defined below. It can be used as interactive CLI, or, it can be fed with a file containing a program and it will execute it.  
+We will implement a simple concatenative, stack-based, programming language interpreter. The interpreter will accept instruction from standard input and execute them following the semantics of the language that we defined below. It can be used as interactive CLI, or, it can be fed with a file containing a program and it will execute it.  
 
 In the CLI mode, the program should parse and interpret the input line by line, in an infinite loop. In the `input file` mode it should work with the entire input. We will discuss those two modes below.
 
@@ -57,7 +57,7 @@ This program is EXACTLY the same as the first program above. This is because we 
 * `x 10 :=` reads/writes more natural 
 * `' x 10 :=` is exactly the same, but, is a bit more "tedious"
 
-Is this a good design decision for our `bprog` language?
+Is this a good design decision for our `stack-interpreter` language?
 
 
 

@@ -5,7 +5,7 @@ use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
 use crate::list_codeblock_ops::{codeblock_custom, find_block_elements, list_op, CODEBLOCK_OPS, LIST_OPS};
 use crate::logical_ops::{arithmetic, ARITHMETIC_OPS};
 use crate::logical_ops::{logical_op, LOGICAL_OPS};
-use crate::stack::Type::{Bool_, List_};
+use crate::stack::Type::{Bool_, List_, Variable};
 use crate::stack::{is_string_number, Stack, Type};
 use crate::string_ops::{IO_OPS, STACK_OPS, STRING_OPS};
 
@@ -30,7 +30,7 @@ pub(crate) fn handle_literal_and_operator(
     ops: Operations,
     stack: &mut Stack<Type>,
 ) -> Stack<Type> {
-    let new_stack = handle_literal_and_operator_recursive(ops, stack, false);
+    let new_stack = handle_literal_and_operator_recursive(ops, stack, false, false);
     new_stack.to_owned()
 }
 
@@ -38,6 +38,7 @@ pub(crate) fn handle_literal_and_operator_recursive(
     ops: Operations,
     stack: &mut Stack<Type>,
     skip: bool,
+    is_if_block: bool,
 ) -> Stack<Type> {
     
     let mut old_stack = stack.clone();
@@ -51,14 +52,14 @@ pub(crate) fn handle_literal_and_operator_recursive(
     if c.is_empty() { Stack::new() }
         
     // Checks if it is an operator
-    else if (operation_type(ops).contains(&st.as_str()) || c.is_block()) && !skip {
+    else if (operation_type(ops).contains(&st.as_str()) || c.is_block() || is_if_block) && !skip {
         let mut item2 = stack.to_owned();
         let mut item1 = stack.to_owned();
 
         // Loops through and finds the next two items of the correct literal type
         if !ops.is_block() {
-            item2 = handle_literal_and_operator_recursive(ops, stack, true);
-            item1 = handle_literal_and_operator_recursive(ops, stack, true);
+            item2 = handle_literal_and_operator_recursive(ops, stack, true, false);
+            item1 = handle_literal_and_operator_recursive(ops, stack, true, false);
         }
         
         let mut new_li = old_stack.clone();
@@ -86,10 +87,10 @@ pub(crate) fn handle_literal_and_operator_recursive(
                 
                 // Finds the next operator and list
                 let (additional_elems, list, operator, condition, then_block) = 
-                    find_block_elements(old_stack.to_owned(), c.to_owned());
+                    find_block_elements(old_stack.to_owned());
                 
                 
-                if let Some(op_some) = operator {
+                if let Some(Variable(op_some)) = operator {
                     let (rem, new) = codeblock_custom(op_some, c, then_block, additional_elems, list, condition);
 
                     // Removes the operator, the original numbers or replaces them with the new element
@@ -114,7 +115,7 @@ pub(crate) fn handle_literal_and_operator_recursive(
     } else if is_wanted_literal_type(ops, c.to_owned()) {
         Stack { elements: vec![c] }
     } else {
-        handle_literal_and_operator_recursive(ops, stack, true)
+        handle_literal_and_operator_recursive(ops, stack, true, false)
     }
 }
 
@@ -131,7 +132,7 @@ fn is_wanted_literal_type(wanted_type: Operations, elem: Type) -> bool {
         Arithmetic => elem.is_number() || elem.is_bool(),
         Logical => elem.is_bool(),
         List => elem.is_list(),
-        Block => elem.is_block(),
+        Block => !elem.is_list(),
     }
 }
 fn operation_type(op: Operations) -> &'static [&'static str] {

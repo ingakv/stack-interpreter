@@ -1,5 +1,5 @@
 use std::env;
-use bprog::run;
+use stack_interpreter::run;
 
 fn main() {
     // For REPL mode, run with

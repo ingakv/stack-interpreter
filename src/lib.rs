@@ -1,12 +1,12 @@
 ﻿use crate::combination_ops::{combination_op, COMBINATION_OPS};
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{IncompleteCodeBlock, IncompleteList, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
-use crate::find_ops::handle_literal_and_operator;
+use crate::find_ops::{handle_literal_and_operator, handle_literal_and_operator_recursive};
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
 use crate::list_codeblock_ops::{pop_front, LIST_OPS};
 use crate::logical_ops::{ARITHMETIC_OPS, LOGICAL_OPS};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
-use crate::stack::{get_line, push_block_to_buffer, push_to_buffer, push_str_to_vec, Buffers, Stack, Type};
+use crate::stack::{get_line, push_block_to_buffer, push_str_to_vec, push_to_buffer, Buffers, Stack, Type};
 use crate::string_ops::{stack_io, string_ops, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::Write;
@@ -53,7 +53,7 @@ pub fn run(normal: bool) {
         if normal {
             print!("\n:q to quit\n:s to print the stack");
         }
-        print!("\nbprog> ");
+        print!("\nstack-interpreter> ");
         io::stdout().flush().unwrap();
 
         // Reads user input
@@ -92,21 +92,20 @@ pub fn run(normal: bool) {
     }
 }
 
-fn exec(mut block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
+fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
     let mut new_stack = Stack::new();
     let mut is_if = false;
     let mut is_if_block = false;
+    let exec_block = &mut block.to_owned();
 
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
     loop {
 
-        let (elem_opt, rem) = if let Some(exec_block) = block.to_owned() {
-                pop_front(exec_block.to_owned())
-        } else { stack.pop_front() };
+        let elem_opt = if !stack.is_empty() { stack.pop_front() }
+        else if exec_block.is_some() { pop_front(exec_block) }
+        else { None };
         
         let Some(elem) = elem_opt else { break };
-        
-        if block.is_some() { block = Some(rem); }
 
         new_stack.push(elem.to_owned());
 
@@ -114,15 +113,16 @@ fn exec(mut block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
         // Therefore, this extra code block will already be processed
 
         if is_if == is_if_block {
-            new_stack = check_operator(elem.to_owned(), &mut new_stack);
+            new_stack = check_operator(elem.to_owned(), &mut new_stack, is_if_block);
         }
 
         if is_if && is_if_block {
             is_if = false;
             is_if_block = false;
         }
+        
+        if is_if { is_if_block = true; }
         if elem.type_to_string_trimmed() == "if" { is_if = true; }
-        if elem.is_block() && is_if { is_if_block = true; }
     
     }
     new_stack
@@ -232,7 +232,7 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
     stack
 }
 
-pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
+pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>, is_if_block: bool) -> Stack<Type> {
 
     let c_string = c.type_to_string_trimmed().to_lowercase();
     let op = c_string.as_str();
@@ -246,7 +246,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>) -> Stack<Type> {
 
         if COMBINATION_OPS.contains(&op) { combination_op(stack) }
 
-        else if c.is_block() { handle_literal_and_operator(Block, stack) }
+        else if c.is_block() || is_if_block { handle_literal_and_operator_recursive(Block, stack, false, is_if_block)}
 
         else if ARITHMETIC_OPS.contains(&op) { handle_literal_and_operator(Arithmetic, stack) }
 

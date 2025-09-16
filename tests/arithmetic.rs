@@ -1,5 +1,5 @@
 mod test_simple_arithmetic {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_addition() {
@@ -23,7 +23,7 @@ mod test_simple_arithmetic {
 }
 
 mod test_arithmetic_with_type_coercion {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_addition_with_float() {

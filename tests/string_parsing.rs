@@ -1,5 +1,5 @@
 mod test_string_parsing {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_parse_integer() {

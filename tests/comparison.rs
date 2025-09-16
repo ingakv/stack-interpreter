@@ -1,5 +1,5 @@
 mod test_comparison {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_less_than_operation() {
@@ -43,7 +43,7 @@ mod test_comparison {
 
     #[test]
     fn test_greater_than_or_equal_int_float_equal() {
-        use bprog::t;
+        use stack_interpreter::t;
         assert_eq!(t("10 10.0 >="), "True");
     }
 

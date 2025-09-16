@@ -1,5 +1,5 @@
 mod test_bool_operations {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_and_operation() {

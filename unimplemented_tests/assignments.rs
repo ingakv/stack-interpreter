@@ -1,5 +1,5 @@
 mod test_assignments {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_variable_name() {

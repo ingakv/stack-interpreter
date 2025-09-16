@@ -1,4 +1,4 @@
-# BPROG - Stack Interpreter
+# Stack Interpreter
 
 This is a simple concatenative, stack-based, programming language interpreter that can do simple math, io, parsing, and simple code blocks, written in Rust.
 
@@ -23,7 +23,7 @@ The program searches through the entire stack from the bottom up.
 If an operator has been added, it will loop through until it finds two (or one, depending on the operator) variables of the correct type, even if there are other variables in between.
 I.e., if the stack is `[1, "hello", 2, +]` the program will extract 1 and 2, and push the result to the back, resulting in the stack now being `["hello", 3]`.
 
-Everything in `bprog` is white-space delimited, so you need white space between all the symbols, and white space between " and the string.
+Everything in the stack interpreter is white-space delimited, so you need white space between all the symbols, and white space between " and the string.
 
 
 

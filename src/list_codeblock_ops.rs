@@ -1,8 +1,8 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedListOrString};
+use crate::exec;
 use crate::stack::Type::{Block_, Bool_, Int_, List_, String_, Variable};
 use crate::stack::{Stack, Type};
-use crate::exec;
 
 pub(crate) const CODEBLOCK_OPS: [&str; 4] = [
     "exec",
@@ -26,7 +26,7 @@ pub(crate) fn codeblock_custom(c: String, block: Type, then_block: Option<Type>,
         // Counts the number of variables in the code block
         "length" => {
             let mut count = 0;
-            exec_custom(block.clone(), &mut |_| { count += 1 });
+            exec_custom(&mut Some(block.clone()), &mut |_| { count += 1 });
             
             new_el.push(Int_(count));
         }
@@ -152,14 +152,13 @@ pub(crate) fn list_op(c: String, list: Type, el: Option<Type>) -> (Vec<Type>, Ve
 }
 
 // Execute a code block
-fn exec_custom<F>(mut code_block: Type, stack_ref: &mut F) -> ()
+fn exec_custom<F>(code_block: &mut Option<Type>, stack_ref: &mut F) -> ()
 where F: FnMut(Type) {
 
     loop {
         // Execute the code from the first element
-        match pop_front(code_block.to_owned()) {
-            (Some(x), rem) => {
-                code_block = rem;
+        match pop_front(code_block) {
+            Some(x) => {
                 stack_ref(x);
             }
 
@@ -169,44 +168,40 @@ where F: FnMut(Type) {
     }
 }
 
-
-pub(crate) fn pop_front(t: Type) -> (Option<Type>, Type) {
+pub fn pop_front(t: &mut Option<Type>) -> Option<Type> {
     match t {
-        Block_(val) => {
-            let mut new = val.clone();
-
-            new.reverse();
-            let el = new.pop();
-            new.reverse();
-
-            (el, Block_(new))
+        Some(Block_(val) | List_(val)) => {
+            val.reverse();
+            let el = val.pop();
+            val.reverse();
+            el
         }
-        _ => { (None, t) }
+        _ => { let el = t.take(); el }
     }
 }
 
-pub(crate) fn find_block_elements(stack: Stack<Type>, else_block: Type) -> (Stack<Type>, Option<Type>, Option<String>, Option<Type>, Option<Type>) {
+pub(crate) fn find_block_elements(stack: Stack<Type>) -> (Stack<Type>, Option<Type>, Option<Type>, Option<Type>, Option<Type>) {
     // Loops through and finds the next operator and list
     let mut list = None;
-    let mut operator = None;
-    let mut then_block = None;
-    let mut condition = None;
     let mut additional_elems = Stack::new();
 
-    for elem in stack.elements.iter() {
+    let mut stack_copy = stack.clone();
+    
+    // Pop the else block
+    stack_copy.pop();
+    
+    // Stores the then block, the operator, and the condition
+    let then_block = stack_copy.pop();
+    let operator = stack_copy.pop();
+    let condition = stack_copy.pop();
 
-        let elem_str = elem.type_to_string_trimmed();
+    // Save other elements of the stack
+    for elem in stack_copy.elements.iter().rev() {
+
         if elem.is_list() && list.is_none() {
             list = Some(elem.to_owned());
-        } else if CODEBLOCK_OPS.contains(&elem_str.as_str()) && operator.is_none() {
-            operator = Some(elem_str);
-        } else if elem.is_bool() && condition.is_none() {
-            condition = Some(elem.to_owned());
-        } else if elem.is_block() && then_block.is_none() {
-            then_block = Some(elem.to_owned());
         }
-        // Save other elements of the stack
-        else if elem.to_owned() != else_block { additional_elems.push(elem.to_owned()); }
+        else { additional_elems.push(elem.to_owned()); }
         
     }
     

@@ -1,5 +1,5 @@
 mod test_length {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_hello_length() {

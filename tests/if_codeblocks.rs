@@ -1,5 +1,5 @@
 mod test_if_with_codeblocks {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_if_true() {
@@ -28,7 +28,7 @@ mod test_if_with_codeblocks {
 }
 
 mod test_if_without_codeblock {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_if_true_condensed() {

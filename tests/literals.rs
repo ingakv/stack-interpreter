@@ -1,5 +1,5 @@
 mod test_literals {
-    use bprog::t;
+    use stack_interpreter::t;
 
     #[test]
     fn test_literal_int() {

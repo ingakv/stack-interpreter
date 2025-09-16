@@ -253,11 +253,11 @@ impl Stack<Type> {
         self.elements.last().cloned()
     }
 
-    pub fn pop_front(&mut self) -> (Option<Type>, Type) {
+    pub fn pop_front(&mut self) -> Option<Type> {
         self.reverse();
         let elem = self.elements.pop();
         self.reverse();
-        (elem, String_(String::new()))
+        elem
     }
 
     pub fn pop(&mut self) -> Option<Type> {
