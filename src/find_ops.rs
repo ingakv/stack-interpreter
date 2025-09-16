@@ -1,6 +1,6 @@
 use crate::combination_ops::COMBINATION_OPS;
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedNumber};
+use crate::error_handling::Error::{ExpectedBoolean, ExpectedList, ExpectedNumber};
 use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
 use crate::list_codeblock_ops::{codeblock_custom, find_block_elements, list_op, CODEBLOCK_OPS, LIST_OPS};
 use crate::logical_ops::{arithmetic, ARITHMETIC_OPS};
@@ -119,13 +119,12 @@ pub(crate) fn handle_literal_and_operator_recursive(
 }
 
 fn print_error_literal(wanted_type: Operations) -> () {
-    let err = match wanted_type { 
-        Arithmetic => ExpectedNumber,
-        Logical => ExpectedBoolean,
-        List => ExpectedList,
-        Block => ExpectedCodeBlock,
+    match wanted_type {
+        Arithmetic => print_error(ExpectedNumber),
+        Logical => print_error(ExpectedBoolean),
+        List => print_error(ExpectedList),
+        _ => {}
     };
-    print_error(err)
 }
 fn is_wanted_literal_type(wanted_type: Operations, elem: Type) -> bool {
     match wanted_type { 

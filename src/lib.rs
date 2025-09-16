@@ -6,7 +6,7 @@ use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
 use crate::list_codeblock_ops::{pop_front, LIST_OPS};
 use crate::logical_ops::{ARITHMETIC_OPS, LOGICAL_OPS};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
-use crate::stack::{get_line, push_block_to_buffer, push_to_buffer, Buffers, Stack, Type};
+use crate::stack::{get_line, push_block_to_buffer, push_to_buffer, push_str_to_vec, Buffers, Stack, Type};
 use crate::string_ops::{stack_io, string_ops, IO_OPS, STACK_OPS, STRING_OPS};
 use std::io;
 use std::io::Write;
@@ -190,7 +190,7 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         // If it is the start of a list
         else if is_list_start {
             buffers.nested_elements.push(ListType);
-            push_to_buffer(&mut stack.to_owned(), elem, &mut buffers);
+            push_str_to_vec(elem, &mut buffers.list);
         }
 
 
@@ -201,7 +201,7 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
         // If it is the start of a block
         else if i.trim().starts_with('{') {
             buffers.nested_elements.push(BlockType);
-            push_to_buffer(&mut stack.to_owned(), elem, &mut buffers);
+            push_str_to_vec(elem, &mut buffers.block);
         }
     
         // If it is the end of the block
