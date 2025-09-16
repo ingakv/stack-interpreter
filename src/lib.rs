@@ -1,15 +1,15 @@
-﻿use crate::combination_ops::{combination_op, COMBINATION_OPS};
+﻿use crate::combination_ops::{combination, combination_ops};
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{IncompleteCodeBlock, IncompleteList, IncompleteString, ProgramFinishedWithMultipleValues, StackEmpty};
-use crate::find_ops::{handle_literal_and_operator, handle_literal_and_operator_recursive};
-use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
-use crate::list_codeblock_ops::{pop_front, LIST_OPS};
-use crate::logical_ops::{ARITHMETIC_OPS, LOGICAL_OPS};
+use crate::find_ops::handle_literal_and_operator;
+use crate::list_codeblock_ops::{codeblock_ops, list_ops, pop_front};
+use crate::logical_ops::{arithmetic_ops, logical_ops};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
 use crate::stack::{get_line, push_block_to_buffer, push_str_to_vec, push_to_buffer, Buffers, Stack, Type};
-use crate::string_ops::{stack_io, string_ops, IO_OPS, STACK_OPS, STRING_OPS};
+use crate::string_ops::{stack_io, stack_io_ops, string_ops, strings_ops};
 use std::io;
 use std::io::Write;
+use crate::stack::Operators::If;
 
 mod combination_ops;
 mod error_handling;
@@ -94,8 +94,7 @@ pub fn run(normal: bool) {
 
 fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
     let mut new_stack = Stack::new();
-    let mut is_if = false;
-    let mut is_if_block = false;
+    let mut is_if_block = 0;
     let exec_block = &mut block.to_owned();
 
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
@@ -111,18 +110,14 @@ fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
 
         // If statements read the two next code blocks instead of one.
         // Therefore, this extra code block will already be processed
-
-        if is_if == is_if_block {
-            new_stack = check_operator(elem.to_owned(), &mut new_stack, is_if_block);
-        }
-
-        if is_if && is_if_block {
-            is_if = false;
-            is_if_block = false;
-        }
         
-        if is_if { is_if_block = true; }
-        if elem.type_to_string_trimmed() == "if" { is_if = true; }
+        if is_if_block == 1 || 
+            elem.type_to_string_trimmed() == "if" { is_if_block += 1; }
+
+        else if is_if_block > 0 {
+            new_stack = check_operator(elem.to_owned(), &mut new_stack, true);
+            is_if_block = 0;
+        } else { new_stack = check_operator(elem.to_owned(), &mut new_stack, false); }
     
     }
     new_stack
@@ -234,8 +229,7 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
 
 pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>, is_if_block: bool) -> Stack<Type> {
 
-    let c_string = c.type_to_string_trimmed().to_lowercase();
-    let op = c_string.as_str();
+    let op = c.type_to_string_trimmed().to_lowercase();
 
     let new = &mut stack.to_owned();
 
@@ -244,25 +238,25 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>, is_if_block: bool
 
     let new_stack =
 
-        if COMBINATION_OPS.contains(&op) { combination_op(stack) }
+        if let Some(ops) = combination_ops(op.to_owned()) { combination(new, ops) }
 
-        else if c.is_block() || is_if_block { handle_literal_and_operator_recursive(Block, stack, false, is_if_block)}
+        else if let Some(ops) = codeblock_ops(op.to_owned()) 
+        { handle_literal_and_operator(ops, stack)}
+            
+        else if is_if_block { handle_literal_and_operator(If, stack)}
 
-        else if ARITHMETIC_OPS.contains(&op) { handle_literal_and_operator(Arithmetic, stack) }
+        else if let Some(ops) = arithmetic_ops(op.to_owned()).or_else(
+                                        || logical_ops(op.to_owned())) .or_else(
+                                        || list_ops(op.to_owned())) 
+        { handle_literal_and_operator(ops, stack) }
 
-        else if LOGICAL_OPS.contains(&op) { handle_literal_and_operator(Logical, stack) }
-
-        else if LIST_OPS.contains(&op) { handle_literal_and_operator(List, stack) }
-
-        else if IO_OPS.contains(&op) ||
-            STRING_OPS.contains(&op) ||
-            STACK_OPS.contains(&op) {
+        else if strings_ops(op.to_owned()).is_some() ||
+            stack_io_ops(op.to_owned()).is_some() {
 
             let (remove_vec, new_vec) =
 
-            if STRING_OPS.contains(&op) { string_ops(op, new) }
-            else if IO_OPS.contains(&op) ||
-                STACK_OPS.contains(&op) { stack_io(op, (new.last(), new.second_to_last())) }
+            if let Some(ops) = strings_ops(op.to_owned()) { string_ops(ops, new) }
+            else if let Some(ops) = stack_io_ops(op.to_owned()) { stack_io(ops, (new.last(), new.second_to_last())) }
             else { (vec![], vec![]) };
 
             new.replace_last_match(remove_vec, new_vec);

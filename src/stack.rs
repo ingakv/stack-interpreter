@@ -1,7 +1,9 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumber, UnexpectedError};
-use crate::find_ops::is_op;
+use crate::find_ops::Operations::*;
+use crate::find_ops::{string_to_operator, Operations};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
+use crate::stack::Operators::*;
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_, Variable};
 use crate::string_ops::StringOnlyOps;
 use crate::string_ops::StringOnlyOps::{StackFloat, StackInt};
@@ -17,7 +19,7 @@ pub enum Type {
     String_(String),
     List_(Vec<Type>),
     Block_(Vec<Type>),
-    Variable(String),
+    Variable(Operators),
 }
 
 impl Default for Type {
@@ -47,8 +49,8 @@ impl Type {
                     else { vec![] };
 
                 match elem { 
-                    String_(el) |
-                    Variable(el) => { vec.push(el); }
+                    String_(el) => { vec.push(el); }
+                    Variable(el) => { vec.push(Variable(el).type_to_string()); }
                     Int_(el) => { vec.push(el.to_string()); }
                     Float_(el) => { vec.push(el.to_string()); }
                     Bool_(el) => { vec.push(el.to_string()); }
@@ -106,7 +108,26 @@ impl Type {
 
                 new_li.concat()
             }
-            Variable(str) => {str.to_string()}
+            Variable(str) => {
+                match str {
+
+                        // Arithmetic
+                        Plus => "+".to_string(),
+                        Minus => "-".to_string(),
+                        Multiply => "*".to_string(),
+                        DivSlash => "/".to_string(),
+                        LessThan => "<".to_string(),
+                        GreaterThan => ">".to_string(),
+                        LessThanOrEqual => "<=".to_string(),
+                        GreaterThanOrEqual => ">=".to_string(),
+
+                        And => "&&".to_string(),
+                        Or => "||".to_string(),
+                        Equal => "==".to_string(),
+
+                    _ => format!("{:?}", str).to_lowercase(),
+                }
+            }
         }
     }
 
@@ -316,10 +337,71 @@ impl Stack<Type> {
     }
 }
 
+//////////////////////////////////////// Operators /////////////////////////////////////////////
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) enum Operators {
+    // Code block
+    Exec,
+    Map,
+    Each,
+    If,
+
+    // List
+    Head,
+    Tail,
+    Empty,
+    Cons,
+    Append,
+
+    // Arithmetic
+    Plus,
+    Minus,
+    Multiply,
+    DivSlash,
+    Div,
+    LessThan,
+    GreaterThan,
+    LessThanOrEqual,
+    GreaterThanOrEqual,
+
+    // Logical
+    And,
+    Or,
+
+    // Stack
+    Dup,
+    Swap,
+    Pop,
+    
+    // IO
+    Print,
+    Read,
+    
+    // String
+    ParseInteger,
+    ParseFloat,
+    Words,
+    
+    // Combination
+    Length,
+    Equal,
+    Not,
+}
+
+
+impl Operators {
+    pub fn operator_to_type(&self) -> Operations {
+        match self {
+            Head|Tail|Empty|Cons|Append => List,
+            Plus|Minus|Multiply|DivSlash|Div|LessThan|GreaterThan|LessThanOrEqual|GreaterThanOrEqual => Arithmetic,
+            And|Or => Logical,
+            _ => Block,
+        }
+    }
+}
+
+
 ///////////////////////////////////////// Buffers //////////////////////////////////////////////
-
-
-
 #[derive(Clone, Copy)]
 pub enum DataTypes {
     ListType,
@@ -420,8 +502,19 @@ pub(crate) fn datatype_to_type(dt: DataTypes, elem: Type, buffers: &mut Buffers)
                 } else { elem };
             buffers.list.push(new_li);
         }
-        // If the data type is a block, wrap elem in Block_ and push to buffer
-        BlockType => { buffers.block.push(elem) }
+        BlockType => {
+            // Try to pop the last list from the buffer
+            let new_li: Type =
+
+                if let Some(mut li)  = buffers.block.pop() {
+                    // Add the new element to the existing list
+                    li.push(elem);
+                    li.to_owned()
+
+                // If no existing list, create a new one from elem
+                } else { elem };
+            buffers.block.push(new_li);
+        }
         // If the data type is a string, join all elements as a string and push
         StringType => {
             if let String_(str) = elem {
@@ -479,7 +572,7 @@ pub fn string_to_type(var: &str) -> Type {
 
     else if var == "True" {Bool_(true)}
     else if var == "False" {Bool_(false)}
-    else if is_op(var) {Variable(var.to_owned())}
+    else if let Some(op) = string_to_operator(var.to_string()) { Variable(op) }
 
     else {String_(var.to_owned())}
 }

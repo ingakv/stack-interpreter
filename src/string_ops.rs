@@ -2,19 +2,39 @@ use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedString, NotEnoughValues, StackEmpty};
 use crate::get_line;
 use crate::stack::Type::{Int_, List_, String_};
-use crate::stack::{string_to_type, Stack, Type};
-use crate::string_ops::StringOnlyOps::{StackFloat, StackInt, Words};
+use crate::stack::{string_to_type, Operators, Stack, Type};
+use crate::stack::Operators::{Dup, ParseFloat, ParseInteger, Pop, Print, Read, Swap, Words, Length};
+use crate::string_ops::StringOnlyOps::{StackFloat, StackInt, WordsOp};
 
-pub(crate) const STACK_OPS: [&str; 3] = ["dup", "swap", "pop"];
+pub(crate) fn stack_io_ops(input: String) -> Option<Operators> {
+    let res = match input.as_str() {
+        "dup" => {Dup},
+        "swap" => {Swap},
+        "pop" => {Pop},
+        
+        "print" => {Print},
+        "read" => {Read},
+        _ => {return None;}
+    };
+    Some(res)
+}
 
-pub(crate) const IO_OPS: [&str; 2] = ["print", "read"];
+pub(crate) fn strings_ops(input: String) -> Option<Operators> {
+    let res = match input.as_str() {
+        "parseinteger" => {ParseInteger},
+        "parsefloat" => {ParseFloat},
+        "words" => { Words },
+        _ => {return None;}
+    };
+    Some(res)
+}
 
-pub(crate) const STRING_OPS: [&str; 3] = ["parseinteger", "parsefloat", "words"];
+
 
 
 #[derive(Clone, Copy)]
 pub enum StringOnlyOps {
-    Words,
+    WordsOp,
     StackInt,
     StackFloat,
 }
@@ -22,7 +42,7 @@ pub enum StringOnlyOps {
 impl StringOnlyOps {
     pub fn is_words(&self) -> bool {
         match self {
-            Words => true,
+            WordsOp => true,
             _ => false
         }
     }
@@ -61,7 +81,7 @@ fn parse_string(stack: &mut Stack<Type>, parse_type: StringOnlyOps) -> (Vec<Type
     (vec![], vec![])
 }
 
-pub(crate) fn string_ops(op: &str, stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
+pub(crate) fn string_ops(op: Operators, stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
     // Error handling on empty stack
     if stack.is_empty() { print_error(StackEmpty) }
@@ -70,12 +90,12 @@ pub(crate) fn string_ops(op: &str, stack: &mut Stack<Type>) -> (Vec<Type>, Vec<T
         match op {
             
             // Converts a string to an integer
-            "parseinteger" => { return parse_string(stack, StackInt); }
+            ParseInteger => { return parse_string(stack, StackInt); }
 
             // Converts a string to a float
-            "parsefloat" => { return parse_string(stack, StackFloat); }
+            ParseFloat => { return parse_string(stack, StackFloat); }
 
-            "words" => { return parse_string(stack, Words); }
+            Words => { return parse_string(stack, WordsOp); }
 
             _ => { print_error(ExpectedString); }
         }
@@ -83,7 +103,7 @@ pub(crate) fn string_ops(op: &str, stack: &mut Stack<Type>) -> (Vec<Type>, Vec<T
     (vec![], vec![])
 }
 
-pub(crate) fn stack_io(op: &str, elems: (Option<Type>, Option<Type>)) -> (Vec<Type>, Vec<Type>) {
+pub(crate) fn stack_io(op: Operators, elems: (Option<Type>, Option<Type>)) -> (Vec<Type>, Vec<Type>) {
 
     let mut new_el = vec![];
     let mut remove_el = vec![];
@@ -97,12 +117,12 @@ pub(crate) fn stack_io(op: &str, elems: (Option<Type>, Option<Type>)) -> (Vec<Ty
         match op {
 
             // Duplicates the top element
-            "dup" => {
+            Dup => {
                 new_el.push(elem.unwrap_or_default())
             }
 
             // Swaps the top two elements
-            "swap" => {
+            Swap => {
                 if elems.1.is_none() { print_error(NotEnoughValues) }
                 else {
                     // Gets added back in the opposite order
@@ -114,24 +134,24 @@ pub(crate) fn stack_io(op: &str, elems: (Option<Type>, Option<Type>)) -> (Vec<Ty
             }
 
             // Removes the top element
-            "pop" => { remove_el.push(elem.unwrap_or_default()) }
+            Pop => { remove_el.push(elem.unwrap_or_default()) }
 
             // Returns the length of the string
-            "length" => {
+            Length => {
                 let st = elem.unwrap_or_default();
                 remove_el.push(st.to_owned());
                 new_el.push(Int_(st.type_to_string_trimmed().len() as i128))
             }
 
             // Prints the top string to standard output and removes it from the stack
-            "print" => { 
+            Print => { 
                 let st = elem.unwrap_or_default();
                 st.print();
                 remove_el.push(st.to_owned())
             }
 
             // Reads an input and adds it to the stack as a string
-            "read" => {
+            Read => {
                 let input = get_line();
                 new_el.push(String_(input))
             }

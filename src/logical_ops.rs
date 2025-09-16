@@ -1,13 +1,36 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{DivisionByZero, ExpectedNumber};
-use crate::stack::Type::{Bool_, Float_, Int_, Variable};
-use crate::stack::Type;
+use crate::stack::Operators::{And, Div, DivSlash, GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual, Minus, Multiply, Or, Plus};
+use crate::stack::Type::{Bool_, Float_, Int_};
+use crate::stack::{Operators, Type};
 
-pub(crate) const ARITHMETIC_OPS: [&str; 9] = ["+", "-", "*", "/", "div", "<", ">", "<=", ">="];
-pub(crate) const LOGICAL_OPS: [&str; 2] = ["&&", "||"];
+pub(crate) fn arithmetic_ops(input: String) -> Option<Operators> {
+    let res = match input.as_str() {
+        "+" => {Plus},
+        "-" => {Minus},
+        "*" => {Multiply},
+        "/" => {DivSlash},
+        "div" => {Div},
+        "<" => {LessThan},
+        ">" => {GreaterThan},
+        "<=" => {LessThanOrEqual},
+        ">=" => {GreaterThanOrEqual},
+        _ => {return None;}
+    };
+    Some(res)
+}
+
+pub(crate) fn logical_ops(input: String) -> Option<Operators> {
+    let res = match input.as_str() {
+        "&&" => {And},
+        "||" => {Or},
+        _ => {return None;}
+    };
+    Some(res)
+}
 
 
-pub fn arithmetic(c: String, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
+pub fn arithmetic(c: Operators, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
     // Float is set as the default value to do calculations
     let float_x = x.type_to_float().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
     let float_y = y.type_to_float().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
@@ -18,9 +41,9 @@ pub fn arithmetic(c: String, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
 
     // Calculates the answers to the arithmetic operations
     let mut new_el = vec![];
-    match c.as_str() {
+    match c {
         // Addition
-        "+" => {
+        Plus => {
             new_el.push(if is_float {
                 Float_(float_x + float_y)
             } else {
@@ -29,7 +52,7 @@ pub fn arithmetic(c: String, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
         }
 
         // Subtraction
-        "-" => {
+        Minus => {
             new_el.push(if is_float {
                 Float_(float_x - float_y)
             } else {
@@ -38,7 +61,7 @@ pub fn arithmetic(c: String, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
         }
 
         // Multiplication
-        "*" => {
+        Multiply => {
             new_el.push(if is_float {
                 Float_(float_x * float_y)
             } else {
@@ -47,7 +70,7 @@ pub fn arithmetic(c: String, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
         }
 
         // Division
-        "/" | "div" => {
+        DivSlash | Div => {
             if float_y == 0.0 {
                 print_error(DivisionByZero);
                 new_el.push(x.to_owned());
@@ -57,23 +80,23 @@ pub fn arithmetic(c: String, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
             } else { new_el.push(Int_(int_x / int_y)); }
         }
 
-        // Smaller than
-        "<" => {
+        // Less than
+        LessThan => {
             new_el.push(Bool_(float_x < float_y))
         }
 
-        // Smaller than or equal to
-        "<=" => {
+        // Less than or equal to
+        LessThanOrEqual => {
             new_el.push(Bool_(float_x <= float_y))
         }
 
-        // Bigger than
-        ">" => {
+        // Greater than
+        GreaterThan => {
             new_el.push(Bool_(float_x > float_y))
         }
 
-        // Bigger than or equal to
-        ">=" => {
+        // Greater than or equal to
+        GreaterThanOrEqual => {
             new_el.push(Bool_(float_x >= float_y))
         }
 
@@ -81,21 +104,21 @@ pub fn arithmetic(c: String, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
     };
 
     // Return the operator, the original numbers and the new element
-    (vec![Variable(c), x, y], new_el)
+    (vec![x, y], new_el)
 }
 
 
-pub fn logical_op(c: String, x: bool, y: bool) -> (Vec<Type>, Vec<Type>) {
-    let new = match c.as_str() {
+pub fn logical_op(c: Operators, x: bool, y: bool) -> (Vec<Type>, Vec<Type>) {
+    let new = match c {
         // Checks whether both predicates are True or not
-        "&&" => x && y,
+        And => x && y,
 
         // Checks whether at least one of the predicates is True or not
-        "||" => x || y,
+        Or => x || y,
 
         _ => panic!("An error occurred in logical_ops!"),
     };
     
-    (vec![Variable(c), Bool_(x), Bool_(y)], vec![Bool_(new)])
+    (vec![Bool_(x), Bool_(y)], vec![Bool_(new)])
 }
 
