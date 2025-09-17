@@ -5,11 +5,12 @@ use crate::find_ops::handle_literal_and_operator;
 use crate::list_codeblock_ops::{codeblock_ops, list_ops, pop_front};
 use crate::logical_ops::{arithmetic_ops, logical_ops};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
-use crate::stack::Operators::If;
-use crate::stack::{get_line, push_block_to_buffer, push_str_to_vec, push_to_buffer, Buffers, Stack, Type};
+use crate::stack::Operators::{If, Map};
+use crate::stack::{get_line, push_block_to_buffer, push_str_to_vec, push_to_buffer, Buffers, Operators, Stack, Type};
 use crate::string_ops::{stack_io_ops, strings_ops};
 use std::io;
 use std::io::Write;
+use crate::stack::Type::Variable;
 
 mod combination_ops;
 mod error_handling;
@@ -94,7 +95,8 @@ pub fn run(normal: bool) {
 
 fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
     let mut new_stack = Stack::new();
-    let mut is_if_block = 0;
+    let mut is_if_block = false;
+    let mut block_type: Option<Operators> = None;
     let exec_block = &mut block.to_owned();
 
     // Loops through the stack as it was (stream pls💚) before execution 😵 (me rn since I am unable to can anymore)
@@ -111,13 +113,17 @@ fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
         // If statements read the two next code blocks instead of one.
         // Therefore, this extra code block will already be processed
         
-        if is_if_block == 1 || 
-            elem.type_to_string_trimmed() == "if" { is_if_block += 1; }
+        if is_if_block { is_if_block = false; }
 
-        else if is_if_block > 0 {
-            new_stack = check_operator(elem.to_owned(), &mut new_stack, true);
-            is_if_block = 0;
-        } else { new_stack = check_operator(elem.to_owned(), &mut new_stack, false); }
+        else if elem == Variable(Map) || elem == Variable(If) { 
+            if elem == Variable(If) { is_if_block = true; }
+            if let Variable(x) = elem {block_type = Some(x) }
+        }
+            
+        else {
+            new_stack = check_operator(elem.to_owned(), &mut new_stack, block_type);
+            block_type = None;
+        }
     
     }
     new_stack
@@ -227,7 +233,7 @@ fn read_stack(input: String, mut stack: Stack<Type>) -> Stack<Type> {
     stack
 }
 
-pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>, is_if_block: bool) -> Stack<Type> {
+pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>, block_type: Option<Operators>) -> Stack<Type> {
 
     let op = c.type_to_string_trimmed().to_lowercase();
 
@@ -240,7 +246,7 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>, is_if_block: bool
 
         if let Some(ops) = combination_ops(op.to_owned()) { combination(new, ops) }
             
-        else if is_if_block { handle_literal_and_operator(If, stack)}
+        else if let Some(ops) = block_type { handle_literal_and_operator(ops, stack)}
 
         else if let Some(ops) = codeblock_ops(op.to_owned()).or_else(
                                         || arithmetic_ops(op.to_owned())) .or_else(

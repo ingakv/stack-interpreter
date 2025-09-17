@@ -297,6 +297,12 @@ impl Stack<Type> {
         self.elements.push(i);
     }
 
+    pub fn push_front(&mut self, i: Type) {
+        self.reverse();
+        self.elements.push(i);
+        self.reverse();
+    }
+
     pub fn reverse(&mut self) {
         self.elements.reverse()
     }

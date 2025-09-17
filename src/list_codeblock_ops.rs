@@ -2,7 +2,7 @@ use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedListOrString, ExpectedNumber};
 use crate::exec;
 use crate::stack::Operators::{Append, Cons, Each, Empty, Exec, Head, If, Length, Map, Tail, Times};
-use crate::stack::Type::{Block_, Bool_, Int_, List_, String_};
+use crate::stack::Type::{Block_, Bool_, Int_, List_, String_, Variable};
 use crate::stack::{Operators, Stack, Type};
 
 pub(crate) fn codeblock_ops(input: String) -> Option<Operators> {
@@ -204,31 +204,29 @@ pub fn pop_front(t: &mut Option<Type>) -> Option<Type> {
     }
 }
 
-pub(crate) fn find_block_elements(stack: Stack<Type>, else_block: Type, operator: Operators) -> (Stack<Type>, Option<Type>, Option<Type>) {
+pub(crate) fn find_block_elements(stack: &mut Stack<Type>, else_block: Type, operator: Operators) -> (Stack<Type>, Option<Type>, Option<Type>) {
     // Loops through and finds the next operator and list
     let mut block_or_number = None;
     let mut bool_or_list = None;
     let mut additional_elems = Stack::new();
     
-
-    let mut stack_copy = stack.clone();
-    
     // Stores the then block, the operator, and the condition
     if operator == If {
-        block_or_number = stack_copy.pop();
-        stack_copy.pop(); // Pop the operator
-        bool_or_list = stack_copy.pop();
+        block_or_number = stack.pop();
+        stack.pop(); // Pop the operator
+        bool_or_list = stack.pop();
     }
 
     // Save other elements of the stack
-    for elem in stack_copy.elements.iter().rev() {
+    loop {
+        let Some(elem) = stack.pop() else { break };
 
         if (elem.is_bool() || elem.is_list()) && bool_or_list.is_none() {
-            bool_or_list = Some(elem.to_owned());
+            bool_or_list = Some(elem);
         } else if (elem.is_block() || elem.is_number()) && block_or_number.is_none() {
-            block_or_number = Some(elem.to_owned());
+            block_or_number = Some(elem);
         }
-        else if elem.to_owned() != else_block { additional_elems.push(elem.to_owned()); }
+        else if ![else_block.to_owned(), Variable(operator)].contains(&elem) { additional_elems.push_front(elem.to_owned()); }
 
     }
     
@@ -243,7 +241,7 @@ pub(crate) fn find_block_elements(stack: Stack<Type>, else_block: Type, operator
         Times => { is_block_or_number.is_number() }
         _ => { true }
     } { (additional_elems, bool_or_list, block_or_number) }
-    else { (stack, None, None) }
+    else { (stack.to_owned(), None, None) }
 }
 
 
