@@ -5,8 +5,6 @@ use crate::find_ops::{string_to_operator, Operations};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
 use crate::stack::Operators::*;
 use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_, Variable};
-use crate::string_ops::StringOnlyOps;
-use crate::string_ops::StringOnlyOps::{StackFloat, StackInt};
 use std::mem::discriminant;
 use std::{io, vec};
 /////////////////////////////////////////// Type //////////////////////////////////////////////
@@ -231,12 +229,12 @@ impl Type {
         }
     }
 
-    pub fn same_type(&self, other: StringOnlyOps) -> bool {
+    pub fn same_type(&self, other: Operators) -> bool {
         match self {
-            Int_(_) => discriminant(&other) == discriminant(&StackInt),
-            Float_(_) => discriminant(&other) == discriminant(&StackFloat),
-            String_(_) => discriminant(&other) != discriminant(&StackInt) &&
-                discriminant(&other) != discriminant(&StackFloat),
+            Int_(_) => discriminant(&other) == discriminant(&ParseInteger),
+            Float_(_) => discriminant(&other) == discriminant(&ParseFloat),
+            String_(_) => discriminant(&other) != discriminant(&ParseInteger) &&
+                discriminant(&other) != discriminant(&ParseFloat),
             _ => false,
         }
     }
@@ -345,6 +343,7 @@ pub(crate) enum Operators {
     Map,
     Each,
     If,
+    Times,
 
     // List
     Head,
@@ -395,6 +394,8 @@ impl Operators {
             Head|Tail|Empty|Cons|Append => List,
             Plus|Minus|Multiply|DivSlash|Div|LessThan|GreaterThan|LessThanOrEqual|GreaterThanOrEqual => Arithmetic,
             And|Or => Logical,
+            Dup|Swap|Pop|Print|Read => StackIO,
+            ParseInteger|ParseFloat|Words => Strings,
             _ => Block,
         }
     }

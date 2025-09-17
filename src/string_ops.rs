@@ -4,7 +4,6 @@ use crate::get_line;
 use crate::stack::Type::{Int_, List_, String_};
 use crate::stack::{string_to_type, Operators, Stack, Type};
 use crate::stack::Operators::{Dup, ParseFloat, ParseInteger, Pop, Print, Read, Swap, Words, Length};
-use crate::string_ops::StringOnlyOps::{StackFloat, StackInt, WordsOp};
 
 pub(crate) fn stack_io_ops(input: String) -> Option<Operators> {
     let res = match input.as_str() {
@@ -29,75 +28,36 @@ pub(crate) fn strings_ops(input: String) -> Option<Operators> {
     Some(res)
 }
 
-
-
-
-#[derive(Clone, Copy)]
-pub enum StringOnlyOps {
-    WordsOp,
-    StackInt,
-    StackFloat,
-}
-
-impl StringOnlyOps {
-    pub fn is_words(&self) -> bool {
-        match self {
-            WordsOp => true,
-            _ => false
-        }
-    }
-}
-
-
 // Performs string-only operations
-fn parse_string(stack: &mut Stack<Type>, parse_type: StringOnlyOps) -> (Vec<Type>, Vec<Type>) {
-    
-    // Iterate through the stack from the end
-    for elem in stack.to_owned().elements.iter().rev() {
-
-        // Skip if the element is not a string
-        if let String_(elem) = elem {
-            let mut str = string_to_type(elem);
-
-            // Parses a string from the stack to a specific type
-            if str.same_type(parse_type) {
-
-                // Divides the string into words and puts them in a list
-                if parse_type.is_words() {
-                    let st = str.type_to_string_trimmed();
-                    let str_val: Vec<&str> = st.split_whitespace().collect();
-                    let mut new_li = vec![];
-
-                    for i in str_val { new_li.push(string_to_type(i)); }
-                    str = List_(new_li)
-                }
-                
-                return (vec![String_(elem.to_string())], vec![str])
-            }
-        }
-    }
-
-    print_error(ExpectedString);
-    (vec![], vec![])
-}
-
 pub(crate) fn string_ops(op: Operators, stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
     // Error handling on empty stack
     if stack.is_empty() { print_error(StackEmpty) }
+    else if ![ParseFloat, ParseInteger, Words].contains(&op) { print_error(ExpectedString); }
     else {
-        
-        match op {
-            
-            // Converts a string to an integer
-            ParseInteger => { return parse_string(stack, StackInt); }
+        // Iterate through the stack from the end
+        for elem in stack.to_owned().elements.iter().rev() {
 
-            // Converts a string to a float
-            ParseFloat => { return parse_string(stack, StackFloat); }
+            // Skip if the element is not a string
+            if let String_(elem) = elem {
+                let mut str = string_to_type(elem);
 
-            Words => { return parse_string(stack, WordsOp); }
+                // Parses a string from the stack to a specific type
+                if str.same_type(op) {
 
-            _ => { print_error(ExpectedString); }
+                    // Divides the string into words and puts them in a list
+                    if op == Words {
+                        let st = str.type_to_string_trimmed();
+                        let str_val: Vec<&str> = st.split_whitespace().collect();
+                        let mut new_li = vec![];
+
+                        for i in str_val { new_li.push(string_to_type(i)); }
+                        str = List_(new_li)
+                    }
+
+                    return (vec![String_(elem.to_string())], vec![str])
+                }
+            }
         }
     }
     (vec![], vec![])

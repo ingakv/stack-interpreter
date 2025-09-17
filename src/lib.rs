@@ -5,11 +5,11 @@ use crate::find_ops::handle_literal_and_operator;
 use crate::list_codeblock_ops::{codeblock_ops, list_ops, pop_front};
 use crate::logical_ops::{arithmetic_ops, logical_ops};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
+use crate::stack::Operators::If;
 use crate::stack::{get_line, push_block_to_buffer, push_str_to_vec, push_to_buffer, Buffers, Stack, Type};
-use crate::string_ops::{stack_io, stack_io_ops, string_ops, strings_ops};
+use crate::string_ops::{stack_io_ops, strings_ops};
 use std::io;
 use std::io::Write;
-use crate::stack::Operators::If;
 
 mod combination_ops;
 mod error_handling;
@@ -239,29 +239,16 @@ pub(crate) fn check_operator(c: Type, stack: &mut Stack<Type>, is_if_block: bool
     let new_stack =
 
         if let Some(ops) = combination_ops(op.to_owned()) { combination(new, ops) }
-
-        else if let Some(ops) = codeblock_ops(op.to_owned()) 
-        { handle_literal_and_operator(ops, stack)}
             
         else if is_if_block { handle_literal_and_operator(If, stack)}
 
-        else if let Some(ops) = arithmetic_ops(op.to_owned()).or_else(
+        else if let Some(ops) = codeblock_ops(op.to_owned()).or_else(
+                                        || arithmetic_ops(op.to_owned())) .or_else(
                                         || logical_ops(op.to_owned())) .or_else(
-                                        || list_ops(op.to_owned())) 
+                                        || list_ops(op.to_owned())) .or_else(
+                                        || strings_ops(op.to_owned())) .or_else(
+                                        || stack_io_ops(op.to_owned())) 
         { handle_literal_and_operator(ops, stack) }
-
-        else if strings_ops(op.to_owned()).is_some() ||
-            stack_io_ops(op.to_owned()).is_some() {
-
-            let (remove_vec, new_vec) =
-
-            if let Some(ops) = strings_ops(op.to_owned()) { string_ops(ops, new) }
-            else if let Some(ops) = stack_io_ops(op.to_owned()) { stack_io(ops, (new.last(), new.second_to_last())) }
-            else { (vec![], vec![]) };
-
-            new.replace_last_match(remove_vec, new_vec);
-            new.to_owned()
-        }
             
         else { stack.to_owned() };
 

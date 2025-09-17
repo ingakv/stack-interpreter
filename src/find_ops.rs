@@ -1,19 +1,21 @@
 use crate::combination_ops::combination_ops;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedList, ExpectedNumber};
-use crate::find_ops::Operations::{Arithmetic, Block, List, Logical};
+use crate::find_ops::Operations::{Arithmetic, Block, List, Logical, Strings, StackIO};
 use crate::list_codeblock_ops::{codeblock_custom, codeblock_ops, find_block_elements, list, list_ops};
 use crate::logical_ops::{arithmetic, arithmetic_ops};
 use crate::logical_ops::{logical_op, logical_ops};
 use crate::stack::Type::{Bool_, List_, Variable};
 use crate::stack::{is_string_number, Operators, Stack, Type};
 use crate::stack::Operators::If;
-use crate::string_ops::{stack_io_ops, strings_ops};
+use crate::string_ops::{stack_io, stack_io_ops, string_ops, strings_ops};
 
 #[derive(Clone, Copy)]
 pub enum Operations {
     Arithmetic,
     Logical,
+    Strings,
+    StackIO,
     List,
     Block
 }
@@ -38,10 +40,10 @@ pub(crate) fn handle_literal_and_operator_recursive(
     skip: bool,
 ) -> Stack<Type> {
     
-    let mut old_stack = stack.clone();
-    
     // Remove the top element and store it
     let c = stack.pop().unwrap_or_default();
+    
+    let mut old_stack = stack.clone();
 
     let ops = op.operator_to_type();
     
@@ -66,7 +68,6 @@ pub(crate) fn handle_literal_and_operator_recursive(
         if let Some(List_(item2_some)) = item2.last() {
 
             // Loops through and finds the next string
-            new_li.elements.pop();
             let str = find_string(&mut new_li);
 
             // Functions with two lists
@@ -89,20 +90,18 @@ pub(crate) fn handle_literal_and_operator_recursive(
             if c.is_block() || ops.is_block() {
                 
                 // Finds the next operator and list
-                let (additional_elems, list, condition, code_block) = 
-                    find_block_elements(old_stack.to_owned(), c.to_owned(), op == If);
+                let (additional_elems, bool_or_list, block_or_number) = 
+                    find_block_elements(old_stack.to_owned(), c.to_owned(), op);
                 
                 
-                if let Some(some_code_block) = code_block {
-                    let (rem, new) = codeblock_custom(op, some_code_block, Some(c), additional_elems, list, condition);
+                let (rem, new) = codeblock_custom(op, additional_elems, c, block_or_number, bool_or_list);
 
-                    // Removes the operator, the original numbers or replaces them with the new element
-                    old_stack.replace_last_match(rem, new);
-                }
+                // Removes the operator, the original numbers or replaces them with the new element
+                old_stack.replace_last_match(rem, new);
 
             }
             
-            else if let (Some(_), Variable(st)) = (item1.last(), c) {
+            else if let Variable(st) = c {
                 old_stack = find_wanted_literal_type(ops, &mut old_stack, st, item1.last(), item2_some);
             }
 
@@ -136,6 +135,7 @@ fn is_wanted_literal_type(wanted_type: Operations, elem: Type) -> bool {
         Logical => elem.is_bool(),
         List => elem.is_list(),
         Block => !elem.is_list(),
+        _ => true
     }
 }
 
@@ -160,6 +160,8 @@ fn find_wanted_literal_type(wanted_type: Operations, stack: &mut Stack<Type>, op
                 return stack.to_owned()
             }
         },
+        Strings => { string_ops(op, stack) },
+        StackIO => { stack_io(op, (stack.last(), stack.second_to_last())) },
         _ => return stack.to_owned()
     };
 
@@ -185,7 +187,8 @@ pub(crate) fn find_string(stack: &mut Stack<Type>) -> Option<Type> {
 }
 
 
-pub(crate) fn string_to_operator(el: String) -> Option<Operators> {
+pub(crate) fn string_to_operator(elem: String) -> Option<Operators> {
+    let el = elem.to_lowercase();
     if let Some(ans) = combination_ops(el.to_owned()).or_else(
         || codeblock_ops(el.to_owned())).or_else(
         || stack_io_ops(el.to_owned())).or_else(

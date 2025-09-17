@@ -11,7 +11,7 @@ pub(crate) fn combination_ops(input: String) -> Option<Operators> {
     let res = match input.as_str() {
         "length" => {Length},
         "==" => {Equal},
-        "not" => { Not },
+        "not" => {Not},
         _ => {return None;}
     };
     Some(res)

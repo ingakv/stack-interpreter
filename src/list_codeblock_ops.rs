@@ -1,7 +1,7 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedListOrString};
+use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedListOrString, ExpectedNumber};
 use crate::exec;
-use crate::stack::Operators::{Append, Cons, Each, Empty, Exec, Head, If, Length, Map, Tail};
+use crate::stack::Operators::{Append, Cons, Each, Empty, Exec, Head, If, Length, Map, Tail, Times};
 use crate::stack::Type::{Block_, Bool_, Int_, List_, String_};
 use crate::stack::{Operators, Stack, Type};
 
@@ -11,6 +11,7 @@ pub(crate) fn codeblock_ops(input: String) -> Option<Operators> {
         "map" => {Map},
         "each" => {Each},
         "if" => {If},
+        "times" => {Times},
         _ => {return None;}
     };
     Some(res)
@@ -30,13 +31,13 @@ pub(crate) fn list_ops(input: String) -> Option<Operators> {
 
 
 pub(crate) fn codeblock(c: Operators, list: Type, block: Type) -> (Vec<Type>, Vec<Type>) {
-    codeblock_custom(c, block, None, Stack::new(), None, Some(list))
+    codeblock_custom(c, Stack::new(), block, None, Some(list))
 }
 
-pub(crate) fn codeblock_custom(c: Operators, block: Type, else_block: Option<Type>, additional_elems: Stack<Type>, list: Option<Type>, condition: Option<Type>) -> (Vec<Type>, Vec<Type>) {
+pub(crate) fn codeblock_custom(c: Operators, stack: Stack<Type>, block: Type, block_or_int: Option<Type>, cond_or_list: Option<Type>) -> (Vec<Type>, Vec<Type>) {
 
     let mut new_el = vec![];
-    let mut exec_stack = additional_elems.clone();
+    let mut exec_stack = stack.clone();
     
     match c {
 
@@ -52,19 +53,20 @@ pub(crate) fn codeblock_custom(c: Operators, block: Type, else_block: Option<Typ
         Exec => {
 
             // Execute the code block for each element in the list
-            if let Some(elems) = list.to_owned() {
-                exec_stack.push(elems.to_owned());
+            if let Some(List_(elems)) = cond_or_list.to_owned() {
+                exec_stack.push(List_(elems).to_owned());
             }
-            exec_stack = exec(Some(block.to_owned()), exec_stack);
+            exec_stack = exec(block_or_int.to_owned(), exec_stack);
             new_el = exec_stack.elements;
         },
 
         // Execute the regular block if the condition is true
         // Execute the then block if the condition is false
         If => {
-            if let Some(Bool_(cond)) = condition {
-                if let Some(some_else) = else_block.to_owned() {
-                    if cond { exec_stack = exec(Some(block.to_owned()), exec_stack); } else { exec_stack = exec(Some(some_else.to_owned()), exec_stack); }
+            if let Some(Bool_(cond)) = cond_or_list {
+                if let Some(_) = block_or_int.to_owned() {
+                    if cond { exec_stack = exec(block_or_int.to_owned(), exec_stack); }
+                    else { exec_stack = exec(Some(block.to_owned()), exec_stack); }
                     new_el = exec_stack.elements;
                 } else { print_error(ExpectedCodeBlock); return (vec![], vec![]); }
             } else { print_error(ExpectedBoolean); return (vec![], vec![]); }
@@ -73,12 +75,12 @@ pub(crate) fn codeblock_custom(c: Operators, block: Type, else_block: Option<Typ
         Each | Map => {
 
             // Execute the code block for each element in the list
-            if let Some(List_(elems)) = list.to_owned() {
+            if let Some(List_(elems)) = cond_or_list.to_owned() {
                 for i in &elems {
                     exec_stack.push(i.to_owned());
                     exec_stack = exec(Some(block.to_owned()), exec_stack);
                 }
-            }
+            } else { print_error(ExpectedList); }
             
             // If the operator is "each", return as a vector of elements,
             // if it is "map" return as a list
@@ -87,11 +89,21 @@ pub(crate) fn codeblock_custom(c: Operators, block: Type, else_block: Option<Typ
             
         }
 
+        // Execute the code block a given number of times
+        Times => {
+
+            if let Some(Int_(num)) = block_or_int.to_owned() {
+                for _ in 0..num { exec_stack = exec(Some(block.to_owned()), exec_stack); }
+            } else { print_error(ExpectedNumber); }
+            new_el = exec_stack.elements;
+            
+        }
+
         _ => panic!("An error occurred in codeblocks_ops!"),
     };
 
     // Return the elements to be removed and the new ones
-    (vec![list.unwrap_or_default(), block, else_block.unwrap_or_default(), condition.unwrap_or_default()], new_el)
+    (vec![block, block_or_int.unwrap_or_default(), cond_or_list.unwrap_or_default()], new_el)
 }
 
 pub(crate) fn list(c: Operators, list: Type, el: Option<Type>) -> (Vec<Type>, Vec<Type>) {
@@ -192,39 +204,46 @@ pub fn pop_front(t: &mut Option<Type>) -> Option<Type> {
     }
 }
 
-pub(crate) fn find_block_elements(stack: Stack<Type>, else_block: Type, is_if_block: bool) -> (Stack<Type>, Option<Type>, Option<Type>, Option<Type>) {
+pub(crate) fn find_block_elements(stack: Stack<Type>, else_block: Type, operator: Operators) -> (Stack<Type>, Option<Type>, Option<Type>) {
     // Loops through and finds the next operator and list
-    let mut list = None;
-    let mut then_block = None;
-    let mut condition = None;
+    let mut block_or_number = None;
+    let mut bool_or_list = None;
     let mut additional_elems = Stack::new();
-
+    
 
     let mut stack_copy = stack.clone();
     
     // Stores the then block, the operator, and the condition
-    if is_if_block {
-        stack_copy.pop(); // Pop the else block
-        then_block = stack_copy.pop();
+    if operator == If {
+        block_or_number = stack_copy.pop();
         stack_copy.pop(); // Pop the operator
-        condition = stack_copy.pop();
+        bool_or_list = stack_copy.pop();
     }
 
     // Save other elements of the stack
     for elem in stack_copy.elements.iter().rev() {
 
-        if elem.is_list() && list.is_none() {
-            list = Some(elem.to_owned());
-        } else if elem.is_bool() && condition.is_none() {
-            condition = Some(elem.to_owned());
-        } else if elem.is_block() && then_block.is_none() {
-            then_block = Some(elem.to_owned());
+        if (elem.is_bool() || elem.is_list()) && bool_or_list.is_none() {
+            bool_or_list = Some(elem.to_owned());
+        } else if (elem.is_block() || elem.is_number()) && block_or_number.is_none() {
+            block_or_number = Some(elem.to_owned());
         }
         else if elem.to_owned() != else_block { additional_elems.push(elem.to_owned()); }
 
     }
-
-    (additional_elems, list, condition, then_block)
+    
+    let is_bool_or_list = bool_or_list.to_owned().unwrap_or_default();
+    let is_block_or_number = block_or_number.to_owned().unwrap_or_default();
+    
+    // Ensures that the required elements are present
+    if match operator {
+        If => { block_or_number.is_some() && is_bool_or_list.is_bool() }
+        Map | Each => { is_bool_or_list.is_list() }
+        Exec => { is_block_or_number.is_block() }
+        Times => { is_block_or_number.is_number() }
+        _ => { true }
+    } { (additional_elems, bool_or_list, block_or_number) }
+    else { (stack, None, None) }
 }
 
 
