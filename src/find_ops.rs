@@ -1,13 +1,12 @@
 use crate::combination_ops::combination_ops;
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedList, ExpectedNumber};
-use crate::find_ops::Operations::{Arithmetic, Block, List, Logical, Strings, StackIO};
+use crate::find_ops::Operations::{Arithmetic, Block, List, Logical, StackIO, Strings};
 use crate::list_codeblock_ops::{codeblock_custom, codeblock_ops, find_block_elements, list, list_ops};
 use crate::logical_ops::{arithmetic, arithmetic_ops};
 use crate::logical_ops::{logical_op, logical_ops};
 use crate::stack::Type::{Bool_, List_, Variable};
 use crate::stack::{is_string_number, Operators, Stack, Type};
-use crate::stack::Operators::If;
 use crate::string_ops::{stack_io, stack_io_ops, string_ops, strings_ops};
 
 #[derive(Clone, Copy)]
@@ -21,8 +20,8 @@ pub enum Operations {
 }
 
 impl Operations {
-    pub(crate) fn is_block(&self) -> bool {
-        matches!(self, Block)
+    pub(crate) fn is_block(&self, type_el: Type) -> bool {
+        matches!(self, Block) || type_el.is_block() 
     }
 }
 
@@ -47,16 +46,18 @@ pub(crate) fn handle_literal_and_operator_recursive(
 
     let ops = op.operator_to_type();
     
+    let is_block = ops.is_block(c.to_owned());
+    
     // Skips if the stack is empty
     if c.is_empty() { Stack::new() }
         
     // Checks if it is an operator
-    else if (string_to_operator(c.type_to_string_trimmed()).is_some() || c.is_block() || op == If) && !skip {
+    else if (string_to_operator(c.type_to_string_trimmed()).is_some() || is_block) && !skip {
         let mut item2 = old_stack.to_owned();
         let mut item1 = old_stack.to_owned();
 
         // Loops through and finds the next two items of the correct literal type
-        if !(c.is_block() || ops.is_block()) {
+        if !is_block {
             item2 = handle_literal_and_operator_recursive(op, old_stack, true);
             item1 = handle_literal_and_operator_recursive(op, old_stack, true);
         }
@@ -87,7 +88,7 @@ pub(crate) fn handle_literal_and_operator_recursive(
         else if let Some(item2_some) = item2.last() {
 
             // Code blocks are handled differently
-            if c.is_block() || ops.is_block() {
+            if is_block {
                 
                 // Finds the next operator and list
                 let (additional_elems, bool_or_list, block_or_number) = 
