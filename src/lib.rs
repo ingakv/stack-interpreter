@@ -5,7 +5,7 @@ use crate::find_ops::handle_literal_and_operator;
 use crate::list_codeblock_ops::{codeblock_ops, list_ops, pop_front};
 use crate::logical_ops::{arithmetic_ops, logical_ops};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
-use crate::stack::Operators::{If, Map};
+use crate::stack::Operators::{Each, If, Map};
 use crate::stack::{get_line, push_block_to_buffer, push_str_to_vec, push_to_buffer, Buffers, Operators, Stack, Type};
 use crate::string_ops::{stack_io_ops, strings_ops};
 use std::io;
@@ -115,7 +115,9 @@ fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
         
         if is_if_block { is_if_block = false; }
 
-        else if elem == Variable(Map) || elem == Variable(If) { 
+        else if elem == Variable(Map) || 
+                elem == Variable(Each) || 
+                elem == Variable(If) { 
             if elem == Variable(If) { is_if_block = true; }
             if let Variable(x) = elem {block_type = Some(x) }
         }

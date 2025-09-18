@@ -204,7 +204,8 @@ pub fn pop_front(t: &mut Option<Type>) -> Option<Type> {
     }
 }
 
-pub(crate) fn find_block_elements(stack: &mut Stack<Type>, else_block: Type, operator: Operators) -> (Stack<Type>, Option<Type>, Option<Type>) {
+pub(crate) fn find_block_elements(stack: &mut Stack<Type>, code_block: Type, operator: Operators) -> (Stack<Type>, Option<Type>, Option<Type>) {
+    
     // Loops through and finds the next operator and list
     let mut block_or_number = None;
     let mut bool_or_list = None;
@@ -218,30 +219,31 @@ pub(crate) fn find_block_elements(stack: &mut Stack<Type>, else_block: Type, ope
     }
 
     // Save other elements of the stack
-    loop {
-        let Some(elem) = stack.pop() else { break };
-
+    while let Some(elem) = stack.pop() {
         if (elem.is_bool() || elem.is_list()) && bool_or_list.is_none() {
             bool_or_list = Some(elem);
         } else if (elem.is_block() || elem.is_number()) && block_or_number.is_none() {
             block_or_number = Some(elem);
-        }
-        else if ![else_block.to_owned(), Variable(operator)].contains(&elem) { additional_elems.push_front(elem.to_owned()); }
+        } else if ![code_block.to_owned(), Variable(operator)].contains(&elem) { additional_elems.push_front(elem.to_owned()); }
 
+
+        let is_bool_or_list = bool_or_list.to_owned().unwrap_or_default();
+        let is_block_or_number = block_or_number.to_owned().unwrap_or_default();
+
+        // Ensures that the required elements are present
+        if match operator {
+            If => { block_or_number.is_some() && is_bool_or_list.is_bool() }
+            Map | Each => { is_bool_or_list.is_list() }
+            Exec => { is_block_or_number.is_block() }
+            Times => { is_block_or_number.is_number() }
+            _ => { true }
+        } {
+            while let Some(elem) = stack.pop() { additional_elems.push_front(elem); }
+            break;
+        }
     }
-    
-    let is_bool_or_list = bool_or_list.to_owned().unwrap_or_default();
-    let is_block_or_number = block_or_number.to_owned().unwrap_or_default();
-    
-    // Ensures that the required elements are present
-    if match operator {
-        If => { block_or_number.is_some() && is_bool_or_list.is_bool() }
-        Map | Each => { is_bool_or_list.is_list() }
-        Exec => { is_block_or_number.is_block() }
-        Times => { is_block_or_number.is_number() }
-        _ => { true }
-    } { (additional_elems, bool_or_list, block_or_number) }
-    else { (stack.to_owned(), None, None) }
+
+    (additional_elems, bool_or_list, block_or_number)
 }
 
 
