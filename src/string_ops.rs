@@ -67,43 +67,39 @@ pub(crate) fn stack_io(op: Operators, elems: (Option<Type>, Option<Type>)) -> (V
 
     let mut new_el = vec![];
     let mut remove_el = vec![];
-    
-    let elem = elems.to_owned().0;
 
     // Error handling on empty stack
-    if elem.is_none() { print_error(StackEmpty) }
-    else {
+    if let Some(elem) = elems.to_owned().0 {
         
         match op {
 
             // Duplicates the top element
-            Dup => { new_el.push(elem.unwrap_or_default()) }
+            Dup => { new_el.push(elem) }
 
             // Swaps the top two elements
             Swap => {
-                if elems.1.is_none() { print_error(NotEnoughValues) }
-                else {
+                if let Some(next_elem) = elems.1.to_owned() {
                     // Gets added back in the opposite order
-                    new_el.push(elems.to_owned().0.unwrap());
-                    new_el.push(elems.to_owned().1.unwrap());
-                    remove_el.push(elems.1.unwrap());
-                    remove_el.push(elems.0.unwrap());
-                }
+                    new_el.push(elem.to_owned());
+                    new_el.push(next_elem.to_owned());
+                    remove_el.push(next_elem);
+                    remove_el.push(elem);
+                } else { print_error(NotEnoughValues) }
             }
 
             // Removes the top element
-            Pop => { remove_el.push(elem.unwrap_or_default()) }
+            Pop => { remove_el.push(elem) }
 
             // Returns the length of the string
             Length => {
-                let st = elem.unwrap_or_default();
+                let st = elem;
                 remove_el.push(st.to_owned());
                 new_el.push(Int_(st.type_to_string_trimmed().len() as i128))
             }
 
             // Prints the top string to standard output and removes it from the stack
             Print => { 
-                let st = elem.unwrap_or_default();
+                let st = elem;
                 st.print();
                 remove_el.push(st.to_owned())
             }
@@ -116,7 +112,7 @@ pub(crate) fn stack_io(op: Operators, elems: (Option<Type>, Option<Type>)) -> (V
 
             _ => { print_error(ExpectedString) }
         }
-    }
+    } else { print_error(StackEmpty) }
 
     (remove_el, new_el)
 }

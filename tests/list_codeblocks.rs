@@ -45,13 +45,13 @@ mod test_list_codeblocks {
     }
 
     #[test]
-    fn test_foldl_sum_short() {
-        assert_eq!(t("[ 1 2 3 4 ] 0 foldl +"), "10");
+    fn test_foldr_sum_short() {
+        assert_eq!(t("[ 1 2 3 4 ] 0 foldr +"), "10");
     }
 
     #[test]
-    fn test_foldl_div() {
-        assert_eq!(t("[ 2 5 ] 20 foldl { div }"), "2");
+    fn test_foldr_div() {
+        assert_eq!(t("[ 2 5 ] 20 foldr { div }"), "2");
     }
 
     #[test]
@@ -76,7 +76,7 @@ mod test_list_codeblocks {
     }
 
     #[test]
-    fn test_foldl_div_short() {
-        assert_eq!(t("[ 2 5 ] 20 foldl div"), "2");
+    fn test_foldr_div_short() {
+        assert_eq!(t("[ 2 5 ] 20 foldr div"), "2");
     }
 }

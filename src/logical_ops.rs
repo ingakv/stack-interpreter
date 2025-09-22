@@ -31,77 +31,78 @@ pub(crate) fn logical_ops(input: String) -> Option<Operators> {
 
 
 pub fn arithmetic(c: Operators, x: Type, y: Type) -> (Vec<Type>, Vec<Type>) {
-    // Float is set as the default value to do calculations
-    let float_x = x.type_to_float().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
-    let float_y = y.type_to_float().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
-    let int_x = x.type_to_int().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
-    let int_y = y.type_to_int().unwrap_or_else(|| panic!("{:?}", print_error(ExpectedNumber)));
 
     let is_float = matches!(x, Float_(_)) || matches!(y, Float_(_));
 
     // Calculates the answers to the arithmetic operations
     let mut new_el = vec![];
-    match c {
-        // Addition
-        Plus => {
-            new_el.push(if is_float {
-                Float_(float_x + float_y)
-            } else {
-                Int_(int_x + int_y)
-            })
-        }
 
-        // Subtraction
-        Minus => {
-            new_el.push(if is_float {
-                Float_(float_x - float_y)
-            } else {
-                Int_(int_x - int_y)
-            })
-        }
+    // Float is set as the default value to do calculations
+    if let (Some(float_x), Some(float_y), Some(int_x), Some(int_y)) =
+        (x.type_to_float(), y.type_to_float(), x.type_to_int(), y.type_to_int() ) {
+        
+        match c {
+            // Addition
+            Plus => {
+                new_el.push(if is_float {
+                    Float_(float_x + float_y)
+                } else {
+                    Int_(int_x + int_y)
+                })
+            }
 
-        // Multiplication
-        Multiply => {
-            new_el.push(if is_float {
-                Float_(float_x * float_y)
-            } else {
-                Int_(int_x * int_y)
-            })
-        }
+            // Subtraction
+            Minus => {
+                new_el.push(if is_float {
+                    Float_(float_x - float_y)
+                } else {
+                    Int_(int_x - int_y)
+                })
+            }
 
-        // Division
-        DivSlash | Div => {
-            if float_y == 0.0 {
-                print_error(DivisionByZero);
-                new_el.push(x.to_owned());
-                new_el.push(y.to_owned());
-            } else if is_float {
-                new_el.push(Float_(float_x / float_y));
-            } else { new_el.push(Int_(int_x / int_y)); }
-        }
+            // Multiplication
+            Multiply => {
+                new_el.push(if is_float {
+                    Float_(float_x * float_y)
+                } else {
+                    Int_(int_x * int_y)
+                })
+            }
 
-        // Less than
-        LessThan => {
-            new_el.push(Bool_(float_x < float_y))
-        }
+            // Division
+            DivSlash | Div => {
+                if float_y == 0.0 {
+                    print_error(DivisionByZero);
+                    new_el.push(x.to_owned());
+                    new_el.push(y.to_owned());
+                } else if is_float {
+                    new_el.push(Float_(float_x / float_y));
+                } else { new_el.push(Int_(int_x / int_y)); }
+            }
 
-        // Less than or equal to
-        LessThanOrEqual => {
-            new_el.push(Bool_(float_x <= float_y))
-        }
+            // Less than
+            LessThan => {
+                new_el.push(Bool_(float_x < float_y))
+            }
 
-        // Greater than
-        GreaterThan => {
-            new_el.push(Bool_(float_x > float_y))
-        }
+            // Less than or equal to
+            LessThanOrEqual => {
+                new_el.push(Bool_(float_x <= float_y))
+            }
 
-        // Greater than or equal to
-        GreaterThanOrEqual => {
-            new_el.push(Bool_(float_x >= float_y))
-        }
+            // Greater than
+            GreaterThan => {
+                new_el.push(Bool_(float_x > float_y))
+            }
 
-        _ => panic!("An error occurred in arithmetic_ops!"),
-    };
+            // Greater than or equal to
+            GreaterThanOrEqual => {
+                new_el.push(Bool_(float_x >= float_y))
+            }
+
+            _ => panic!("An error occurred in arithmetic_ops!"),
+        };
+    } else { print_error(ExpectedNumber) };
 
     // Return the operator, the original numbers and the new element
     (vec![x, y], new_el)

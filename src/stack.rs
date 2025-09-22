@@ -350,6 +350,7 @@ pub(crate) enum Operators {
     Times,
     Loop,
     Foldl,
+    Foldr,
 
     // List
     Head,
@@ -579,7 +580,7 @@ pub fn string_to_type(var: &str) -> Type {
 
     else if var == "True" {Bool_(true)}
     else if var == "False" {Bool_(false)}
-    else if let Some(op) = string_to_operator(var.to_string()) { Variable(op) }
+    else if let Some(op) = string_to_operator(var) { Variable(op) }
 
     else {String_(var.to_owned())}
 }

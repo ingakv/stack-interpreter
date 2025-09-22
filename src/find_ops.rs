@@ -54,7 +54,7 @@ pub(crate) fn handle_literal_and_operator_recursive(
     let is_block = ops.is_block(c.to_owned());
         
     // Checks if it is an operator
-    if (string_to_operator(c.type_to_string_trimmed()).is_some() || is_block) && !skip {
+    if (string_to_operator(c.type_to_string_trimmed().as_str()).is_some() || is_block) && !skip {
         let mut item2 = old_stack.to_owned();
         let mut item1 = old_stack.to_owned();
 
@@ -184,7 +184,7 @@ pub(crate) fn find_string(stack: Stack<Type>) -> Option<Type> {
 }
 
 
-pub(crate) fn string_to_operator(elem: String) -> Option<Operators> {
+pub(crate) fn string_to_operator(elem: &str) -> Option<Operators> {
     let el = elem.to_lowercase();
     if let Some(ans) = combination_ops(el.to_owned()).or_else(
         || codeblock_ops(el.to_owned())).or_else(

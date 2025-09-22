@@ -2,7 +2,7 @@ use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedNumberOrBoolean, ExpectedNumberStringOrList};
 use crate::list_codeblock_ops::{codeblock, list};
 use crate::stack::Operators::{Equal, Length, Not};
-use crate::stack::Type::{Bool_, Float_, Int_, List_, String_};
+use crate::stack::Type::{Block_, Bool_, Float_, Int_, List_, String_};
 use crate::stack::{Operators, Stack, Type};
 use crate::string_ops::stack_io;
 use std::ops::Neg;
@@ -39,20 +39,15 @@ pub(crate) fn combination(stack: &mut Stack<Type>, op: Operators) -> Stack<Type>
 
 // Returns the length of the list or string
 fn length(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
+    match stack.last() {
+        // If it is a list
+        Some(List_(elem)) => { list(Length, List_(elem), None) }
 
-    let elem = stack.last().unwrap_or_default();
+        // If it is a code block
+        Some(Block_(elem)) => { codeblock(Length, List_(vec![]), Block_(elem)) }
 
-    let (remove_vec, new_el);
-
-    // If it is a list
-    (remove_vec, new_el) = if let List_(x) = elem { list(Length, List_(x), None) }
-
-    // If it is a code block
-    else if elem.is_block() { codeblock(Length, List_(vec![]), elem) }
-
-    else { stack_io(Length, (stack.last(), None)) };
-    
-    (remove_vec, new_el)
+        _ => { stack_io(Length, (stack.last(), None)) }
+    }
 }
 
 
@@ -115,17 +110,17 @@ fn compare(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
         else { break }
     }
 
-    if elem1.is_some() && elem2.is_some() {
+    if let (Some(some_elem1), Some(some_elem2)) = (elem1.to_owned(), elem2.to_owned()) {
 
         let mut is_equal = Bool_(elem1 == elem2);
         
         if types.number {
             // This ensures that i.e., 10.0 and 10 are considered as equal
-            let elem1_float = Some(Float_(elem1.to_owned().unwrap().type_to_float().unwrap()));
-            let elem2_float = Some(Float_(elem2.to_owned().unwrap().type_to_float().unwrap()));
-            is_equal = Bool_(elem1_float == elem2_float);
+            if let (Some(elem1_float), Some(elem2_float)) = 
+                (some_elem1.type_to_float(), some_elem2.type_to_float())
+            { is_equal = Bool_(elem1_float == elem2_float); }
         }
-        (vec![elem1.unwrap_or_default(), elem2.unwrap_or_default()], vec![is_equal])
+        (vec![some_elem1, some_elem2], vec![is_equal])
 
     }
     else { print_error(ExpectedNumberStringOrList); (vec![], vec![]) }
@@ -150,9 +145,9 @@ fn invert(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
 
                 // Inverts the predicate
                 Bool_(el) => {
-                    let new_elem2 = if el { Some(Bool_(false)) }
-                    else { Some(Bool_(true)) };
-                    new_elem2.unwrap()
+                    let new_elem2 = if el { Bool_(false) }
+                    else { Bool_(true) };
+                    new_elem2
                 }
                 _ => { Type::default() }
             };

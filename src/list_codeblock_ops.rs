@@ -1,8 +1,8 @@
 use crate::error_handling::print_error;
 use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedListOrString, ExpectedNumber, ExpectedNumberStringOrList};
 use crate::exec;
-use crate::stack::Operators::{Append, Cons, Each, Empty, Exec, Foldl, Head, If, Length, Loop, Map, Tail, Times};
-use crate::stack::Type::{Block_, Bool_, Int_, List_, String_, Variable};
+use crate::stack::Operators::{Append, Cons, Each, Empty, Exec, Foldl, Foldr, Head, If, Length, Loop, Map, Tail, Times};
+use crate::stack::Type::{Block_, Bool_, Int_, List_, Variable};
 use crate::stack::{Operators, Stack, Type};
 
 pub(crate) fn codeblock_ops(input: String) -> Option<Operators> {
@@ -14,6 +14,7 @@ pub(crate) fn codeblock_ops(input: String) -> Option<Operators> {
         "times" => {Times},
         "loop" => {Loop},
         "foldl" => {Foldl},
+        "foldr" => {Foldr},
         _ => {return None;}
     };
     Some(res)
@@ -121,18 +122,19 @@ pub(crate) fn codeblock_custom(c: Operators, stack: Stack<Type>, block: Type, bl
             
         }
 
-        Foldl => {
+        Foldl | Foldr => {
             // Check if the second argument is a list
-            let mut list = bool_or_list.clone();
-            
-            if bool_or_list.to_owned().unwrap_or_default().is_list() {
+            if let Some(List_(mut list)) = bool_or_list.clone() {
+                
+                // Reverse the list from left to right if the operator is "foldl"
+                if c == Foldl { list.reverse() }
                 
                 // Check if the first argument is an integer and push it onto the stack
                 if let Some(Int_(number)) = block_or_int.to_owned() {
                     exec_stack.push(Int_(number));
 
                     // Iterate over each element in the list
-                    while let Some(list_elem) = pop_front(&mut list) {
+                    while let Some(list_elem) =list.pop() {
                         exec_stack.push(list_elem);
 
                         // Execute the code block with the current stack
@@ -158,10 +160,12 @@ pub(crate) fn list(c: Operators, list: Type, el: Option<Type>) -> (Vec<Type>, Ve
     if let List_(elems) = list {
         
     match c {
+        
         // Returns the first item of the list
         Head => {
-            let head = elems.first().cloned().unwrap_or_else(|| String_(String::new()));
-            new_el.push(head);
+            if let Some(head) = elems.first() {
+                new_el.push(head.to_owned());
+            } else { print_error(ExpectedList) }
         }
 
         // Returns the last item of the list
@@ -180,13 +184,15 @@ pub(crate) fn list(c: Operators, list: Type, el: Option<Type>) -> (Vec<Type>, Ve
         // Inserts the string onto the front of the list
         Append => {
 
-            if el.is_none() { print_error(ExpectedListOrString); }
-            let mut list = vec![el.to_owned().unwrap_or_default()];
+            if let Some(some_el) = el {
+                let mut list = vec![some_el.to_owned()];
 
-            for i in elems.to_owned() { list.push(i); }
+                for i in elems.to_owned() { list.push(i); }
 
-            new_el.push(List_(list));
-            remove_vec.push(el.unwrap_or_default());
+                new_el.push(List_(list));
+                remove_vec.push(some_el);
+                
+            } else { print_error(ExpectedListOrString); }
         }
 
         // Combines the two lists
@@ -260,7 +266,7 @@ pub(crate) fn find_block_elements(stack: &mut Stack<Type>, code_block: Type, ope
             Map | Each => { is_bool_or_list.is_list() }
             Exec => { is_block_or_number.is_block() }
             Times => { is_block_or_number.is_number() }
-            Foldl => { is_bool_or_list.is_list() && is_block_or_number.is_number() }
+            Foldl | Foldr => { is_bool_or_list.is_list() && is_block_or_number.is_number() }
             _ => { true }
         } {
             while let Some(elem) = stack.pop() { additional_elems.push_front(elem); }
