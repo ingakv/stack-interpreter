@@ -45,14 +45,10 @@ fn length(stack: &mut Stack<Type>) -> (Vec<Type>, Vec<Type>) {
     let (remove_vec, new_el);
 
     // If it is a list
-    (remove_vec, new_el) = if let List_(x) = elem {
-        list(Length, List_(x), None)
-    }
+    (remove_vec, new_el) = if let List_(x) = elem { list(Length, List_(x), None) }
 
     // If it is a code block
-    else if elem.is_block() {
-        codeblock(Length, List_(vec![]), elem)
-    }
+    else if elem.is_block() { codeblock(Length, List_(vec![]), elem) }
 
     else { stack_io(Length, (stack.last(), None)) };
     

@@ -350,6 +350,7 @@ pub(crate) enum Operators {
     Each,
     If,
     Times,
+    Loop,
 
     // List
     Head,

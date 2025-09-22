@@ -5,7 +5,7 @@ use crate::find_ops::Operations::{Arithmetic, Block, List, Logical, StackIO, Str
 use crate::list_codeblock_ops::{codeblock_custom, codeblock_ops, find_block_elements, list, list_ops};
 use crate::logical_ops::{arithmetic, arithmetic_ops};
 use crate::logical_ops::{logical_op, logical_ops};
-use crate::stack::Type::{Bool_, List_, Variable};
+use crate::stack::Type::{Bool_, Variable};
 use crate::stack::{is_string_number, Operators, Stack, Type};
 use crate::string_ops::{stack_io, stack_io_ops, string_ops, strings_ops};
 
@@ -22,6 +22,11 @@ pub enum Operations {
 impl Operations {
     pub(crate) fn is_block(&self, type_el: Type) -> bool {
         matches!(self, Block) || type_el.is_block() 
+    }
+    pub(crate) fn is_list(&self, type_el: Option<Type>) -> bool {
+        if let Some(type_list) = type_el {
+            matches!(self, List) && type_list.is_list()
+        } else { false }
     }
 }
 
@@ -40,19 +45,16 @@ pub(crate) fn handle_literal_and_operator_recursive(
 ) -> Stack<Type> {
     
     // Remove the top element and store it
-    let c = stack.pop().unwrap_or_default();
-    
+    let Some(c) = stack.pop() else { return Stack::new() };
+
     let old_stack = &mut stack.clone();
 
     let ops = op.operator_to_type();
     
     let is_block = ops.is_block(c.to_owned());
-    
-    // Skips if the stack is empty
-    if c.is_empty() { Stack::new() }
         
     // Checks if it is an operator
-    else if (string_to_operator(c.type_to_string_trimmed()).is_some() || is_block) && !skip {
+    if (string_to_operator(c.type_to_string_trimmed()).is_some() || is_block) && !skip {
         let mut item2 = old_stack.to_owned();
         let mut item1 = old_stack.to_owned();
 
@@ -66,23 +68,26 @@ pub(crate) fn handle_literal_and_operator_recursive(
         let mut new_li = stack.clone();
         
         // Lists are handled differently
-        if let Some(List_(item2_some)) = item2.last() {
-
-            // Loops through and finds the next string
-            let str = find_string(&mut new_li);
-
-            // Functions with two lists
-            let (remove_vec, new_vec) = 
-                if let (Some(_), Variable(st)) = (item1.last(), c.to_owned()) { 
-                    list(st, List_(item2_some), item1.last()) 
-                }
+        if ops.is_list(item2.last()) {
+            if let Some(item2_some) = item2.last() {
+    
+                // Loops through and finds the next string
+                let str = find_string(&mut new_li);
+    
+                // Functions with two lists
+                let (remove_vec, new_vec) = 
+                    if let (Some(_), Variable(st)) = (item1.last(), c.to_owned()) { 
+                        list(st, item2_some, item1.last()) 
+                    }
+                    
+                    // Functions with a list and a string, or only one list
+                    else if let Variable(st) = c { 
+                        list(st, item2_some, str) 
+                    } else { (vec![], vec![]) };
                 
-            // Functions with a list and a string, or only one list
-            else if let Variable(st) = c { 
-                list(st, List_(item2_some), str) 
-            } else { (vec![], vec![]) };
-            
-            stack.replace_last_match(remove_vec, new_vec)
+                stack.replace_last_match(remove_vec, new_vec);
+            }
+            stack.to_owned()
         }
         
         else if let Some(item2_some) = item2.last() {

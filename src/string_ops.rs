@@ -77,9 +77,7 @@ pub(crate) fn stack_io(op: Operators, elems: (Option<Type>, Option<Type>)) -> (V
         match op {
 
             // Duplicates the top element
-            Dup => {
-                new_el.push(elem.unwrap_or_default())
-            }
+            Dup => { new_el.push(elem.unwrap_or_default()) }
 
             // Swaps the top two elements
             Swap => {

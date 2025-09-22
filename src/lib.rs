@@ -5,12 +5,12 @@ use crate::find_ops::handle_literal_and_operator;
 use crate::list_codeblock_ops::{codeblock_ops, list_ops, pop_front};
 use crate::logical_ops::{arithmetic_ops, logical_ops};
 use crate::stack::DataTypes::{BlockType, ListType, StringType};
-use crate::stack::Operators::{Each, If, Map, Times};
+use crate::stack::Operators::{Exec, If, Loop};
+use crate::stack::Type::Variable;
 use crate::stack::{get_line, push_block_to_buffer, push_str_to_vec, push_to_buffer, Buffers, Operators, Stack, Type};
 use crate::string_ops::{stack_io_ops, strings_ops};
 use std::io;
 use std::io::Write;
-use crate::stack::Type::Variable;
 
 mod combination_ops;
 mod error_handling;
@@ -95,7 +95,7 @@ pub fn run(normal: bool) {
 
 fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
     let mut new_stack = Stack::new();
-    let mut is_if_block = false;
+    let mut need_two_blocks = false;
     let mut block_type: Option<Operators> = None;
     let exec_block = &mut block.to_owned();
 
@@ -113,13 +113,10 @@ fn exec(block: Option<Type>, mut stack: Stack<Type>) -> Stack<Type> {
         // If statements read the two next code blocks instead of one.
         // Therefore, this extra code block will already be processed
         
-        if is_if_block { is_if_block = false; }
+        if need_two_blocks { need_two_blocks = false; }
 
-        else if elem == Variable(Map) || 
-                elem == Variable(Each) || 
-                elem == Variable(Times) || 
-                elem == Variable(If) { 
-            if elem == Variable(If) { is_if_block = true; }
+        else if codeblock_ops(elem.type_to_string()).is_some() && elem != Variable(Exec) {
+            if [Variable(If), Variable(Loop)].contains(&elem) { need_two_blocks = true; }
             if let Variable(x) = elem {block_type = Some(x) }
         }
             
