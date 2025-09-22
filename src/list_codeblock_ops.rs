@@ -1,7 +1,7 @@
 use crate::error_handling::print_error;
-use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedListOrString, ExpectedNumber};
+use crate::error_handling::Error::{ExpectedBoolean, ExpectedCodeBlock, ExpectedList, ExpectedListOrString, ExpectedNumber, ExpectedNumberStringOrList};
 use crate::exec;
-use crate::stack::Operators::{Append, Cons, Each, Empty, Exec, Head, If, Length, Map, Tail, Times, Loop};
+use crate::stack::Operators::{Append, Cons, Each, Empty, Exec, Foldl, Head, If, Length, Loop, Map, Tail, Times};
 use crate::stack::Type::{Block_, Bool_, Int_, List_, String_, Variable};
 use crate::stack::{Operators, Stack, Type};
 
@@ -13,6 +13,7 @@ pub(crate) fn codeblock_ops(input: String) -> Option<Operators> {
         "if" => {If},
         "times" => {Times},
         "loop" => {Loop},
+        "foldl" => {Foldl},
         _ => {return None;}
     };
     Some(res)
@@ -44,8 +45,7 @@ pub(crate) fn codeblock_custom(c: Operators, stack: Stack<Type>, block: Type, bl
 
         // Counts the number of variables in the code block
         Length => {
-            let mut count = 0;
-            exec_custom(&mut Some(block.clone()), &mut |_| { count += 1 });
+            let count =block.length() as i128;
             
             new_el.push(Int_(count));
         }
@@ -121,6 +121,29 @@ pub(crate) fn codeblock_custom(c: Operators, stack: Stack<Type>, block: Type, bl
             
         }
 
+        Foldl => {
+            // Check if the second argument is a list
+            let mut list = bool_or_list.clone();
+            
+            if bool_or_list.to_owned().unwrap_or_default().is_list() {
+                
+                // Check if the first argument is an integer and push it onto the stack
+                if let Some(Int_(number)) = block_or_int.to_owned() {
+                    exec_stack.push(Int_(number));
+
+                    // Iterate over each element in the list
+                    while let Some(list_elem) = pop_front(&mut list) {
+                        exec_stack.push(list_elem);
+
+                        // Execute the code block with the current stack
+                        exec_stack = exec(Some(block.to_owned()), exec_stack);
+                    }
+                } else { print_error(ExpectedNumber); }
+            } else { print_error(ExpectedList); }
+            
+            new_el = exec_stack.elements;
+        }
+
         _ => panic!("An error occurred in codeblocks_ops!"),
     };
 
@@ -169,17 +192,17 @@ pub(crate) fn list(c: Operators, list: Type, el: Option<Type>) -> (Vec<Type>, Ve
         // Combines the two lists
         Cons => {
 
-            // Return the other list if one of them is empty
-            match el.to_owned().unwrap_or_default() {
-                List_(mut i) => {
+            if let Some(list) =  el.to_owned() {
+                if let List_(mut i) = list.to_owned() {
                     for elem in elems.to_owned() {
                         if !i.contains(&elem) { i.push(elem); }
                     }
                     new_el.push(List_(i));
-                },
-                _ => { new_el.push(List_(vec![el.to_owned().unwrap_or_default()])); }
-            }
-            remove_vec.push(el.unwrap_or_default());
+                    
+                // Return the other list if one of them is empty
+                } else { new_el.push(List_(vec![list.to_owned()])); }
+                remove_vec.push(list);
+            } else { print_error(ExpectedNumberStringOrList) }
         }
 
         _ => panic!("An error occurred in list_ops!"),
@@ -190,23 +213,6 @@ pub(crate) fn list(c: Operators, list: Type, el: Option<Type>) -> (Vec<Type>, Ve
 
     // Return the operator, the original numbers and the new element
     (remove_vec, new_el)
-}
-
-// Execute a code block
-fn exec_custom<F>(code_block: &mut Option<Type>, stack_ref: &mut F) -> ()
-where F: FnMut(Type) {
-
-    loop {
-        // Execute the code from the first element
-        match pop_front(code_block) {
-            Some(x) => {
-                stack_ref(x);
-            }
-
-            // Loop through until the list is empty
-            _ => break,
-        }
-    }
 }
 
 pub fn pop_front(t: &mut Option<Type>) -> Option<Type> {
@@ -254,6 +260,7 @@ pub(crate) fn find_block_elements(stack: &mut Stack<Type>, code_block: Type, ope
             Map | Each => { is_bool_or_list.is_list() }
             Exec => { is_block_or_number.is_block() }
             Times => { is_block_or_number.is_number() }
+            Foldl => { is_bool_or_list.is_list() && is_block_or_number.is_number() }
             _ => { true }
         } {
             while let Some(elem) = stack.pop() { additional_elems.push_front(elem); }

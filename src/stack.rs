@@ -181,14 +181,12 @@ impl Type {
         }
     }
 
-
-    // Returns the variable as a bool
-    pub fn is_empty(&self) -> bool {
+    pub fn length(&self) -> usize {
         match self {
-            String_(val) => {
-                val.is_empty()
-            }
-            _ => false,
+            String_(val) => { val.len() }
+            List_(val) => { val.len() }
+            Block_(val) => { val.len() }
+            _ => { 0 }
         }
     }
 
@@ -351,6 +349,7 @@ pub(crate) enum Operators {
     If,
     Times,
     Loop,
+    Foldl,
 
     // List
     Head,

@@ -6,7 +6,7 @@ use crate::list_codeblock_ops::{codeblock_custom, codeblock_ops, find_block_elem
 use crate::logical_ops::{arithmetic, arithmetic_ops};
 use crate::logical_ops::{logical_op, logical_ops};
 use crate::stack::Type::{Bool_, Variable};
-use crate::stack::{is_string_number, Operators, Stack, Type};
+use crate::stack::{Operators, Stack, Type};
 use crate::string_ops::{stack_io, stack_io_ops, string_ops, strings_ops};
 
 #[derive(Clone, Copy)]
@@ -64,15 +64,12 @@ pub(crate) fn handle_literal_and_operator_recursive(
             item1 = handle_literal_and_operator_recursive(op, old_stack, true);
         }
         
-        
-        let mut new_li = stack.clone();
-        
         // Lists are handled differently
         if ops.is_list(item2.last()) {
             if let Some(item2_some) = item2.last() {
     
                 // Loops through and finds the next string
-                let str = find_string(&mut new_li);
+                let str = find_string(stack.to_owned());
     
                 // Functions with two lists
                 let (remove_vec, new_vec) = 
@@ -177,16 +174,13 @@ fn find_wanted_literal_type(wanted_type: Operations, stack: &mut Stack<Type>, op
 }
 
 
-pub(crate) fn find_string(stack: &mut Stack<Type>) -> Option<Type> {
-    // Remove the top element and store it
-    let c = stack.pop().unwrap_or_default();
-
+pub(crate) fn find_string(stack: Stack<Type>) -> Option<Type> {
+    let mut mut_stack = stack.clone();
     // Skips if the stack is empty
-    if c.is_empty() { None } 
-    else if string_to_operator(c.type_to_string_trimmed()).is_none() && 
-            (c.is_string() || is_string_number(c.type_to_string_trimmed().as_str()))
-    { Some(c) }
-    else { find_string(stack) }
+    if let Some(elem) = mut_stack.pop() {
+        if elem.is_string() || elem.is_number() { Some(elem) } 
+        else { find_string(mut_stack) }
+    } else { None }
 }
 
 
